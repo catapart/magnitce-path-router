@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Path Router Demo</title>
+</head>
+<body>
+    <menu>
+        <a is="route-link" for="app-router" path="/">Home</a>
+        <a is="route-link" for="app-router" path="/user">User</a>
+        <a is="route-link" for="app-router" path="/help">Help</a>
+        <a is="route-link" for="app-router" path="/help/faq">FAQ</a>
+        <a is="route-link" for="app-router" path="/help/contact">Contact</a>
+    </menu>
+    <path-router id="app-router">
+        <path-route path="/">
+            <header>Home</header>
+            <p>Home Content</p>
+        </path-route>
+        <path-route path="/user/:id">
+            <header>User</header>
+            <p>User Content</p>
+        </path-route>
+        <path-route path="/help/:subpage">
+            <header>Help</header>
+            <menu>
+                <nav>
+                    <ul>
+                        <li><a is="route-link" for="help-router" path="/faq">FAQ</a></li>
+                        <li><a is="route-link" for="help-router" path="/contact">Contact</a></li>
+                    </ul>
+                </nav>
+            </menu>
+            <path-router id="help-router">
+                <path-route path="/faq">
+                    <header>Frequently Asked Questions</header>
+                    <p>Answer Content</p>
+                </path-route>
+                <path-route path="/contact">
+                    <header>Contact Us</header>
+                    <p>Contact Content</p>
+                </path-route>
+                <dialog is="route-dialog" path="about">
+                    <header>About</header>
+                    <p>About Content</p>
+                    <form method="dialog"><button method="dialog">Close</button></form>
+                </dialog>
+            </path-router>
+            <div><button type="button" is="route-button" for="help-router" path="#about">About App</button></div>
+        </path-route>
+    </path-router>
+    <!-- <menu>
+        <a is="route-link" for="app-router" path="/">Home</a>
+        <a is="route-link" for="app-router" path="/subpages">Subpages</a>
+        <a is="route-link" for="app-router" path="/subpages/disable">Subpages - Disable</a>
+        <a is="route-link" for="app-router" path="/dialog-routing">Dialog Routing</a>
+        <a is="route-link" for="app-router" path="/paths-links-buttons">Paths, Links, and Buttons</a>
+        <a is="route-link" for="app-router" path="/events">Events</a>
+    </menu> -->
+    <!-- <path-router id="app-router">
+        <path-route path="/">
+            <header>Simple Route</header>
+            <p>If no default route is set, the first route will be opened.</p>
+        </path-route>
+        <path-route path="/subpages">
+            <header>Route with Subpages</header>
+            <menu>
+                <nav>
+                    <ul>
+                        <li><a is="route-link" for="subpages-router" path="/">Default</a></li>
+                        <li><a is="route-link" for="subpages-router" path="/disable">Disable</a></li>
+                    </ul>
+                </nav>
+            </menu>
+            <path-router id="subpages-router">
+                <path-route path="/">
+                    <header>Default Sub-Routing</header>
+                    <p>Nested path-router elements have their path attribtues updated by parent path-routers, by default.</p>
+                </path-route>
+                <path-route path="/disable">
+                    <header>Default Sub-Routing</header>
+                    <p>This functionality can be disabled with the "subroute" attributes in either the parent or child router</p>
+                </path-route>
+            </path-router>
+        </path-route>
+        <path-route path="/dialog-routing">
+            <header>Dialog Routing</header>
+            <menu>
+                <nav>
+                    <ul>
+                        <li><a is="route-link" for="dialog-router" path="/a">Route A</a></li>
+                        <li><a is="route-link" for="dialog-router" path="/b">Route B</a></li>
+                    </ul>
+                </nav>
+            </menu>
+            <path-router id="dialog-router">
+                <path-route path="/a">
+                    <header>Route A</header>
+                    <p>Use the route-button to open the dialog</p>
+                    <div><button type="button" is="route-button" for="dialog-router" path="/a#c">Open Route Dialog</button></div>
+                </path-route>
+                <path-route path="/b">
+                    <header>Route A</header>
+                    <p>If no path is specified before the hash character, the current path will be used</p>
+                    <div><button type="button" is="route-button" for="dialog-router" path="#c">Open Route Dialog</button></div>
+                </path-route>
+                <dialog is="route-dialog" path="c">
+                    <header>Dialog Route</header>
+                    <p>Use the hash character (#) to navigate to a dialog route.</p>
+                    <p>The path before the hash character will remain the current route, while the path after the hash route will be used for routing and subroutes within the dialog route.</p>
+                    <p>If no path is specified before the hash character, the current path will be used.</p>
+                    <p>Dialog routes are convenient for modal experiences and content expansion.</p>
+                </dialog>
+            </path-router>
+        </path-route>
+        <path-route path="/paths-links-buttons">
+            <header>Paths, Links, and Buttons</header>
+            <menu>
+                <nav>
+                    <ul>
+                        <li><a is="route-link" for="path-link-button-router" path="/paths">Route Paths</a></li>
+                        <li><a is="route-link" for="path-link-button-router" path="/links">Route Links</a></li>
+                        <li><a is="route-link" for="path-link-button-router" path="/buttons">Route Buttons</a></li>
+                    </ul>
+                </nav>
+            </menu>
+            <path-router id="path-link-button-router">
+                <path-route path="/paths">
+                    <header>Route Paths</header>
+                    <p></p>
+                </path-route>
+                <path-route path="/links">
+                    <header>Route Links</header>
+                    <p></p>
+                </path-route>
+                <path-route path="/buttons">
+                    <header>Route Buttons</header>
+                    <p></p>
+                    <div><button type="button" is="route-button" for="path-link-button-router" path="#hello">Say Hello</button></div>
+                </path-route>
+                <dialog is="route-dialog" path="hello">
+                    <header>Hi!</header>
+                    <p>Thanks for opening the dialog route.</p>
+                    <form method="dialog"><button method="dialog">Close</button></form>
+                </dialog>
+            </path-router>
+        </path-route>
+        <path-route path="/events">
+            <header>Events</header>
+            <menu>
+                <nav>
+                    <ul>
+                        <li><a is="route-link" for="events-router" path="/">Events</a></li>
+                        <li><a is="route-link" for="events-router" path="/basic">Basic Events</a></li>
+                        <li><a is="route-link" for="events-router" path="/blocking">Blocking Events</a></li>
+                        <li><a is="route-link" for="events-router" path="/applied">Applied Events</a></li>
+                    </ul>
+                </nav>
+            </menu>
+            <path-router id="events-router">
+                <path-route path="/">
+                    <header>Events</header>
+                    <p></p>
+                </path-route>
+                <path-route path="/basic">
+                    <header>Basic Events</header>
+                    <p></p>
+                </path-route>
+                <path-route path="/blocking">
+                    <header>Blocking Events</header>
+                    <p></p>
+                </path-route>
+                <path-route path="/applied">
+                    <header>Applied Events</header>
+                    <p></p>
+                </path-route>
+            </path-router>
+        </path-route>
+    </path-router> -->
+    <script type="module" src="../vanilla/path-router.min.js"></script>
+    <style>
+    </style>
+</body>
+</html>
