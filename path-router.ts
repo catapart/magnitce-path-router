@@ -20,19 +20,19 @@ export type PathRouterAttributes =
 
 
 const COMPONENT_STYLESHEET = new CSSStyleSheet();
-COMPONENT_STYLESHEET.replaceSync(`:host
+COMPONENT_STYLESHEET.replaceSync(`path-router
 {
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
 }
-::slotted(path-route)
+path-route
 {
     grid-column: 1;
     grid-row: 1;
     display: none;
 }
-::slotted(path-route[open])
+path-route[open]
 {
     display: contents;
 }`);
@@ -61,9 +61,7 @@ export class PathRouterComponent extends HTMLElement
     constructor()
     {
         super();
-        this.attachShadow({ mode: "open" });
-        this.shadowRoot!.innerHTML = `<slot></slot>`;
-        this.shadowRoot!.adoptedStyleSheets.push(COMPONENT_STYLESHEET);
+        
         
         window.addEventListener('popstate', async (_event: PopStateEvent) =>
         {
@@ -82,7 +80,7 @@ export class PathRouterComponent extends HTMLElement
         {
             // needs to wait for DOM content to know that sub
             // components will be registered.
-            this.init();
+            this.#init();
         });
     }
 
@@ -93,9 +91,9 @@ export class PathRouterComponent extends HTMLElement
     async navigate(path: string)
     {
         const { pathName, hash } = this.destructurePath(path);
-        await this.update(pathName, hash);
+        await this.#update(pathName, hash);
         const newPath = `${pathName}${(hash.trim() != '') ? '#':''}${hash}`;
-        this.setPath(newPath);
+        this.#setPath(newPath);
     }
     getPathElement<T extends HTMLElement, K extends T[] = T[]>(path: string, elements: K)
     {
@@ -103,37 +101,63 @@ export class PathRouterComponent extends HTMLElement
         const pathMap: Map<string, HTMLElement> = new Map(pathArrays);
 
         path = (path.startsWith('/')) ? path.substring(1) : path;
+        path = (path.endsWith('/')) ? path.substring(0, path.length-1) : path;
 
         let foundRoute: HTMLElement|null = null;
         routeLoop:
         for(let [routePath, element] of pathMap)
         {
             routePath = (routePath.startsWith('/')) ? routePath.substring(1) : routePath;
+            routePath = (routePath.endsWith('/')) ? routePath.substring(0, routePath.length-1) : routePath;
             const routeArray = routePath.split('/');
             const pathArray = path.split('/');
-
+            
+            let routeMatchesPath = false;
+            let lastRouteSlugWasParameter = false;
             for(let i = 0; i < pathArray.length; i++)
             {
-                if(i == pathArray.length - 1 && pathArray[i] == "")
-                { 
-                    continue;
-                }
                 
                 const slug = routeArray[i];
                 if(slug == null)
                 {
-                    foundRoute = null;
+                    if(lastRouteSlugWasParameter == true)
+                    {
+                        continue;
+                    }
+
+                    routeMatchesPath = false;
                     continue routeLoop;
                 }
 
-                if(!slug.startsWith(':') && slug != WILDCARD_INDICATOR)
+                const isParameter = slug.startsWith(':');
+                if(isParameter == false && slug != WILDCARD_INDICATOR)
                 {
                     if(slug != pathArray[i])
                     {
+                        routeMatchesPath = false
                         continue routeLoop;
                     }
                 }
 
+                routeMatchesPath = true;
+
+                lastRouteSlugWasParameter = isParameter;
+            }
+
+            // if there are any more slugs in the route that were not
+            // requested by the path, they must all be parameters
+            for(let i = pathArray.length; i < routeArray.length; i++)
+            {
+                const slug = routeArray[i];
+                if(slug.startsWith(':') == false)
+                {
+                    routeMatchesPath = false;
+                    break;
+                }
+            }
+
+            if(routeMatchesPath == true)
+            {
                 foundRoute = element;
             }
         }
@@ -201,7 +225,7 @@ export class PathRouterComponent extends HTMLElement
         return false;
     }
 
-    private async init()
+    async #init()
     {
         const promises: Promise<boolean>[] = [];
         for(let i = 0; i < this.routes.length; i++)
@@ -247,7 +271,7 @@ export class PathRouterComponent extends HTMLElement
     }
 
 
-    private async update(path: string, hash: string)
+    async #update(path: string, hash: string)
     {
         const currentPathAttribute = this.getAttribute('path') ?? "";
         const { path: currentPath, hash: currentHash } = this.splitPath(currentPathAttribute);
@@ -255,7 +279,7 @@ export class PathRouterComponent extends HTMLElement
         const pathHasChanged = currentPath != path;
         if(pathHasChanged)
         {
-            await this.openRoute(path);
+            await this.#openRoute(path);
         }
 
         // silently set the path attribute so the hash
@@ -265,17 +289,17 @@ export class PathRouterComponent extends HTMLElement
 
         if(pathHasChanged || currentHash != hash)
         {
-            await this.openRouteDialog(hash);
+            await this.#openRouteDialog(hash);
         }
     }
-    private async openRoute(path: string)
+    async #openRoute(path: string)
     {
         await Promise.allSettled(this.routes.map((route) =>
         {
             return route.currentProcess;
         }));
         
-        const closed = await this.closeCurrentPathRoute();
+        const closed = await this.#closeCurrentPathRoute();
         if(closed == false) 
         {
             return false; 
@@ -290,6 +314,7 @@ export class PathRouterComponent extends HTMLElement
             }
         }
         route = route || this.defaultRoute;
+        console.log(route);
 
         if(route == null)
         {
@@ -304,7 +329,7 @@ export class PathRouterComponent extends HTMLElement
         }
         return opened;
     }
-    private async openRouteDialog(path: string)
+    async #openRouteDialog(path: string)
     {
         const trimmedPath = (path.startsWith('#')) ? path.substring(1) : path;
         await Promise.allSettled(this.routeDialogs.map((route) =>
@@ -312,7 +337,7 @@ export class PathRouterComponent extends HTMLElement
             return route.currentProcess;
         }));
         
-        const closed = await this.closeCurrentRouteDialog();
+        const closed = await this.#closeCurrentRouteDialog();
         if(closed == false) 
         {
             return false; 
@@ -334,13 +359,13 @@ export class PathRouterComponent extends HTMLElement
         return opened;
     }
 
-    private setPath(path: string)
+    #setPath(path: string)
     {
         this.setAttribute('path', path);
         this.dispatchEvent(new CustomEvent(PathRouterEvent.PathChange, { detail: { path } }));
     }
 
-    private async closeCurrentPathRoute(): Promise<boolean>
+    async #closeCurrentPathRoute(): Promise<boolean>
     {
         if(this.currentPathRoute == null) { return true; }
 
@@ -356,7 +381,7 @@ export class PathRouterComponent extends HTMLElement
         return closed;
     }
 
-    private async closeCurrentRouteDialog(): Promise<boolean>
+    async #closeCurrentRouteDialog(): Promise<boolean>
     {
         if(this.currentRouteDialog == null) { return true; }
 
@@ -370,6 +395,16 @@ export class PathRouterComponent extends HTMLElement
             this.currentRouteDialog = undefined;
         }
         return closed;
+    }
+
+    
+    connectedCallback()
+    {
+        let parent = this.getRootNode() as Document|ShadowRoot;
+        if(parent.adoptedStyleSheets.indexOf(COMPONENT_STYLESHEET) == -1)
+        {
+            parent.adoptedStyleSheets.push(COMPONENT_STYLESHEET);
+        }
     }
 }
 if(customElements.get(COMPONENT_TAG_NAME) == null)

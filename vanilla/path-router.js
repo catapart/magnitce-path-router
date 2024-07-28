@@ -35,6 +35,14 @@ var PathRouteComponent = class extends HTMLElement {
     const properties = this.getProperties(path);
     this.dispatchEvent(new CustomEvent("beforeopen" /* BeforeOpen */, { detail: { path, properties } }));
     await Promise.allSettled(this.blockingBeforeOpen.map((value) => value()));
+    const allowSubroute = (this.getAttribute("subrouting") ?? this.closest("[subrouting]")?.getAttribute("subrouting")) != "false";
+    if (allowSubroute == true) {
+      const subrouter = this.querySelector(":scope > path-router");
+      if (subrouter != null) {
+        const subroute = this.createPathFromProperties(properties);
+        subrouter.navigate(subroute);
+      }
+    }
     await Promise.allSettled(this.getAnimations({ subtree: true }).map((animation) => animation.finished));
     delete this.dataset.entering;
     this.toggleAttribute("open", true);
@@ -82,6 +90,13 @@ var PathRouteComponent = class extends HTMLElement {
       }
     }
     return properties;
+  }
+  createPathFromProperties(properties) {
+    const resultArray = [];
+    for (const value of Object.values(properties)) {
+      resultArray.push(value);
+    }
+    return resultArray.join("/");
   }
   applyEventListener(type, listener, options) {
     const isOpen = this.getAttribute("open") != null;

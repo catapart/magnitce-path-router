@@ -31,8 +31,6 @@ export class PathRouteComponent extends HTMLElement
     constructor()
     {
         super();
-        this.attachShadow({ mode: "open" });
-        this.shadowRoot!.innerHTML = `<slot></slot>`;
         
         this.currentProcess = Promise.resolve();
         this.canBeOpened = async () => true;
@@ -58,6 +56,20 @@ export class PathRouteComponent extends HTMLElement
   
         this.dispatchEvent(new CustomEvent(PathRouteEvent.BeforeOpen, { detail: { path, properties }}));
         await Promise.allSettled(this.blockingBeforeOpen.map(value => value()));
+
+        const allowSubroute = (this.getAttribute('subrouting') ?? this.closest('path-router[subrouting]')?.getAttribute('subrouting')) != "false";
+        console.log(allowSubroute, properties);
+        if(allowSubroute == true)
+        {
+            const subrouter = this.querySelector<PathRouterComponent>(':scope > path-router');
+            console.log(subrouter);
+            if(subrouter != null)
+            {
+                const subroute = this.extractSubroute(path);
+                await subrouter.navigate(subroute);
+                console.log(subroute);
+            }
+        }
   
   
         await Promise.allSettled(this.getAnimations({ subtree: true }).map((animation) => animation.finished));
@@ -129,6 +141,20 @@ export class PathRouteComponent extends HTMLElement
         }
 
         return properties;
+    }
+    extractSubroute(targetPath: string)
+    {
+        const routePathAttribute = this.getAttribute('path') ?? "";
+        const routePath = (routePathAttribute.startsWith('/')) ? routePathAttribute.substring(1) : routePathAttribute;
+        const routeArray = routePath!.split('/');
+        const path = (targetPath.startsWith('/')) ? targetPath.substring(1) : targetPath;
+        const pathArray = path.split('/');
+
+        const lastNonParameterIndex = routeArray.findLastIndex(item => !item.startsWith(':')) + 1;
+        console.log(lastNonParameterIndex);
+
+        const subPathArray = pathArray.slice(lastNonParameterIndex);
+        return subPathArray.join('/');
     }
 
     applyEventListener<K extends (keyof HTMLElementEventMap|'beforeopen'|'afteropen'|'beforeclose'|'afterclose')>(type: K, listener: (this: HTMLElement, ev: Event|CustomEvent) => void|Promise<void>, options?: boolean | AddEventListenerOptions | undefined)

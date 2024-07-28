@@ -17,10 +17,59 @@
         <path-route path="/">
             <header>Home</header>
             <p>Home Content</p>
+            <a is="route-link" for="app-router" path="/user/1/contact/alice">Open Alice Contact</a>
+            <a is="route-link" for="app-router" path="/user/1/contact/bob">Open Bob Contact</a>
+            <!-- Can't do this: -->
+            <!-- <a is="route-link" for="app-router" path="/help#about">Open About Dialog</a> -->
+            <!-- No automated way to know if the hash should be for the top level router, or a subrouter -->
+            <!-- Can move the dialog to top level and change link target router, or script from a page open event -->
         </path-route>
         <path-route path="/user/:id">
             <header>User</header>
-            <p>User Content</p>
+            <menu>
+                <nav>
+                    <ul>
+                        <li><a is="route-link" for="user-router" path="1/profile">Profile</a></li>
+                        <li><a is="route-link" for="user-router" path="1/contact">Contacts</a></li>
+                    </ul>
+                </nav>
+            </menu>
+            <path-router id="user-router">
+                <path-route path=":id/profile">
+                    <header>User Profile</header>
+                    <p>Profile Content</p>
+                </path-route>
+                <path-route path=":id/contact/:contactId">
+                    <path-router id="user-contact-router">
+                        <path-route path=":contactId/">
+                            <header>User Contacts</header>
+                            <menu>
+                                <nav>
+                                    <ul>
+                                        <li><a is="route-link" for="user-contact-router" path="/alice">Alice</a></li>
+                                        <li><a is="route-link" for="user-contact-router" path="/bob">Bob</a></li>
+                                    </ul>
+                                </nav>
+                            </menu>
+                        </path-route>
+                        <path-route path="alice">
+                            <header>Alice</header>
+                            <p>Alice's Contact Info</p>
+                            <a is="route-link" for="user-contact-router" path="/">Back</a>
+                        </path-route>
+                        <path-route path="bob">
+                            <header>Bob</header>
+                            <p>Bob's Contact Info</p>
+                            <a is="route-link" for="user-contact-router" path="/">Back</a>
+                        </path-route>
+                    </path-router>
+                </path-route>
+                <dialog is="route-dialog" path="about">
+                    <header>About</header>
+                    <p>About Content</p>
+                    <form method="dialog"><button method="dialog">Close</button></form>
+                </dialog>
+            </path-router>
         </path-route>
         <path-route path="/help/:subpage">
             <header>Help</header>
@@ -178,7 +227,7 @@
             </path-router>
         </path-route>
     </path-router> -->
-    <script type="module" src="../vanilla/path-router.min.js"></script>
+    <script type="module" src="../dist/path-router.js"></script>
     <style>
     </style>
 </body>

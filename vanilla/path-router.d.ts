@@ -21,6 +21,7 @@ declare class PathRouteComponent extends HTMLElement {
     open(path: string): Promise<boolean>;
     close(): Promise<boolean>;
     getProperties(targetPath: string): RouteProperties;
+    createPathFromProperties(properties: RouteProperties): string;
     applyEventListener<K extends (keyof HTMLElementEventMap | 'beforeopen' | 'afteropen' | 'beforeclose' | 'afterclose')>(type: K, listener: (this: HTMLElement, ev: Event | CustomEvent) => void | Promise<void>, options?: boolean | AddEventListenerOptions | undefined): void;
     addBlockingEventListener(eventName: PathRouteEvent, handler: () => void | Promise<void>): void;
     applyBlockingEventListener(eventName: PathRouteEvent, handler: () => void | Promise<void>): void;
