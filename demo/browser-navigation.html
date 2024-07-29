@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Path Router Demo</title>
+    <link rel="stylesheet" href="./demo-page.css">
+    <link rel="stylesheet" href="./browser-mockup.css">
+    <link rel="stylesheet" href="./tabs.theme.css">
+</head>
+<body>
+    <menu id="demo-pages">
+        <a href="./index.html">Basic Routing</a>
+        <a href="./browser-navigation.html">Browser Navigation</a>
+        <a href="./transitions.html">Transitions</a>
+    </menu>
+    <div id="demo-content">
+        <header>Browser Navigation</header>
+        <div class="browser-mockup">
+            <header>
+                <span class="tabs">
+                    <span class="tab">
+                        <span class="icon">♜</span>
+                        <span class="title">Tabbr</span>
+                    </span>
+                    <span class="tab">
+                        <span class="icon">♔</span>
+                        <span class="title">Browsr</span>
+                    </span>
+                    <span class="tab">
+                        <span class="icon">♔</span>
+                    </span>
+                    <span class="tab">
+                        <span class="icon">♕</span>
+                    </span>
+                </span>
+                <span class="actions">
+                    <span class="action"></span>
+                    <span class="action"></span>
+                    <span class="action"></span>
+                </span>
+                <div class="navigation">
+                    <span class="history">
+                        <span class="button">➜</span>
+                        <span class="button">➜</span>
+                        <span class="button">↻</span>
+                    </span>
+                    <span class="url">
+                        <span class="path">https://www.mywebsite.com</span>
+                    </span>
+                </div>
+            </header>
+            <menu id="page-menu">
+                <nav>
+                    <ul>
+                        <li><a is="route-link" for="browser-navigation-router" class="tab link" path="a">Page A</a></li>
+                        <li><a is="route-link" for="browser-navigation-router" class="tab link" path="b">Page B</a></li>
+                    </ul>
+                </nav>
+            </menu>
+            <path-router id="browser-navigation-router">
+                <path-route path="a" class="tab page">
+                    <header>Page A</header>
+                    <p>Page A Content</p>
+                </path-route>
+                <path-route path="b" class="tab page">
+                    <path-router id="browser-navigation-b-router">
+                        <path-route path="d">
+                            <header>Page D</header>
+                            <menu>
+                                <nav>
+                                    <ul>
+                                        <li><a is="route-link" for="browser-navigation-b-router" path="/e">Page E</a></li>
+                                        <li><a is="route-link" for="browser-navigation-b-router" path="/f">Page F</a></li>
+                                    </ul>
+                                </nav>
+                            </menu>
+                        </path-route>
+                        <path-route path="e">
+                            <header>Page E</header>
+                            <p>Page E Content</p>
+                            <a is="route-link" for="browser-navigation-b-router" path="/">Back</a>
+                        </path-route>
+                        <path-route path="f">
+                            <header>Page F</header>
+                            <p>Page F Content</p>
+                            <a is="route-link" for="browser-navigation-b-router" path="/">Back</a>
+                        </path-route>
+                    </path-router>
+                </path-route>
+                <dialog is="route-dialog" path="popup-c">
+                    <header>Popup C</header>
+                    <p>Popup C Content</p>
+                    <form method="dialog"><button method="dialog">Close</button></form>
+                </dialog>
+            </path-router>
+        </div>
+    </div>
+    <script type="module" src="../dist/path-router.js"></script>
+</body>
+</html>

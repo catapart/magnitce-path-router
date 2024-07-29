@@ -20,16 +20,9 @@ export type PathRouterAttributes =
 
 
 const COMPONENT_STYLESHEET = new CSSStyleSheet();
-COMPONENT_STYLESHEET.replaceSync(`path-router
-{
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr;
-}
+COMPONENT_STYLESHEET.replaceSync(`
 path-route
 {
-    grid-column: 1;
-    grid-row: 1;
     display: none;
 }
 path-route[open]
@@ -314,7 +307,6 @@ export class PathRouterComponent extends HTMLElement
             }
         }
         route = route || this.defaultRoute;
-        console.log(route);
 
         if(route == null)
         {

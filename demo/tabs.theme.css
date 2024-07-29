@@ -1,0 +1,39 @@
+:root
+{
+    --tabs-theme-color: rgb(15, 84, 129);
+}
+a[is="route-link"].tab.link
+{
+    padding: .2em 1em;
+    display: inline-block;
+    user-select: none;
+    cursor: pointer;
+    font-family: sans-serif;
+    margin-inline: 0;
+}
+a[is="route-link"].tab.link:hover
+,a[is="route-link"].tab.link[aria-current="page"]
+{
+    background-color: var(--tabs-theme-color);
+}
+
+
+a[is="route-link"].tab.link:first-of-type
+{
+    border-top-left-radius: 3px;
+}
+a[is="route-link"].tab.link:last-of-type
+{
+    border-top-right-radius: 3px;
+}
+
+path-route[open].tab.page
+{
+    display: block !important;
+    padding: 1em;
+}
+
+path-route[aria-current="page"].tab.page
+{
+    border: solid 1px var(--tabs-theme-color);
+}

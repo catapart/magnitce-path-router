@@ -4,101 +4,112 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Path Router Demo</title>
+    <link rel="stylesheet" href="./demo-page.css">
+    <link rel="stylesheet" href="./tabs.theme.css">
 </head>
 <body>
-    <menu>
-        <a is="route-link" for="app-router" path="/">Home</a>
-        <a is="route-link" for="app-router" path="/user">User</a>
-        <a is="route-link" for="app-router" path="/help">Help</a>
-        <a is="route-link" for="app-router" path="/help/faq">FAQ</a>
-        <a is="route-link" for="app-router" path="/help/contact">Contact</a>
+    <menu id="demo-pages">
+        <a href="./index.html">Basic Routing</a>
+        <a href="./browser-navigation.html">Browser Navigation</a>
+        <a href="./transitions.html">Transitions</a>
     </menu>
-    <path-router id="app-router">
-        <path-route path="/">
-            <header>Home</header>
-            <p>Home Content</p>
-            <a is="route-link" for="app-router" path="/user/1/contact/alice">Open Alice Contact</a>
-            <a is="route-link" for="app-router" path="/user/1/contact/bob">Open Bob Contact</a>
-            <!-- Can't do this: -->
-            <!-- <a is="route-link" for="app-router" path="/help#about">Open About Dialog</a> -->
-            <!-- No automated way to know if the hash should be for the top level router, or a subrouter -->
-            <!-- Can move the dialog to top level and change link target router, or script from a page open event -->
-        </path-route>
-        <path-route path="/user/:id">
-            <header>User</header>
-            <menu>
-                <nav>
-                    <ul>
-                        <li><a is="route-link" for="user-router" path="1/profile">Profile</a></li>
-                        <li><a is="route-link" for="user-router" path="1/contact">Contacts</a></li>
-                    </ul>
-                </nav>
-            </menu>
-            <path-router id="user-router">
-                <path-route path=":id/profile">
-                    <header>User Profile</header>
-                    <p>Profile Content</p>
-                </path-route>
-                <path-route path=":id/contact/:contactId">
-                    <path-router id="user-contact-router">
-                        <path-route path=":contactId/">
-                            <header>User Contacts</header>
-                            <menu>
-                                <nav>
-                                    <ul>
-                                        <li><a is="route-link" for="user-contact-router" path="/alice">Alice</a></li>
-                                        <li><a is="route-link" for="user-contact-router" path="/bob">Bob</a></li>
-                                    </ul>
-                                </nav>
-                            </menu>
-                        </path-route>
-                        <path-route path="alice">
-                            <header>Alice</header>
-                            <p>Alice's Contact Info</p>
-                            <a is="route-link" for="user-contact-router" path="/">Back</a>
-                        </path-route>
-                        <path-route path="bob">
-                            <header>Bob</header>
-                            <p>Bob's Contact Info</p>
-                            <a is="route-link" for="user-contact-router" path="/">Back</a>
-                        </path-route>
-                    </path-router>
-                </path-route>
-                <dialog is="route-dialog" path="about">
-                    <header>About</header>
-                    <p>About Content</p>
-                    <form method="dialog"><button method="dialog">Close</button></form>
-                </dialog>
-            </path-router>
-        </path-route>
-        <path-route path="/help/:subpage">
-            <header>Help</header>
-            <menu>
-                <nav>
-                    <ul>
-                        <li><a is="route-link" for="help-router" path="/faq">FAQ</a></li>
-                        <li><a is="route-link" for="help-router" path="/contact">Contact</a></li>
-                    </ul>
-                </nav>
-            </menu>
-            <path-router id="help-router">
-                <path-route path="/faq">
-                    <header>Frequently Asked Questions</header>
-                    <p>Answer Content</p>
-                </path-route>
-                <path-route path="/contact">
-                    <header>Contact Us</header>
-                    <p>Contact Content</p>
-                </path-route>
-                <dialog is="route-dialog" path="about">
-                    <header>About</header>
-                    <p>About Content</p>
-                    <form method="dialog"><button method="dialog">Close</button></form>
-                </dialog>
-            </path-router>
-            <div><button type="button" is="route-button" for="help-router" path="#about">About App</button></div>
-        </path-route>
-    </path-router>
+    <div id="demo-content">
+        <header>Basic Routing</header>
+        <menu id="page-menu">
+            <a is="route-link" for="page-router" class="tab link" path="/">Home</a>
+            <a is="route-link" for="page-router" class="tab link" path="/user">User</a>
+            <a is="route-link" for="page-router" class="tab link" path="/help">Help</a>
+            <a is="route-link" for="page-router" class="tab link" path="/help/faq">FAQ</a>
+            <a is="route-link" for="page-router" class="tab link" path="/help/contact">Contact</a>
+        </menu>
+        <path-router id="page-router">
+            <path-route path="/" class="tab page">
+                <header>Home</header>
+                <p>Home Content</p>
+                <a is="route-link" for="page-router" path="/user/1/contact/alice">Open Alice Contact</a>
+                <a is="route-link" for="page-router" path="/user/1/contact/bob">Open Bob Contact</a>
+                <!-- Can't do this: -->
+                <!-- <a is="route-link" for="app-router" path="/help#about">Open About Dialog</a> -->
+                <!-- No automated way to know if the hash should be for the top level router, or a subrouter -->
+                <!-- Can move the dialog to top level and change link target router, or script from a page open event -->
+            </path-route>
+            <path-route path="/user/:id" class="tab page">
+                <header>User</header>
+                <menu>
+                    <nav>
+                        <ul>
+                            <li><a is="route-link" for="user-router" path="1/profile">Profile</a></li>
+                            <li><a is="route-link" for="user-router" path="1/contact">Contacts</a></li>
+                        </ul>
+                    </nav>
+                </menu>
+                <path-router id="user-router">
+                    <path-route path=":id/profile">
+                        <header>User Profile</header>
+                        <p>Profile Content</p>
+                    </path-route>
+                    <path-route path=":id/contact/:contactId">
+                        <path-router id="user-contact-router">
+                            <path-route path=":contactId/">
+                                <header>User Contacts</header>
+                                <menu>
+                                    <nav>
+                                        <ul>
+                                            <li><a is="route-link" for="user-contact-router" path="/alice">Alice</a></li>
+                                            <li><a is="route-link" for="user-contact-router" path="/bob">Bob</a></li>
+                                        </ul>
+                                    </nav>
+                                </menu>
+                            </path-route>
+                            <path-route path="alice">
+                                <header>Alice</header>
+                                <p>Alice's Contact Info</p>
+                                <a is="route-link" for="user-contact-router" path="/">Back</a>
+                            </path-route>
+                            <path-route path="bob">
+                                <header>Bob</header>
+                                <p>Bob's Contact Info</p>
+                                <a is="route-link" for="user-contact-router" path="/">Back</a>
+                            </path-route>
+                        </path-router>
+                    </path-route>
+                    <dialog is="route-dialog" path="about">
+                        <header>About</header>
+                        <p>About Content</p>
+                        <form method="dialog"><button method="dialog">Close</button></form>
+                    </dialog>
+                </path-router>
+            </path-route>
+            <path-route path="/help/:subpage" class="tab page">
+                <header>Help</header>
+                <menu>
+                    <nav>
+                        <ul>
+                            <li><a is="route-link" for="help-router" path="/faq">FAQ</a></li>
+                            <li><a is="route-link" for="help-router" path="/contact">Contact</a></li>
+                        </ul>
+                    </nav>
+                </menu>
+                <path-router id="help-router">
+                    <path-route path="/faq">
+                        <header>Frequently Asked Questions</header>
+                        <p>Answer Content</p>
+                    </path-route>
+                    <path-route path="/contact">
+                        <header>Contact Us</header>
+                        <p>Contact Content</p>
+                    </path-route>
+                    <dialog is="route-dialog" path="about">
+                        <header>About</header>
+                        <p>About Content</p>
+                        <form method="dialog"><button method="dialog">Close</button></form>
+                    </dialog>
+                </path-router>
+                <div><button type="button" is="route-button" for="help-router" path="#about">About App</button></div>
+            </path-route>
+        </path-router>
+    </div>
+    
     <!-- <menu>
         <a is="route-link" for="app-router" path="/">Home</a>
         <a is="route-link" for="app-router" path="/subpages">Subpages</a>

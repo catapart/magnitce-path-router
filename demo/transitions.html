@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Path Router Demo</title>
+    <link rel="stylesheet" href="./demo-page.css">
+</head>
+<body>
+    <menu id="demo-pages">
+        <a href="./index.html">Basic Routing</a>
+        <a href="./browser-navigation.html">Browser Navigation</a>
+        <a href="./transitions.html">Transitions</a>
+    </menu>
+    <div id="demo-content">
+        <header>Transitions</header>
+        <path-router id="transitions-router">
+            <path-route path="a">
+                <header>Page A</header>
+                <p>Page A Content</p>
+            </path-route>
+            <dialog is="route-dialog" path="transitions-dialog">
+                <header>Popup C</header>
+                <p>Popup C Content</p>
+                <form method="dialog"><button method="dialog">Close</button></form>
+            </dialog>
+        </path-router>
+    </div>
+    <script type="module" src="../dist/path-router.js"></script>
+</body>
+</html>

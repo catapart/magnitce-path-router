@@ -1,0 +1,69 @@
+html
+{
+    color-scheme: light dark;
+    height: 100%;
+}
+
+html
+,body
+{
+    margin: 0;
+    padding: 0;
+}
+
+body
+{
+    display: flex;
+    min-height: 100dvh;
+}
+
+#demo-pages
+{
+    padding: 0;
+    margin: 0;
+    background-color: var(--tabs-theme-color);
+}
+#demo-pages a
+{
+    padding: 1em;
+    display: block;
+    color: white;
+    text-decoration: none;
+}
+#demo-pages a:hover
+{
+    text-decoration: underline;
+}
+
+#demo-content
+{
+    flex: 1;
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    grid-template-columns: 1fr;
+    padding: 1em;
+}
+#demo-content > header
+{
+    padding: 1em 0;
+    font-size: 2em;
+}
+
+#page-menu
+{
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+#page-menu ul
+{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+#page-router
+{
+    flex: 1;
+}

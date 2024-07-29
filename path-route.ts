@@ -58,16 +58,13 @@ export class PathRouteComponent extends HTMLElement
         await Promise.allSettled(this.blockingBeforeOpen.map(value => value()));
 
         const allowSubroute = (this.getAttribute('subrouting') ?? this.closest('path-router[subrouting]')?.getAttribute('subrouting')) != "false";
-        console.log(allowSubroute, properties);
         if(allowSubroute == true)
         {
             const subrouter = this.querySelector<PathRouterComponent>(':scope > path-router');
-            console.log(subrouter);
             if(subrouter != null)
             {
                 const subroute = this.extractSubroute(path);
                 await subrouter.navigate(subroute);
-                console.log(subroute);
             }
         }
   
@@ -151,7 +148,6 @@ export class PathRouteComponent extends HTMLElement
         const pathArray = path.split('/');
 
         const lastNonParameterIndex = routeArray.findLastIndex(item => !item.startsWith(':')) + 1;
-        console.log(lastNonParameterIndex);
 
         const subPathArray = pathArray.slice(lastNonParameterIndex);
         return subPathArray.join('/');
