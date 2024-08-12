@@ -8,7 +8,7 @@ export class RouteButtonComponent extends HTMLButtonElement
     {
         super();
         // set here to catch first window load
-        window.addEventListener('popstate', () => this.setIsCurrent());
+        // window.addEventListener('popstate', () => this.setIsCurrent());
     }
     connectedCallback()
     {
@@ -24,7 +24,8 @@ export class RouteButtonComponent extends HTMLButtonElement
             {
                 return;
             }
-            const path = this.getAttribute('path') ?? this.getAttribute('data-path') ?? "";
+            let path = this.getAttribute('path') ?? this.getAttribute('data-path') ?? "";
+            path = this.#preparePath();
             target.dispatchEvent(new CustomEvent(RouteLinkEvent.Navigate, { detail: { target: this, path } }));
         });
 
@@ -68,6 +69,20 @@ export class RouteButtonComponent extends HTMLButtonElement
             this.removeAttribute('aria-current');
         }
     }
+
+    #preparePath()
+    {
+        let path = this.getAttribute('path') ?? this.getAttribute('data-path') ?? "";
+        path = this.onPreparePath(path);
+        return path;
+    }
+    /**
+     * An override-able string transformation function for preparing the static path attribute value.
+     * @param staticPath the path that is set in the route-link's html
+     * @returns a new path that has been transformed to the exact path expected for navigation
+     * @description Useful for replacing variables.
+     */
+    onPreparePath(staticPath: string) { return staticPath; }
 }
 if(customElements.get(COMPONENT_TAG_NAME) == null)
 {

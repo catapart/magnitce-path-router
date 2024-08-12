@@ -28,6 +28,8 @@ export class PathRouteComponent extends HTMLElement
     canBeOpened: () => Promise<boolean>;
     canBeClosed: () => Promise<boolean>;
 
+    currentProperties: RouteProperties|undefined;
+
     constructor()
     {
         super();
@@ -52,9 +54,9 @@ export class PathRouteComponent extends HTMLElement
     {
         this.dataset.entering = '';
 
-        const properties = this.getProperties(path);
+        this.currentProperties = this.getProperties(path);
   
-        this.dispatchEvent(new CustomEvent(PathRouteEvent.BeforeOpen, { detail: { path, properties }}));
+        this.dispatchEvent(new CustomEvent(PathRouteEvent.BeforeOpen, { detail: { path, properties: this.currentProperties }}));
         await Promise.allSettled(this.blockingBeforeOpen.map(value => value()));
 
         const allowSubroute = (this.getAttribute('subrouting') ?? this.closest('path-router[subrouting]')?.getAttribute('subrouting')) != "false";
@@ -106,6 +108,7 @@ export class PathRouteComponent extends HTMLElement
   
         delete this.dataset.exiting;
         this.removeAttribute('aria-current');
+        this.currentProperties = undefined;
   
         this.dispatchEvent(new Event(PathRouteEvent.AfterClose));
         await Promise.allSettled(this.blockingAfterClose.map(value => value()));

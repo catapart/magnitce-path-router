@@ -11,6 +11,7 @@
         <a href="./index.html">Basic Routing</a>
         <a href="./browser-navigation.html">Browser Navigation</a>
         <a href="./transitions.html">Transitions</a>
+        <a href="./themes.html">Themes</a>
     </menu>
     <div id="demo-content">
         <header>Transitions</header>
@@ -27,5 +28,31 @@
         </path-router>
     </div>
     <script type="module" src="../dist/path-router.js"></script>
+    <script>
+        async function init(example)
+        {
+            // example.querySelector('path-route[path="/dialog"]').applyEventListener('beforeopen', (event) =>
+            // {
+            //     example.querySelector('dialog').open = true;
+            // });
+            // example.querySelector('path-route[path="/dialog"]').applyEventListener('beforeclose', (event) =>
+            // {
+            //     const currentRoute = example.querySelector('path-router').currentRoute;
+            //     const currentPath = currentRoute.getAttribute('path');
+            //     if(currentPath.indexOf('dialog') == -1)
+            //     {
+            //         example.querySelector('dialog').open = false;
+            //     }
+            // });
+        }
+        route_beforeOpen(example)
+        {
+            console.log('route open');
+        }
+        route_beforeClose(example)
+        {
+            console.log('route close');
+        }
+    </script>
 </body>
 </html>

@@ -18,6 +18,8 @@ export class RouteDialogComponent extends HTMLDialogElement
     canBeOpened: () => Promise<boolean>;
     canBeClosed: () => Promise<boolean>;
 
+    currentProperties: RouteProperties|undefined;
+
     constructor()
     {
         super();
@@ -42,9 +44,9 @@ export class RouteDialogComponent extends HTMLDialogElement
     {
         this.setAttribute('data-entering', '');
 
-        const properties = this.getProperties(path);
+        this.currentProperties = this.getProperties(path);
   
-        this.dispatchEvent(new CustomEvent(PathRouteEvent.BeforeOpen, { detail: { path, properties }}));
+        this.dispatchEvent(new CustomEvent(PathRouteEvent.BeforeOpen, { detail: { path, properties: this.currentProperties }}));
         await Promise.allSettled(this.blockingBeforeOpen.map(value => value()));
   
   

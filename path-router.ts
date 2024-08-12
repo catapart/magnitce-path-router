@@ -1,6 +1,6 @@
 import { RouteDialogComponent, COMPONENT_TAG_NAME as ROUTEDIALOG_TAG_NAME } from "./route-dialog";
 import { RouteLinkEvent } from "./route-link";
-import { PathRouteComponent, COMPONENT_TAG_NAME as ROUTE_TAG_NAME } from "./path-route";
+import { PathRouteComponent, COMPONENT_TAG_NAME as ROUTE_TAG_NAME, RouteProperties } from "./path-route";
 
 import './route-button';
 
@@ -20,7 +20,7 @@ export type PathRouterAttributes =
 
 
 const COMPONENT_STYLESHEET = new CSSStyleSheet();
-COMPONENT_STYLESHEET.replaceSync(`
+COMPONENT_STYLESHEET.replaceSync(`path-router { display: block; }
 path-route
 {
     display: none;
@@ -45,29 +45,47 @@ export class PathRouterComponent extends HTMLElement
         return [].map.call(this.querySelectorAll(`:scope > [is="${ROUTEDIALOG_TAG_NAME}"]`) as NodeListOf<RouteDialogComponent>, (routeDialog: RouteDialogComponent) => routeDialog) as RouteDialogComponent[];
     }
 
-    currentPathRoute: PathRouteComponent|undefined;
+    targetRoute: PathRouteComponent|undefined;
+    currentRoute: PathRouteComponent|undefined;
+    targetRouteDialog: RouteDialogComponent|undefined;
     currentRouteDialog: RouteDialogComponent|undefined;
 
     defaultRoute: PathRouteComponent|undefined;
     wildcardRoute: PathRouteComponent|undefined;
+
+    get path(): string|null  { return this.getAttribute("path"); }
+    set path(value: string)  { this.setAttribute("path", value); }
+    subpaths: string[] = [];
 
     constructor()
     {
         super();
         
         
-        window.addEventListener('popstate', async (_event: PopStateEvent) =>
-        {
-            // event occurs on browser back button;
-            const path = window.location.pathname + window.location.hash;
-            this.navigate(path);
-        });
+        // window.addEventListener('popstate', async (_event: PopStateEvent) =>
+        // {
+        //     // event occurs on browser back button;
+        //     const path = window.location.pathname + window.location.hash;
+        //     this.navigate(path);
+        // });
 
         this.addEventListener(RouteLinkEvent.Navigate, (async (event: Event|CustomEvent) =>
         {
             const { path } = (event as CustomEvent).detail;
             this.navigate(path);
         }) as EventListener);
+
+        this.addEventListener(PathRouterEvent.PathChange, (event) =>
+        {
+            if(event.target != this)
+            {
+                const subpath = (event.target as HTMLElement).getAttribute('path');
+                if(subpath != null)
+                {
+                    this.subpaths.push(subpath);
+                }
+            }
+        })
 
         document.addEventListener('DOMContentLoaded', () =>
         {
@@ -83,10 +101,12 @@ export class PathRouterComponent extends HTMLElement
      */
     async navigate(path: string)
     {
-        const { pathName, hash } = this.destructurePath(path);
+        const [ pathName, hash ] = this.destructurePath(path);
         await this.#update(pathName, hash);
         const newPath = `${pathName}${(hash.trim() != '') ? '#':''}${hash}`;
-        this.#setPath(newPath);
+        this.#setPath(newPath);        
+        this.targetRoute = undefined;
+        this.targetRouteDialog = undefined;
     }
     getPathElement<T extends HTMLElement, K extends T[] = T[]>(path: string, elements: K)
     {
@@ -178,24 +198,45 @@ export class PathRouterComponent extends HTMLElement
             pathName = attributePathname;
         }
         pathName = (pathName.trim() == "") ? "/" : pathName;
-        return { pathName, hash };
+        return [ pathName, hash ];
     }
     
     pathIsActive(path: string)
     {
         let { path: queryPath, hash: queryHash } = this.splitPath(path);
-        queryPath = (queryPath.startsWith('/')) ? queryPath.substring(1) : queryPath;
-        queryHash = (queryHash.startsWith('#')) ? queryHash.substring(1) : queryHash;
+        [ queryPath, queryHash ] = this.stripLeadingCharacters(queryPath, queryHash);
+        // queryPath = (queryPath.startsWith('/')) ? queryPath.substring(1) : queryPath;
+        // queryHash = (queryHash.startsWith('#')) ? queryHash.substring(1) : queryHash;
 
         let routerFullPath = this.getAttribute('path') ?? "/";
         let { path: routerComparePath, hash: routerCompareHash } = this.splitPath(routerFullPath);
-        routerComparePath = (routerComparePath.startsWith('/')) ? routerComparePath.substring(1) : routerComparePath;
-        routerCompareHash = (routerCompareHash.startsWith('#')) ? routerCompareHash.substring(1) : routerCompareHash;
+        [ routerComparePath, routerCompareHash ] = this.stripLeadingCharacters(routerComparePath, routerCompareHash);
+        // routerComparePath = (routerComparePath.startsWith('/')) ? routerComparePath.substring(1) : routerComparePath;
+        // routerCompareHash = (routerCompareHash.startsWith('#')) ? routerCompareHash.substring(1) : routerCompareHash;
 
         // console.log(queryPath, routerComparePath, queryHash, routerCompareHash);
 
-        let matchingPath = false;
-        if(queryPath == routerComparePath) { matchingPath = true; }
+        // let matchingPath = false;
+        // if(queryPath == routerComparePath) { matchingPath = true; }
+        let linkRoute = this.getPathElement<PathRouteComponent>(queryPath, this.routes);
+        if(linkRoute == null) { return false; }
+
+        let matchingPath = (this.currentRoute == linkRoute);
+        // if(linkRoute.extractSubroute(queryPath) != "") { return false; } // never highlight the subroute link
+        if(matchingPath == true)
+        {
+            // highlight the link, if the parent route already matches, and the link routes to the currently open subroute
+            const subroute = linkRoute.extractSubroute(queryPath)
+            if(linkRoute.getAttribute('subrouting') != "false" && subroute != "")
+            {
+                const subrouter = linkRoute.querySelector<PathRouterComponent>(':scope > path-router');
+                if(subrouter != null)
+                {
+                    matchingPath = subrouter.pathIsActive(subroute);
+                }
+            } 
+        }
+
         let matchingHash = false;
         if(queryHash == routerCompareHash) { matchingHash = true; }
 
@@ -216,6 +257,246 @@ export class PathRouterComponent extends HTMLElement
         }
 
         return false;
+    }
+
+
+    comparePath(toCompare: string)
+    {
+        const currentPath = this.getAttribute('path');
+        if(currentPath == null) { return {}; }
+
+        const url = new URL(toCompare);
+        let [ windowPath, windowHash ] = this.destructurePath(url.pathname + url.hash);
+        [ windowPath, windowHash ] = this.stripLeadingCharacters(windowPath, windowHash);
+        let [ routePath, routeHash ] = this.destructurePath(currentPath);
+        [ routePath, routeHash ] = this.stripLeadingCharacters(routePath, routeHash);        
+
+        const newPath = `/${routePath}${(routeHash != '') ? `#${routeHash}` : ''}${url.search}`;        
+        const pathHasChanged = !(windowPath == routePath && windowHash == routeHash);
+        const onlyHashChanged = pathHasChanged && (windowPath == routePath && windowHash != '' && routeHash != '');
+
+        return { newPath, pathHasChanged, onlyHashChanged };
+    }
+    compareLocations(currentLocation: URL, updatedLocation: URL)
+    {
+        let hasChanged = false;
+        let isReplacementChange = false;
+        
+        if(updatedLocation.pathname != currentLocation.pathname)
+        {
+            hasChanged = true;
+        }
+        else if(updatedLocation.pathname == currentLocation.pathname && updatedLocation.hash != currentLocation.hash)
+        {
+            hasChanged = true;
+            // if we're not adding a hash or removing a hash from the url,
+            // this navigation is a replacement change
+            // otherwise, we want to record this change in our navigation history
+            if(currentLocation.hash != "" && updatedLocation.hash != "")
+            {
+                isReplacementChange = true;
+            }
+        }
+
+        return { hasChanged, isReplacementChange };
+    }
+
+    stripLeadingCharacters(path: string, hash: string)
+    {
+        let cleanedPath = path;
+        if(cleanedPath.startsWith('/')) { cleanedPath = cleanedPath.substring(1); }
+        cleanedPath = cleanedPath.trim();
+
+        let cleanedHash = hash;
+        if(cleanedHash.startsWith('#')) { cleanedHash = cleanedHash.substring(1); }
+        cleanedHash = cleanedHash.trim();
+
+        return [ cleanedPath, cleanedHash ];
+    }
+
+    static getUrlParameters(urlString: string)
+    {
+        const url = new URL(urlString);
+        const targetPath = url.pathname;
+        const path = (targetPath.startsWith('/')) ? targetPath.substring(1) : targetPath;
+        const pathArray = path.split('/');
+        
+        const properties: { [key:string]: string } = {};
+
+        let previousSlug: string|null = null;
+        for(let i = 0; i < pathArray.length; i++)
+        {
+            const slug = pathArray[i];
+            if(previousSlug == null)
+            {
+                previousSlug = slug;
+            }
+            else
+            {
+                properties[previousSlug] = slug;
+                previousSlug = null;
+            }
+        }
+
+        return properties;
+    }
+
+    composeRoutePath()
+    {
+        const path = this.getAttribute('path') ?? "";
+        const [ routerPath, routerHash ] = this.destructurePath(path);
+        // let composedPathsArray = [routerPath];
+
+
+        const targetProperties =  {};
+        let targetPath = routerPath ?? "";
+        let targetHash = routerHash ?? "";
+        let targetSubroutePath = "";
+        let targetSubrouteHash = "";
+
+        const route =  this.targetRoute ?? this.currentRoute;
+        if(route != null)
+        {
+            Object.assign(targetProperties, route.currentProperties);
+            const routePathAttribute = route.getAttribute('path') ?? "";
+            const [ routePath, routeHash ] = this.destructurePath(routePathAttribute);
+            
+            // console.log(routerPath, routerHash, routePath, routeHash);
+            const subrouter = (route.querySelector('path-router') as PathRouterComponent);
+            if(subrouter != null)
+            {
+                const subrouteFullPath = subrouter.composeRoutePath();
+                [ targetSubroutePath, targetSubrouteHash ] = this.destructurePath(subrouteFullPath);
+                const subroute = subrouter.targetRoute ?? subrouter.currentRoute;
+                if(subroute != null)
+                {
+                    Object.assign(targetProperties, subroute.currentProperties);
+                }
+                // console.log(subrouteFullPath, subroutePath, subrouteHash);
+            }
+
+            targetPath = routePath ?? targetPath;
+            targetHash = (routeHash.trim() == "") ? targetHash : routeHash;
+        }
+        
+        const dialogRoute = this.targetRouteDialog ?? this.currentRouteDialog;
+        if(dialogRoute != null)
+        {
+            const dialogRouteProperties = dialogRoute.currentProperties ?? {};
+            Object.assign(targetProperties, dialogRouteProperties);
+
+            const dialogSubrouter = (dialogRoute.querySelector('path-router') as PathRouterComponent);
+            let dialogSubroutePath = "";
+            if(dialogSubrouter != null)
+            {
+                const dialogSubrouteFullPath = dialogSubrouter.composeRoutePath();
+                [ dialogSubroutePath ] = this.destructurePath(dialogSubrouteFullPath);
+                const dialogSubroute = dialogSubrouter.targetRoute ?? dialogSubrouter.currentRoute;
+                if(dialogSubroute != null)
+                {
+                    Object.assign(dialogRouteProperties, dialogSubroute.currentProperties);
+                }
+                // console.log(dialogSubrouteFullPath, dialogSubroutePath);
+            }
+
+            targetHash += (dialogSubroutePath.trim() == "") ? '' : `/${dialogSubroutePath}`;
+        }
+        
+
+        return this.#composeRoutePath(targetPath, targetHash, targetSubroutePath, targetSubrouteHash, targetProperties);
+    }
+    #composeRoutePath(path: string, hash: string, subroutePath: string, subrouteHash: string, properties: RouteProperties)
+    {
+        const pathArray = path.split('/');
+        const subpathArray = subroutePath.split('/');
+        const replaceLastPathSlug = pathArray[pathArray.length - 1].startsWith(':');
+
+        const hashArray = hash.split('/');
+        const subhashArray = subrouteHash.split('/');
+        const replaceLastHashSlug = hashArray[hashArray.length - 1].startsWith(':');
+
+        for(const [key, value] of Object.entries(properties))
+        {
+            const pathIndex = pathArray.indexOf(`:${key}`);
+            if(pathIndex > -1) { pathArray[pathIndex] = value; }
+            const subpathIndex = subpathArray.indexOf(`:${key}`);
+            if(subpathIndex > -1) { subpathArray[subpathIndex] = value; }
+            
+            const hashIndex = hashArray.indexOf(`:${key}`);
+            if(hashIndex > -1) { hashArray[hashIndex] = value; }
+            const subhashIndex = subhashArray.indexOf(`:${key}`);
+            if(subhashIndex > -1) { subhashArray[subhashIndex] = value; }
+        }
+        if(replaceLastPathSlug == true)
+        {
+            pathArray[pathArray.length - 1] = subpathArray[0];
+            subpathArray.shift();
+        }
+        if(replaceLastHashSlug == true)
+        {
+            hashArray[hashArray.length - 1] = subhashArray[0];
+            subhashArray.shift();
+        }
+
+        const fullPathArray = pathArray.concat(subpathArray);
+        path = fullPathArray.join('/');
+        
+        const fullHashArray = hashArray.concat(subhashArray).filter(item => item.trim() != "");
+        const fullHashPath = fullHashArray.join('/');
+        if(fullHashPath.trim() != "")
+        {
+            path = path.endsWith('/') ? path.substring(0, path.length - 1) : path;
+            path += `#${fullHashPath}`;
+        }
+        path = path.replace('//', '/');
+
+
+        return path;
+    }
+    composeRoutePath_old()
+    {
+        let path = this.getAttribute('path') ?? "";
+        let pathHash = path.indexOf('#') != -1 ? path.substring(path.indexOf('#') + 1) : path;
+        const route = this.targetRoute ?? this.currentRoute;
+        if(route == null) { return path; }
+        path = route.getAttribute('path') ?? path;
+        // console.log(pathHash);
+
+        const subrouter = (route.querySelector('path-router') as PathRouterComponent);
+        if(subrouter == null) { return path; }
+        let subpath = subrouter.composeRoutePath();
+        let subpathHash = subpath.indexOf('#') != -1 ? subpath.substring(subpath.indexOf('#') + 1) : subpath;
+
+        // console.log(subpathHash);
+
+        const routeParams = route.currentProperties ?? {};
+        const subroute = subrouter.targetRoute ?? subrouter.currentRoute;
+        if(subroute != null)
+        {
+            Object.assign(routeParams, subroute.currentProperties);
+        }
+        
+        const pathArray = path.split('/');
+        const subpathArray = subpath.startsWith('/') ? subpath.substring(1).split('/') : subpath.split('/');
+        const replaceLastPathSlug = pathArray[pathArray.length - 1].startsWith(':');
+        for(const [key, value] of Object.entries(routeParams))
+        {
+            const pathIndex = pathArray.indexOf(`:${key}`);
+            if(pathIndex > -1) { pathArray[pathIndex] = value; }
+            const subpathIndex = subpathArray.indexOf(`:${key}`);
+            if(subpathIndex > -1) { subpathArray[subpathIndex] = value; }
+        }
+        if(replaceLastPathSlug == true)
+        {
+            pathArray[pathArray.length - 1] = subpathArray[0];
+            subpathArray.shift();
+        }
+
+        const fullPathArray = pathArray.concat(subpathArray);
+        path = fullPathArray.join('/');
+        path = path.replace('//', '/');
+
+        return path;
     }
 
     async #init()
@@ -266,6 +547,7 @@ export class PathRouterComponent extends HTMLElement
 
     async #update(path: string, hash: string)
     {
+        this.subpaths = [];
         const currentPathAttribute = this.getAttribute('path') ?? "";
         const { path: currentPath, hash: currentHash } = this.splitPath(currentPathAttribute);
         
@@ -298,26 +580,26 @@ export class PathRouterComponent extends HTMLElement
             return false; 
         }
 
-        let route = this.getPathElement<PathRouteComponent>(path, this.routes);
-        if(route == null)
+        this.targetRoute = this.getPathElement<PathRouteComponent>(path, this.routes);
+        if(this.targetRoute == null)
         {
             if(this.wildcardRoute != null)
             {
-                route = this.wildcardRoute;
+                this.targetRoute = this.wildcardRoute;
             }
         }
-        route = route || this.defaultRoute;
+        this.targetRoute = this.targetRoute || this.defaultRoute;
 
-        if(route == null)
+        if(this.targetRoute == null)
         {
             return false;
         }
 
-        const opened = await route!.open(path);
+        const opened = await this.targetRoute!.open(path);
         if(opened)
         {
-            this.currentPathRoute = route!;
-            this.dispatchEvent(new CustomEvent(PathRouterEvent.Change, { detail: { route, path }}))
+            this.currentRoute = this.targetRoute!;
+            this.dispatchEvent(new CustomEvent(PathRouterEvent.Change, { detail: { route: this.targetRoute, path } }));
         }
         return opened;
     }
@@ -335,18 +617,18 @@ export class PathRouterComponent extends HTMLElement
             return false; 
         }
 
-        const routeDialog = this.getPathElement<RouteDialogComponent>(trimmedPath, this.routeDialogs);
+        this.targetRouteDialog = this.getPathElement<RouteDialogComponent>(trimmedPath, this.routeDialogs);
 
-        if(routeDialog == null)
+        if(this.targetRouteDialog == null)
         {
             return false;
         }
 
-        const opened = await routeDialog.openRoute(path);
+        const opened = await this.targetRouteDialog.openRoute(path);
         if(opened)
         {
-            this.currentRouteDialog = routeDialog;
-            this.dispatchEvent(new CustomEvent(PathRouterEvent.Change, { detail: { route: routeDialog, path: trimmedPath }}))
+            this.currentRouteDialog = this.targetRouteDialog;
+            this.dispatchEvent(new CustomEvent(PathRouterEvent.Change, { detail: { route: this.targetRouteDialog, path: trimmedPath } }))
         }
         return opened;
     }
@@ -354,21 +636,21 @@ export class PathRouterComponent extends HTMLElement
     #setPath(path: string)
     {
         this.setAttribute('path', path);
-        this.dispatchEvent(new CustomEvent(PathRouterEvent.PathChange, { detail: { path } }));
+        this.dispatchEvent(new CustomEvent(PathRouterEvent.PathChange, { detail: { path, supaths: this.subpaths }, bubbles: true, cancelable: true }));
     }
 
     async #closeCurrentPathRoute(): Promise<boolean>
     {
-        if(this.currentPathRoute == null) { return true; }
+        if(this.currentRoute == null) { return true; }
 
         await Promise.allSettled(this.routes.map((route) =>
         {
             return route.currentProcess;
         }));
-        const closed = await this.currentPathRoute.close();
+        const closed = await this.currentRoute.close();
         if(closed == true)
         {
-            this.currentPathRoute = undefined;
+            this.currentRoute = undefined;
         }
         return closed;
     }

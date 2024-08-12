@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Path Router Demo</title>
+    <link rel="stylesheet" href="./demo-page.css">
+    <link rel="stylesheet" href="./heading-nav.theme.css">
+    <link rel="stylesheet" href="./tabs.theme.css">
+    <link rel="stylesheet" href="./sidebar.theme.css">
+    <style>
+        #demo-content
+        {
+            grid-template-rows: auto auto auto 1fr;
+        }
+    </style>
+</head>
+<body>
+    <menu id="demo-pages">
+        <a href="./index.html">Basic Routing</a>
+        <a href="./browser-navigation.html">Browser Navigation</a>
+        <a href="./transitions.html">Transitions</a>
+        <a href="./themes.html">Themes</a>
+    </menu>
+    <div id="demo-content">
+        <header>Themes</header>
+        <p>Select a theme to apply styling for common routing layouts like tabs and sidebars.</p>
+        <div class="form-field">
+            <label class="form-field">
+                <span class="label">Theme:</span>
+                <select name="theme" class="value">
+                    <option value="tabs">Tabs</option>
+                    <option value="sidebar">Sidebar</option>
+                    <option value="heading-nav">Heading Navigation</option>
+                </select>
+            </label>
+        </div>
+        <div data-theme="tabs" class="layout">
+            <menu id="page-menu">
+                <a is="route-link" for="page-router" data-theme="tabs" path="/">Home</a>
+                <a is="route-link" for="page-router" data-theme="tabs" path="/user">User</a>
+                <a is="route-link" for="page-router" data-theme="tabs" path="/help">Help</a>
+                <a is="route-link" for="page-router" data-theme="tabs" path="/help/faq">FAQ</a>
+                <a is="route-link" for="page-router" data-theme="tabs" path="/help/contact">Contact</a>
+            </menu>
+            <path-router id="page-router" data-theme="tabs">
+                <path-route path="/">
+                    <header>Home</header>
+                    <p>Home Content</p>
+                    <button is="route-button" for="page-router" data-theme="tabs" path="/user/1/contact/alice">Open Alice Contact</button>
+                    <button is="route-button" for="page-router" data-theme="tabs" path="/user/1/contact/bob">Open Bob Contact</button>
+                    <!-- Can't do this: -->
+                    <!-- <a is="route-link" for="app-router" path="/help#about">Open About Dialog</a> -->
+                    <!-- No automated way to know if the hash should be for the top level router, or a subrouter -->
+                    <!-- Can move the dialog to top level and change link target router, or script from a page open event -->
+                </path-route>
+                <path-route path="/user/:id">
+                    <header>User</header>
+                    <menu>
+                        <nav>
+                            <ul>
+                                <li><a is="route-link" for="user-router" path="1/profile">Profile</a></li>
+                                <li><a is="route-link" for="user-router" path="1/contact">Contacts</a></li>
+                            </ul>
+                        </nav>
+                    </menu>
+                    <path-router id="user-router">
+                        <path-route path=":id/profile">
+                            <header>User Profile</header>
+                            <p>Profile Content</p>
+                        </path-route>
+                        <path-route path=":id/contact/:contactId">
+                            <path-router id="user-contact-router">
+                                <path-route path=":contactId/">
+                                    <header>User Contacts</header>
+                                    <menu>
+                                        <nav>
+                                            <ul>
+                                                <li><a is="route-link" for="user-contact-router" path="/alice">Alice</a></li>
+                                                <li><a is="route-link" for="user-contact-router" path="/bob">Bob</a></li>
+                                            </ul>
+                                        </nav>
+                                    </menu>
+                                </path-route>
+                                <path-route path="alice">
+                                    <header>Alice</header>
+                                    <p>Alice's Contact Info</p>
+                                    <a is="route-link" for="user-contact-router" path="/">Back</a>
+                                </path-route>
+                                <path-route path="bob">
+                                    <header>Bob</header>
+                                    <p>Bob's Contact Info</p>
+                                    <a is="route-link" for="user-contact-router" path="/">Back</a>
+                                </path-route>
+                            </path-router>
+                        </path-route>
+                        <dialog is="route-dialog" path="about">
+                            <header>About</header>
+                            <p>About Content</p>
+                            <form method="dialog"><button method="dialog">Close</button></form>
+                        </dialog>
+                    </path-router>
+                </path-route>
+                <path-route path="/help/:subpage">
+                    <header>Help</header>
+                    <menu>
+                        <nav>
+                            <ul>
+                                <li><a is="route-link" for="help-router" path="/faq">FAQ</a></li>
+                                <li><a is="route-link" for="help-router" path="/contact">Contact</a></li>
+                            </ul>
+                        </nav>
+                    </menu>
+                    <path-router id="help-router">
+                        <path-route path="/faq">
+                            <header>Frequently Asked Questions</header>
+                            <p>Answer Content</p>
+                        </path-route>
+                        <path-route path="/contact">
+                            <header>Contact Us</header>
+                            <p>Contact Content</p>
+                        </path-route>
+                        <dialog is="route-dialog" path="about">
+                            <header>About</header>
+                            <p>About Content</p>
+                            <form method="dialog"><button method="dialog">Close</button></form>
+                        </dialog>
+                    </path-router>
+                    <div><button type="button" is="route-button" for="help-router" path="#about">About App</button></div>
+                </path-route>
+            </path-router>
+        </div>
+    </div>
+    
+    <script>
+        const select = document.querySelector('select');
+        const items = document.querySelectorAll('[data-theme]');
+        select.addEventListener('change', 
+        () => { items.forEach(item => item.setAttribute('data-theme', event.target.value)); });
+    </script>
+    <script type="module" src="../dist/path-router.js"></script>
+</body>
+</html>

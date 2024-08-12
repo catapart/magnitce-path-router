@@ -12,7 +12,7 @@ export class RouteLinkComponent extends HTMLAnchorElement
     {
         super();
         // set here to catch first window load
-        window.addEventListener('popstate', () => this.setIsCurrent());
+        // window.addEventListener('popstate', () => this.setIsCurrent());
     }
     connectedCallback()
     {
@@ -28,7 +28,7 @@ export class RouteLinkComponent extends HTMLAnchorElement
             {
                 return;
             }
-            const path = this.getAttribute('path') ?? this.getAttribute('data-path') ?? "";
+            const path = this.#preparePath();
             target.dispatchEvent(new CustomEvent(RouteLinkEvent.Navigate, { detail: { target: this, path } }));
         });
 
@@ -40,6 +40,20 @@ export class RouteLinkComponent extends HTMLAnchorElement
             this.setIsCurrent();
         }
     }
+
+    #preparePath()
+    {
+        let path = this.getAttribute('path') ?? this.getAttribute('data-path') ?? "";
+        path = this.onPreparePath(path);
+        return path;
+    }
+    /**
+     * An override-able string transformation function for preparing the static path attribute value.
+     * @param staticPath the path that is set in the route-link's html
+     * @returns a new path that has been transformed to the exact path expected for navigation
+     * @description Useful for replacing variables.
+     */
+    onPreparePath(staticPath: string) { return staticPath; }
 
     private getTarget()
     {
@@ -56,6 +70,7 @@ export class RouteLinkComponent extends HTMLAnchorElement
 
     private setIsCurrent()
     {
+        // console.log('isCurrent', this);
         const linkPath = this.getAttribute('path');
         if(linkPath == null) { return; }
 
