@@ -5,6 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Path Router Demo</title>
     <link rel="stylesheet" href="./demo-page.css">
+    <style>
+
+        path-route[data-entering]
+        {
+            animation: fade-in 1s ease forwards;
+        }
+
+        @keyframes fade-in
+        {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        @keyframes bounce
+        {
+            0% { translate: 0 50px; }
+            100% { trasnlate: 0 0; }
+        }
+    </style>
 </head>
 <body>
     <menu id="demo-pages">
@@ -15,44 +33,181 @@
     </menu>
     <div id="demo-content">
         <header>Transitions</header>
-        <path-router id="transitions-router">
-            <path-route path="a">
-                <header>Page A</header>
-                <p>Page A Content</p>
-            </path-route>
-            <dialog is="route-dialog" path="transitions-dialog">
-                <header>Popup C</header>
-                <p>Popup C Content</p>
-                <form method="dialog"><button method="dialog">Close</button></form>
-            </dialog>
-        </path-router>
+        <div class="description">
+            <p>The <code>&lt;route-page&gt;</code> and <code>&lt;route-dialog&gt;</code> elements dispatch custom events when navigation is occurring. There are four total events, but the events may be assigned in two ways: "normally" or "blocking". These are handled by two separate sets of event handlers, so you can specify the preference in implementation.</p>
+            <p>Using the standard `addEventListener` will add an event that does NOT block the page from transitioning. The handler will run simultaneously with the css transitions.</p>
+            <p>If you need to prevent a route from opening until after your handler has finished its work, you can use the custom `addBlockingEventListener`, in the same way, using the same event name.</p>
+            <p>Since the handlers will be awaited, you can use asynchronous code within the handler. This allows dynamic content to be set during the transitions.</p>
+            <p>For example, if you want to load some data to populate the route on the <code>beforeopen</code></p>
+            <ul>
+                Overview: will await css transition; can be awaited in js
+                <li>Before Open</li>
+                <li>After Open</li>
+                <li>Before Close</li>
+                <li>After Close</li>
+                <li>applyEventListener vs addEventListener</li>
+                <li>Blocking Events</li>
+            </ul>
+        <main>
+            <div class="layout" data-theme="heading-nav">
+                <menu id="page-menu">
+                    <a is="route-link" for="page-router" data-theme="heading-nav" path="/">Basics</a>
+                    <a is="route-link" for="page-router" data-theme="heading-nav" path="/async-event-handlers">Async Event Handlers</a>
+                    <a is="route-link" for="page-router" data-theme="heading-nav" path="/route-dialogs">Route Dialogs</a>
+                </menu>
+                <path-router id="page-router" path="" data-theme="heading-nav" >
+                    <path-route path="/">
+                        <h3>Basics</h3>
+                        <h4>Events</h4>
+                        <ul>
+                            <li><code>beforeopen</code></li>
+                            <li><code>afteropen</code></li>
+                            <li><code>beforeclose</code></li>
+                            <li><code>afterclose</code></li>
+                        </ul>
+
+                        <h4>Blocking Events</h4>
+
+                        <p>Routes can define simple routes, nested routes, and dialog routes, which provide a secondary routing path for displaying dialogs over existing route content.</p>
+                        <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="#about">Open Dialog Route</button>
+                        <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="#about/website">Open Dialog Subroute</button>
+                        <p>Routes can include variables by using a colon character before the variable name (ex: 'routeA/:id' defines the route variable of "id" for the "routeA" route).</p>
+                        <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="/user/1">Open User 1</button>
+                        <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="/user/2">Open User 2</button>
+                        <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="/user/3">Open User 3</button>
+                        <p>Nested routes can be linked to from top-level path-router elements by using variables.</p>
+                        <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="/user/1/contact/alice">Open Alice Contact</button>
+                        <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="/user/1/contact/bob">Open Bob Contact</button>
+                    </path-route>
+                    <path-route path="/async-event-handlers">
+                        <h3>User</h3>
+                        <p>Routes can be nested by adding a path-router element as a child of a path-route element.</p>
+                        <nav>
+                            <a is="route-link" for="user-router" data-theme="tabs" path=":id/profile">Profile</a>
+                            <a is="route-link" for="user-router" data-theme="tabs" path=":id/contact">Contacts</a>
+                        </nav>
+                        <path-router id="user-router" data-theme="tabs">
+                            <path-route path=":id/profile">
+                                <h4>User Profile</h4>
+                                <p>By giving the route a variable, like ":subpage", the remanining route can be passed down to the nested path-router element.</p>
+                            </path-route>
+                            <path-route path=":id/contact/:contactId">
+                                <path-router id="user-contact-router">
+                                    <path-route path=":contactId/">
+                                        <h4>User Contacts</h4>
+                                        <p>Nested routes can also have path-router elements.</p>
+                                        <p>By using variables and route-link elements, a nested path can be navigated to without any javascript needed for the implementer.</p>
+                                        <nav>
+                                            <style>
+                                                .link-button { padding: 0 .2em; cursor: pointer; }
+                                                .link-button:hover { text-decoration: underline ;}
+                                            </style>
+                                            <a is="route-link" for="user-contact-router" class="link-button" path="/alice">Alice</a>
+                                            <a is="route-link" for="user-contact-router" class="link-button" path="/bob">Bob</a>
+                                        </nav>
+                                    </path-route>
+                                    <path-route path="alice">
+                                        <h4>Alice</h4>
+                                        <p>Alice's Contact Info</p>
+                                        <a is="route-link" for="user-contact-router" class="link-button" path=":contactId#address">See Address</a>
+                                        <a is="route-link" for="user-contact-router" class="link-button" path="/">Back</a>
+                                    </path-route>
+                                    <path-route path="bob">
+                                        <h4>Bob</h4>
+                                        <p>Bob's Contact Info</p>
+                                        <a is="route-link" for="user-contact-router" class="link-button" path=":contactId#address">See Address</a>
+                                        <a is="route-link" for="user-contact-router" class="link-button" path="/">Back</a>
+                                    </path-route>
+                                    <dialog is="route-dialog" path="address">
+                                        <h2>Contact Address</h2>
+                                        <p>Contact Address Content</p>
+                                        <form method="dialog"><button method="dialog">Close</button></form>
+                                    </dialog>
+                                </path-router>
+                            </path-route>
+                        </path-router>
+                    </path-route>
+                    <path-route path="/route-dialogs">
+                        <h2>Help</h2>
+                        <nav>
+                            <a is="route-link" for="help-router" data-theme="tabs" path="/faq">FAQ</a>
+                            <a is="route-link" for="help-router" data-theme="tabs" path="/contact">Contact</a>
+                        </nav>
+                        <path-router id="help-router"data-theme="tabs">
+                            <path-route path="/faq">
+                                <h3>Frequently Asked Questions</h3>
+                                <p>Answer Content</p>
+                            </path-route>
+                            <path-route path="/contact">
+                                <h3>Contact Us</h3>
+                                <p>Contact Content</p>
+                            </path-route>
+                        </path-router>
+                    </path-route>
+                    <dialog is="route-dialog" path="about/:subpage">
+                        <h2>About</h2>
+                        <p>About Content</p>
+                        <nav>
+                            <a is="route-link" for="about-router" data-theme="tabs" path="/company">Company</a>
+                            <a is="route-link" for="about-router" data-theme="tabs" path="/website">Website</a>
+                        </nav>
+                        <path-router id="about-router">
+                            <path-route path="company">
+                                <h3>About Company</h3>
+                                <p>About Company Content</p>
+                            </path-route>
+                            <path-route path="website">
+                                <h3>About Website</h3>
+                                <p>About Website Content</p>
+                                <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="#disclaimer">See Disclaimer</button>
+                            </path-route>
+                        </path-router>
+                        <form method="dialog"><button method="dialog">Close</button></form>
+                    </dialog>
+                    <dialog is="route-dialog" path="disclaimer">
+                        <h2>Disclaimer</h2>
+                        <p>Disclaimer content</p>
+                        <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="#about">Back to About</button>
+                        <form method="dialog"><button method="dialog">Close</button></form>
+                    </dialog>
+                </path-router>
+            </div>
+        </main>
     </div>
     <script type="module" src="../dist/path-router.js"></script>
     <script>
+        const basics = document.querySelector('path-route[path="/"]');
+        const asyncEventHandlers = document.querySelector('path-route[path="/async-event-handlers"]');
+        const routeDialogs = document.querySelector('path-route[path="/route-dialogs"]');
+
+        const basics_beforeOpen = async (event) =>
+        {
+            console.log('start awaiting');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            console.log('stop awaiting');
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
         async function init(example)
         {
-            // example.querySelector('path-route[path="/dialog"]').applyEventListener('beforeopen', (event) =>
-            // {
-            //     example.querySelector('dialog').open = true;
-            // });
-            // example.querySelector('path-route[path="/dialog"]').applyEventListener('beforeclose', (event) =>
-            // {
-            //     const currentRoute = example.querySelector('path-router').currentRoute;
-            //     const currentPath = currentRoute.getAttribute('path');
-            //     if(currentPath.indexOf('dialog') == -1)
-            //     {
-            //         example.querySelector('dialog').open = false;
-            //     }
-            // });
+            basics.addBlockingEventListener('beforeopen', basics_beforeOpen);
+
+            asyncEventHandlers.addEventListener('afteropen', () =>
+            {
+                console.log('this will fire after the css transition has occurred.');
+            })
         }
-        route_beforeOpen(example)
-        {
-            console.log('route open');
-        }
-        route_beforeClose(example)
-        {
-            console.log('route close');
-        }
+
+        // basics.applyBlockingEventListener('beforeopen', basics_beforeOpen);
+
+        // route_beforeOpen(example)
+        // {
+        //     console.log('route open');
+        // }
+        // route_beforeClose(example)
+        // {
+        //     console.log('route close');
+        // }
     </script>
 </body>
 </html>

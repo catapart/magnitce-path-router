@@ -7,9 +7,9 @@ declare enum PathRouteEvent {
 type RouteProperties = {
     [key: string]: string;
 };
-declare class PathRouteComponent extends HTMLElement {
+declare class RoutePageElement extends HTMLElement {
     #private;
-    get router(): PathRouterComponent | null;
+    get router(): PathRouterElement | null;
     private blockingBeforeOpen;
     private blockingAfterOpen;
     private blockingBeforeClose;
@@ -17,11 +17,13 @@ declare class PathRouteComponent extends HTMLElement {
     currentProcess: Promise<void>;
     canBeOpened: () => Promise<boolean>;
     canBeClosed: () => Promise<boolean>;
+    subrouting: boolean;
+    currentProperties: RouteProperties | undefined;
     constructor();
     open(path: string): Promise<boolean>;
     close(): Promise<boolean>;
     getProperties(targetPath: string): RouteProperties;
-    createPathFromProperties(properties: RouteProperties): string;
+    extractSubroute(targetPath: string): string;
     applyEventListener<K extends (keyof HTMLElementEventMap | 'beforeopen' | 'afteropen' | 'beforeclose' | 'afterclose')>(type: K, listener: (this: HTMLElement, ev: Event | CustomEvent) => void | Promise<void>, options?: boolean | AddEventListenerOptions | undefined): void;
     addBlockingEventListener(eventName: PathRouteEvent, handler: () => void | Promise<void>): void;
     applyBlockingEventListener(eventName: PathRouteEvent, handler: () => void | Promise<void>): void;
@@ -29,7 +31,7 @@ declare class PathRouteComponent extends HTMLElement {
 
 declare class RouteDialogComponent extends HTMLDialogElement {
     #private;
-    get router(): PathRouterComponent | null;
+    get router(): PathRouterElement | null;
     private blockingBeforeOpen;
     private blockingAfterOpen;
     private blockingBeforeClose;
@@ -37,10 +39,12 @@ declare class RouteDialogComponent extends HTMLDialogElement {
     currentProcess: Promise<void>;
     canBeOpened: () => Promise<boolean>;
     canBeClosed: () => Promise<boolean>;
+    currentProperties: RouteProperties | undefined;
     constructor();
     openRoute(path: string): Promise<boolean>;
     closeRoute(): Promise<boolean>;
     getProperties(targetPath: string): RouteProperties;
+    extractSubroute(targetPath: string): string;
     applyEventListener<K extends (keyof HTMLElementEventMap | 'beforeopen' | 'afteropen' | 'beforeclose' | 'afterclose')>(type: K, listener: (this: HTMLElement, ev: Event | CustomEvent) => void | Promise<void>, options?: boolean | AddEventListenerOptions | undefined): void;
     addBlockingEventListener(eventName: PathRouteEvent, handler: () => void | Promise<void>): void;
 }
@@ -48,44 +52,55 @@ declare class RouteDialogComponent extends HTMLDialogElement {
 declare enum PathRouterEvent {
     /** Fires when a route is opened or closed.  */
     Change = "change",
-    /** Fires when the router's path element is updated. */
-    PathChange = "pathchange"
+    /** Fires when the router's `path` attribute is updated. */
+    PathChange = "pathchange",
+    /** Fires when the router's `path` attribute is combined with all subroute paths to update the `composed-path` attribute. */
+    PathCompose = "pathcompose"
 }
 type PathRouterAttributes = {
     /** The target path for the router to route to. */
     path?: string;
+    /** The composition of the router's current path along with any subroute paths. */
+    get composedPath(): string | undefined;
 };
 declare const COMPONENT_TAG_NAME = "path-router";
-declare class PathRouterComponent extends HTMLElement {
-    get routes(): PathRouteComponent[];
+declare class PathRouterElement extends HTMLElement {
+    #private;
+    get routes(): RoutePageElement[];
     get routeDialogs(): RouteDialogComponent[];
-    currentPathRoute: PathRouteComponent | undefined;
-    currentRouteDialog: RouteDialogComponent | undefined;
-    defaultRoute: PathRouteComponent | undefined;
-    wildcardRoute: PathRouteComponent | undefined;
+    targetPageRoute: RoutePageElement | undefined;
+    currentPageRoute: RoutePageElement | undefined;
+    targetDialogRoute: RouteDialogComponent | undefined;
+    currentDialogRoute: RouteDialogComponent | undefined;
+    defaultRoute: RoutePageElement | undefined;
+    wildcardRoute: RoutePageElement | undefined;
+    get path(): string | null;
+    set path(value: string);
+    subpaths: string[];
+    subrouting: boolean;
+    isInitialized: boolean;
+    resolveNavigation?: () => void;
     constructor();
     /**
      * Navigate to a route path.
      * @param path route path
      */
     navigate(path: string): Promise<void>;
-    getPathElement<T extends HTMLElement, K extends T[] = T[]>(path: string, elements: K): T;
-    splitPath(path: string): {
-        path: string;
-        hash: string;
-    };
-    destructurePath(path: string): {
-        pathName: string;
-        hash: string;
+    subnavigate(path: string): Promise<void>;
+    destructurePath(path: string): string[];
+    trimCharacter(value: string, character: string): string;
+    composeRoutePath(): string;
+    compareLocations(currentLocation: URL, updatedLocation: URL): {
+        hasChanged: boolean;
+        isReplacementChange: boolean;
     };
     pathIsActive(path: string): boolean;
-    private init;
-    private update;
-    private openRoute;
-    private openRouteDialog;
-    private setPath;
-    private closeCurrentPathRoute;
-    private closeCurrentRouteDialog;
+    static getUrlParameters(urlString: string): {
+        [key: string]: string;
+    };
+    connectedCallback(): void;
+    static observedAttributes: string[];
+    attributeChangedCallback(attributeName: string, oldValue: string, newValue: string): void;
 }
 
-export { COMPONENT_TAG_NAME, type PathRouterAttributes, PathRouterComponent, PathRouterEvent };
+export { COMPONENT_TAG_NAME, type PathRouterAttributes, PathRouterElement, PathRouterEvent };

@@ -30,7 +30,7 @@
     </menu>
     <div id="demo-content">
         <header>Browser Navigation</header>
-        <div class="description">
+        <div class="description"></div>
             <p>This browser mockup demonstrates how the path-router element's navigation events can be handled. This demo page does not actually manipulate your browser's history.</p>
             <p>Instead, this demo collects the new path from the path-router element's "comparePath" function, and then applies it to the mockup.</p>
             <p>To see a demonstration that actually manipulates your browser's history, see <a href="./active-browser-navigation.html">the Active Browser Navigation demo</a>.</p>
@@ -45,7 +45,7 @@
                         <a is="route-link" for="page-router" data-theme="heading-nav" path="/help/faq">FAQ</a>
                         <a is="route-link" for="page-router" data-theme="heading-nav" path="/help/contact">Contact</a>
                     </menu>
-                    <path-router id="page-router" data-theme="heading-nav" >
+                    <path-router id="page-router" path="" data-theme="heading-nav" >
                         <path-route path="/">
                             <h3>Routing</h3>
                             <p>Routes can define simple routes, nested routes, and dialog routes, which provide a secondary routing path for displaying dialogs over existing route content.</p>
@@ -94,13 +94,13 @@
                                         <path-route path="alice">
                                             <h4>Alice</h4>
                                             <p>Alice's Contact Info</p>
-                                            <a is="route-link" for="user-contact-router" class="link-button" path="#address">See Address</a>
+                                            <a is="route-link" for="user-contact-router" class="link-button" path=":contactId#address">See Address</a>
                                             <a is="route-link" for="user-contact-router" class="link-button" path="/">Back</a>
                                         </path-route>
                                         <path-route path="bob">
                                             <h4>Bob</h4>
                                             <p>Bob's Contact Info</p>
-                                            <a is="route-link" for="user-contact-router" class="link-button" path="#address">See Address</a>
+                                            <a is="route-link" for="user-contact-router" class="link-button" path=":contactId#address">See Address</a>
                                             <a is="route-link" for="user-contact-router" class="link-button" path="/">Back</a>
                                         </path-route>
                                         <dialog is="route-dialog" path="address">
@@ -163,7 +163,7 @@
     <script type="module" src="./browser-mockup.js"></script>
     <script type="module" src="../dist/path-router.js"></script>
     <script type="module">
-        import { PathRouterComponent } from '../dist/path-router.js';
+        import { PathRouterElement } from '../dist/path-router.js';
         const browserMockup = document.body.querySelector('browser-mockup');
         const pageRouter = document.querySelector('#page-router');
         const userRouter = document.querySelector('#user-router');
@@ -177,9 +177,15 @@
         // fix dialog subroute
         let historyIsUpdating = false;
 
-        pageRouter.addEventListener('pathchange', pageRouter_onPathChange);
-        function pageRouter_onPathChange(event)
+        pageRouter.addEventListener('pathcompose', pageRouter_onPathCompose);
+        function pageRouter_onPathCompose(event)
         {
+            // console.log(event);
+
+            // prevent changing the url using events from subrouters
+            // console.log(event.target);
+            if(event.target != pageRouter) { return; }
+
             // if we're moving back or forward,
             // we don't want to record that in history
             // and the browser will update the url
@@ -187,7 +193,8 @@
              
             const currentLocation = new URL(browserMockup.getAttribute('url')); // equivalent to `window.location`
 
-            let updatedPath = pageRouter.composeRoutePath();
+            // let updatedPath = pageRouter.composeRoutePath();
+            let updatedPath = pageRouter.getAttribute('composed-path');
             // console.log(updatedPath);
             const origin = 'https://www.path-router.com' // reference window's origin with `window.location.origin`;
             const updatedLocation = new URL(origin + updatedPath);
@@ -214,7 +221,7 @@
         function prepareRouteLink(path)
         {
             const url = browserMockup.getAttribute('url') ?? ""; // equivalent to `window.location.href`
-            const urlParameters = PathRouterComponent.getUrlParameters(url);
+            const urlParameters = PathRouterElement.getUrlParameters(url);
 
             if(path.indexOf(':id') > -1)
             {
@@ -225,6 +232,12 @@
                 {
                     path = path.replace(":id", userId);
                 }
+            }
+            if(path.indexOf(':contactId') > -1)
+            {
+                const idValue = urlParameters.contact;
+                const contactId = parseInt(idValue);
+                path = path.replace(":contactId", urlParameters.contact);
             }
 
             return path;

@@ -1,4 +1,4 @@
-import { PathRouterComponent, COMPONENT_TAG_NAME as ROUTER_TAG_NAME } from "./path-router";
+import { PathRouterElement, COMPONENT_TAG_NAME as ROUTER_TAG_NAME } from "./path-router";
 
 export enum PathRouteEvent
 {
@@ -12,9 +12,9 @@ export type RouteProperties = { [key: string]: string };
 
 
 export const COMPONENT_TAG_NAME = 'path-route';
-export class PathRouteComponent extends HTMLElement
+export class RoutePageElement extends HTMLElement
 {
-    get router(): PathRouterComponent | null
+    get router(): PathRouterElement | null
     {
         return this.closest(ROUTER_TAG_NAME);
     }
@@ -27,6 +27,7 @@ export class PathRouteComponent extends HTMLElement
     currentProcess: Promise<void>;
     canBeOpened: () => Promise<boolean>;
     canBeClosed: () => Promise<boolean>;
+    subrouting: boolean = true;
 
     currentProperties: RouteProperties|undefined;
 
@@ -52,24 +53,23 @@ export class PathRouteComponent extends HTMLElement
     }
     async #open(path: string)
     {
+        this.dispatchEvent(new CustomEvent(PathRouteEvent.BeforeOpen, { detail: { path, properties: this.currentProperties }}));
+        await Promise.allSettled(this.blockingBeforeOpen.map(value => value()));
+
         this.dataset.entering = '';
 
         this.currentProperties = this.getProperties(path);
-  
-        this.dispatchEvent(new CustomEvent(PathRouteEvent.BeforeOpen, { detail: { path, properties: this.currentProperties }}));
-        await Promise.allSettled(this.blockingBeforeOpen.map(value => value()));
 
         const allowSubroute = (this.getAttribute('subrouting') ?? this.closest('path-router[subrouting]')?.getAttribute('subrouting')) != "false";
         if(allowSubroute == true)
         {
-            const subrouter = this.querySelector<PathRouterComponent>(':scope > path-router');
+            const subrouter = this.querySelector<PathRouterElement>(':scope > path-router');
             if(subrouter != null)
             {
                 const subroute = this.extractSubroute(path);
-                await subrouter.navigate(subroute);
+                await subrouter.subnavigate(subroute);
             }
         }
-  
   
         await Promise.allSettled(this.getAnimations({ subtree: true }).map((animation) => animation.finished));
   
@@ -98,11 +98,11 @@ export class PathRouteComponent extends HTMLElement
     async #close()
     {
         this.removeAttribute('open');
-        this.dataset.exiting = '';
-  
+
         this.dispatchEvent(new Event(PathRouteEvent.BeforeClose));
         await Promise.allSettled(this.blockingBeforeClose.map(value => value()));
-  
+
+        this.dataset.exiting = '';
   
         await Promise.all(this.getAnimations({ subtree: true }).map((animation) => animation.finished));
   
@@ -203,5 +203,5 @@ export class PathRouteComponent extends HTMLElement
 }
 if(customElements.get(COMPONENT_TAG_NAME) == null)
 {
-    customElements.define(COMPONENT_TAG_NAME, PathRouteComponent);
+    customElements.define(COMPONENT_TAG_NAME, RoutePageElement);
 }
