@@ -3,7 +3,7 @@ A custom `HTMLElement` that routes to pages based on its `path` attribute.
 
 Includes subrouting, transitions, events, dialog routes, route links, and route buttons.
 
-Package size: ~12kb minified, ~22kb verbose.
+Package size: ~19kb minified, ~33kb verbose.
 
 ## Quick Reference
 ```html
@@ -71,8 +71,6 @@ Package size: ~12kb minified, ~22kb verbose.
 ## Demos
 https://catapart.github.io/magnitce-path-router/demo/
 
-To run the demos, yourself, run the `package` script (`npm run pacakge`) before serving the demo index page, to generate the dist folder which are linked in the demo html.
-
 ## Support
 - Firefox
 - Chrome
@@ -84,8 +82,8 @@ To run the demos, yourself, run the `package` script (`npm run pacakge`) before 
  1. [Add Routes](#add-routes)
  1. [Add Links](#add-links)
  1. [Add a Theme](#add-a-theme)
- 1. [Await Animations](#await-animations)
  1. [Await Data](#await-data)
+ 1. [Await Animations](#await-animations)
  1. [Add a Dialog Route](#add-a-dialog-route)
  1. [Add a Subrouter](#add-a-subrouter)
  1. [Manage History](#manage-history)
