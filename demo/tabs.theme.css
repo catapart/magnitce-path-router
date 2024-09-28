@@ -2,7 +2,7 @@ path-router[data-theme="tabs"]
 {
     --theme-color: rgb(15, 84, 129);
     
-    & > path-route[open]
+    & > route-page[open]
     {
         display: block !important;
         padding: 1em;

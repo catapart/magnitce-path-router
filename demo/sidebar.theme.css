@@ -1,41 +1,38 @@
 path-router[data-theme="sidebar"]
 {
     --theme-color: rgb(15, 121, 129);
-    display: flex;
-    
-    & > path-route[open]
-    {
-        display: block !important;
-        padding: 1em;
-        border-left: solid 3px var(--theme-color);
-
-        & > [is="route-button"][data-theme="sidebar"]
-        {
-            padding: .2em 1em;
-            border: none;
-            border-radius: 2px;
-            user-select: none;
-            cursor: pointer;
-            font-family: sans-serif;
-            margin-inline: 0;
-            background-color: var(--theme-color);
-            color: #f1f1f1;
-            border: solid 2px transparent;
-        }
-        & > [is="route-button"][aria-current="page"][data-theme="sidebar"]
-        {
-            border: solid 2px var(--theme-color);
-            background-color: transparent;
-            color: var(--theme-color);
-        }
-    }
+}
+path-router[data-theme="sidebar"] > route-page[open]
+{
+    display: block !important;
+    padding: 1em;
+    border-left: solid 3px var(--theme-color);
+}
+path-router[data-theme="sidebar"] > route-page[open] > [is="route-button"][data-theme="sidebar"]
+{
+    padding: .2em 1em;
+    border: none;
+    border-radius: 2px;
+    user-select: none;
+    cursor: pointer;
+    font-family: sans-serif;
+    margin-inline: 0;
+    background-color: var(--theme-color);
+    color: #f1f1f1;
+    border: solid 2px transparent;
+}
+path-router[data-theme="sidebar"] > route-page[open] > [is="route-button"][aria-current="page"][data-theme="sidebar"]
+{
+    border: solid 2px var(--theme-color);
+    background-color: transparent;
+    color: var(--theme-color);
 }
 
-[data-theme="sidebar"].layout
+/* [data-theme="sidebar"].layout
 {
     display: grid;
     grid-template-columns: auto 1fr;
-}
+} */
 
 [is="route-link"][data-theme="sidebar"]
 {
@@ -47,12 +44,12 @@ path-router[data-theme="sidebar"]
     font-family: sans-serif;
     margin-inline: 0;
 }
-[is="route-link"][data-theme="sidebar"].inline
+/* [is="route-link"][data-theme="sidebar"].inline
 {
     border-bottom: solid 2px;
     display: inline-block;
     color: var(--theme-color);
-}
+} */
 
 [is="route-link"][data-theme="sidebar"]:hover
 ,[is="route-link"][data-theme="sidebar"][aria-current="page"]
@@ -66,4 +63,13 @@ path-router[data-theme="sidebar"]
 {
     border-bottom-color: var(--theme-color);
     color: #f1f1f1;
+}
+
+
+
+:has(> [is="route-link"][data-theme="sidebar"], > [is="route-button"][data-theme="sidebar"])
+{
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0;
 }

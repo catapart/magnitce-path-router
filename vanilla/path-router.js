@@ -1,5 +1,5 @@
 // route-page.ts
-var COMPONENT_TAG_NAME2 = "path-route";
+var COMPONENT_TAG_NAME2 = "route-page";
 var RoutePageElement = class extends HTMLElement {
   get router() {
     return this.closest(COMPONENT_TAG_NAME);
@@ -62,10 +62,10 @@ var RoutePageElement = class extends HTMLElement {
     return true;
   }
   async #close() {
-    this.removeAttribute("open");
     this.dispatchEvent(new Event("beforeclose" /* BeforeClose */));
     await Promise.allSettled(this.blockingBeforeClose.map((value) => value()));
     this.dataset.exiting = "";
+    this.removeAttribute("open");
     await Promise.all(this.getAnimations({ subtree: true }).map((animation) => animation.finished));
     delete this.dataset.exiting;
     this.removeAttribute("aria-current");
@@ -173,10 +173,10 @@ var RouteDialogComponent = class extends HTMLDialogElement {
     return true;
   }
   async #open(path) {
-    this.setAttribute("data-entering", "");
-    this.currentProperties = this.getProperties(path);
     this.dispatchEvent(new CustomEvent("beforeopen" /* BeforeOpen */, { detail: { path, properties: this.currentProperties } }));
     await Promise.allSettled(this.blockingBeforeOpen.map((value) => value()));
+    this.setAttribute("data-entering", "");
+    this.currentProperties = this.getProperties(path);
     const allowSubroute = (this.getAttribute("subrouting") ?? this.closest("path-router[subrouting]")?.getAttribute("subrouting")) != "false";
     if (allowSubroute == true) {
       const subrouter = this.querySelector(":scope > path-router");
@@ -185,14 +185,14 @@ var RouteDialogComponent = class extends HTMLDialogElement {
         await subrouter.subnavigate(subroute);
       }
     }
-    await Promise.allSettled(this.getAnimations({ subtree: true }).map((animation) => animation.finished));
-    this.removeAttribute("data-entering");
     if (this.dataset.modal != null) {
       this.showModal();
     } else {
       this.show();
     }
     this.setAttribute("aria-current", "page");
+    await Promise.allSettled(this.getAnimations({ subtree: true }).map((animation) => animation.finished));
+    this.removeAttribute("data-entering");
     this.dispatchEvent(new Event("afteropen" /* AfterOpen */));
     await Promise.allSettled(this.blockingAfterOpen.map((value) => value()));
   }
@@ -208,12 +208,12 @@ var RouteDialogComponent = class extends HTMLDialogElement {
     return true;
   }
   async #close() {
-    this.setAttribute("data-exiting", "");
     this.dispatchEvent(new Event("beforeclose" /* BeforeClose */));
     await Promise.allSettled(this.blockingBeforeClose.map((value) => value()));
-    await Promise.all(this.getAnimations({ subtree: true }).map((animation) => animation.finished));
+    this.setAttribute("data-exiting", "");
     this.close();
     this.removeAttribute("aria-current");
+    await Promise.all(this.getAnimations({ subtree: true }).map((animation) => animation.finished));
     this.dispatchEvent(new Event("afterclose" /* AfterClose */));
     await Promise.allSettled(this.blockingAfterClose.map((value) => value()));
   }
@@ -421,8 +421,8 @@ path-router
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
 }
-path-route:not([open],[data-entering],[data-exiting]) path-router { display: none; /* browser bug when rendering visibility? */ }
-path-route
+route-page:not([open],[data-entering],[data-exiting]) path-router { display: none; /* browser bug when rendering visibility? */ }
+route-page
 {
     display: var(--route-display, block);
     visibility: hidden;
@@ -433,9 +433,9 @@ path-route
    Visibility is visible during the entering and exiting phases
    to allow for animations to be awaited.
  */
-path-route[open]
-,path-route[data-entering]
-,path-route[data-exiting]
+route-page[open]
+,route-page[data-entering]
+,route-page[data-exiting]
 {
     visibility: visible;
 }`);
@@ -482,10 +482,8 @@ var PathRouterElement5 = class extends HTMLElement {
   async #init() {
     return new Promise((resolve) => {
       document.addEventListener("DOMContentLoaded", async () => {
-        const promises = [];
         for (let i = 0; i < this.routes.length; i++) {
           const route = this.routes[i];
-          promises.push(route.close());
           if (this.defaultRoute == null) {
             this.defaultRoute = route;
           }
@@ -510,7 +508,6 @@ var PathRouterElement5 = class extends HTMLElement {
             dialogs[i].removeAttribute("data-exiting");
           });
         }
-        await Promise.allSettled(promises);
         const subrouters = [...this.querySelectorAll("path-router")];
         for (let i = 0; i < subrouters.length; i++) {
           subrouters[i].toggleAttribute("subrouter", true);
@@ -563,6 +560,7 @@ var PathRouterElement5 = class extends HTMLElement {
     }
     await this.#awaitAllRouteProcesses();
     const [pageRoute, dialogRoute] = this.#getRouteElements(path);
+    let openPagePromise;
     if (pathHasChanged == true || this.querySelector("[open]") == null) {
       const closed = await this.#closeCurrentRoutePage();
       if (closed == false) {
@@ -574,7 +572,7 @@ var PathRouterElement5 = class extends HTMLElement {
         }
         return false;
       }
-      openedPage = await this.#openRoutePage(pageRoute, page);
+      openPagePromise = this.#openRoutePage(pageRoute, page);
     }
     if (pathHasChanged || currentHash != hash) {
       const closed = await this.#closeCurrentRouteDialog();
@@ -583,6 +581,7 @@ var PathRouterElement5 = class extends HTMLElement {
         openedDialog = await this.#openRouteDialog(dialogRoute, hash);
       }
     }
+    await openPagePromise;
     this.targetPageRoute = void 0;
     this.targetDialogRoute = void 0;
     if (this.resolveNavigation != null) {

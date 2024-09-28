@@ -15,6 +15,7 @@ body
 {
     display: flex;
     min-height: 100dvh;
+    font-family: sans-serif;
 }
 
 #demo-pages
@@ -37,16 +38,39 @@ body
 
 #demo-content
 {
+    display: flex;
+    flex-direction: column;
     flex: 1;
-    display: grid;
-    grid-template-rows: auto auto 1fr;
-    grid-template-columns: 1fr;
-    padding: 1em;
+    gap: 1em;
+    align-items: center;
 }
 #demo-content > header
 {
     padding: 1em 0;
     font-size: 2em;
+}
+
+#demo-content :is(p, dl)
+{
+    max-width: 80ch;
+}
+
+#demo-content article
+{
+    padding: 2em;
+    border-radius: 10px;
+    border: solid 1px #222;
+    background-color: #1A1A1A;
+    color: #f1f1f1;
+}
+
+#demo-content code
+{
+    background-color: #222;
+    color: #bb5d26;
+    padding: 2px 5px;
+    display: inline-block;
+    border-radius: 2px;
 }
 
 #page-menu
@@ -68,7 +92,122 @@ body
     display: flex;
 } */
 
-#page-router
+:is(header,h1,h2,h3,h4,h5,h6)
+{
+    color: rgb(121, 123, 216);
+}
+
+header
+{
+    font-size: 1.3em;
+}
+
+article menu
+{
+    padding: 0;
+    display: flex;
+    gap: 1em;
+}
+
+article .example
+{
+    margin-block: 1em;
+}
+
+[is="route-link"]:hover
+{
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+[is="route-link"][aria-current="page"]
+{
+    text-decoration: underline;
+    color: highlight;
+}
+
+[is="route-button"][aria-current="page"]
+{
+    color: highlight;
+    outline:solid 3px highlight;
+}
+
+path-router
 {
     flex: 1;
+
+    background-color: #666;
+    color: #111;
+    padding: 2em;
+    border-radius: 3px;
+}
+
+path-router path-router
+{
+    background-color: #555;
+}
+
+browser-mockup
+{
+    width: 640px;
+}
+
+.event-log
+{
+    background: field;
+    color: fieldtext;
+    border: solid 1px #616161;
+    border-radius: 2px;
+    padding: 1em;
+    height: 300px;
+    overflow: auto;
+    margin: 1em;
+}
+
+
+#transitions path-route[data-entering]
+{
+    animation: fade-in 1s ease forwards;
+}
+
+#transitions path-route path-route[data-entering]
+{
+    animation: slide-in 1s ease forwards;
+}
+
+#transitions dialog[open]
+{
+    opacity: 1;
+    transition: opacity 2s ease;
+}
+@starting-style
+{
+    #transitions dialog[path]
+    {
+        opacity: 0;
+    }
+}
+
+@keyframes fade-in
+{
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+@keyframes slide-in
+{
+    0% { translate: 50px 0; }
+    100% { translate: 0 0; }
+}
+
+browser-mockup path-router
+,.themes path-router
+{
+    margin: 0;
+    padding: 0;
+}
+
+.themes menu
+{
+    margin: 0;
+    padding: 0;
 }

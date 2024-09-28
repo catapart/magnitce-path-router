@@ -11,7 +11,7 @@ export enum PathRouteEvent
 export type RouteProperties = { [key: string]: string };
 
 
-export const COMPONENT_TAG_NAME = 'path-route';
+export const COMPONENT_TAG_NAME = 'route-page';
 export class RoutePageElement extends HTMLElement
 {
     get router(): PathRouterElement | null
@@ -97,19 +97,18 @@ export class RoutePageElement extends HTMLElement
     }
     async #close()
     {
-        this.removeAttribute('open');
-
         this.dispatchEvent(new Event(PathRouteEvent.BeforeClose));
         await Promise.allSettled(this.blockingBeforeClose.map(value => value()));
 
         this.dataset.exiting = '';
+        this.removeAttribute('open');
   
         await Promise.all(this.getAnimations({ subtree: true }).map((animation) => animation.finished));
   
         delete this.dataset.exiting;
         this.removeAttribute('aria-current');
         this.currentProperties = undefined;
-  
+
         this.dispatchEvent(new Event(PathRouteEvent.AfterClose));
         await Promise.allSettled(this.blockingAfterClose.map(value => value()));
     }

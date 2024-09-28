@@ -37,8 +37,8 @@ path-router
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
 }
-path-route:not([open],[data-entering],[data-exiting]) path-router { display: none; /* browser bug when rendering visibility? */ }
-path-route
+route-page:not([open],[data-entering],[data-exiting]) path-router { display: none; /* browser bug when rendering visibility? */ }
+route-page
 {
     display: var(--route-display, block);
     visibility: hidden;
@@ -49,9 +49,9 @@ path-route
    Visibility is visible during the entering and exiting phases
    to allow for animations to be awaited.
  */
-path-route[open]
-,path-route[data-entering]
-,path-route[data-exiting]
+route-page[open]
+,route-page[data-entering]
+,route-page[data-exiting]
 {
     visibility: visible;
 }`);
@@ -96,6 +96,19 @@ export class PathRouterElement extends HTMLElement
 
     constructor()
     {
+        //todo:
+        // todo: make sure getProperties returns full correct values
+        // move themes into library
+        // style page for better light/dark display
+        // add lt; and gt; to path-router, page-route, and dialog-route references
+        // add documentation
+        // add missing code blocks to readme
+        // add history to browser mockup
+        // remove nested css from browser mockup
+        // update browser mockup on npm
+        // update browser mockup reference
+        // adjust history management to use new browser mockup        
+
         super();
 
         this.addEventListener(PathRouterEvent.PathChange, (event) =>
@@ -115,11 +128,11 @@ export class PathRouterElement extends HTMLElement
         {
             document.addEventListener('DOMContentLoaded', async () =>
             {
-                const promises: Promise<boolean>[] = [];
+                // const promises: Promise<boolean>[] = [];
                 for(let i = 0; i < this.routes.length; i++)
                 {
                     const route = this.routes[i];
-                    promises.push(route.close());
+                    // promises.push(route.close());
 
                     if(this.defaultRoute == null) { this.defaultRoute = route; }
                     const path = route.getAttribute('path');
@@ -150,7 +163,7 @@ export class PathRouterElement extends HTMLElement
                     })
                 }
 
-                await Promise.allSettled(promises);
+                // await Promise.allSettled(promises);
 
                 const subrouters = [...this.querySelectorAll('path-router')] as PathRouterElement[];
                 for(let i = 0; i < subrouters.length; i++)
@@ -223,9 +236,12 @@ export class PathRouterElement extends HTMLElement
         let openedPage = false;
         let openedDialog = false;
 
-        const pathHasChanged = currentPage != page;
+        // if we're only navigating the dialog route, we don't need to indicate that the empty
+        // route used for the page is a direction to set the route to the default.
+        // otherwise, if the pages don't match, it's a page change.
+        const pageHasChanged = (hash != "" && page == "") ? false : currentPage != page;
         const hashHasChanged = hash != currentHash;
-        if(pathHasChanged == false && hashHasChanged == false && this.querySelector('[open]') != null)
+        if(pageHasChanged == false && hashHasChanged == false && this.querySelector('[open]') != null)
         {
             if(this.resolveNavigation != null)
             { 
@@ -240,8 +256,9 @@ export class PathRouterElement extends HTMLElement
 
         // find routes by path
         const [ pageRoute, dialogRoute ] = this.#getRouteElements(path);
+        let openPagePromise;
 
-        if(pathHasChanged == true || this.querySelector('[open]') == null)
+        if(pageHasChanged == true || this.querySelector('[open]') == null)
         {
             // close the route that is currently open
             const closed = await this.#closeCurrentRoutePage();
@@ -261,11 +278,11 @@ export class PathRouterElement extends HTMLElement
                 return false; 
             }
 
-            openedPage = await this.#openRoutePage(pageRoute, page);
+            openPagePromise = this.#openRoutePage(pageRoute, page);
         }
 
 
-        if(pathHasChanged || currentHash != hash)
+        if(pageHasChanged || currentHash != hash)
         {
             // close the dialog route that is currently open, if any
             const closed = await this.#closeCurrentRouteDialog();
@@ -277,6 +294,8 @@ export class PathRouterElement extends HTMLElement
                 openedDialog = await this.#openRouteDialog(dialogRoute, hash);
             }
         }
+
+        await openPagePromise; // deferred awaiting because the dialog does not need to await the page opening/transitions
 
         this.targetPageRoute = undefined;
         this.targetDialogRoute = undefined;
@@ -674,16 +693,13 @@ export class PathRouterElement extends HTMLElement
 
     pathIsActive(path: string)
     {
-        // todo: pathIsActive doesn't work for dialog routes
-        // todo: write transitions page
-        // todo: write themes page
 
         const [ queryPath, queryHash ] = this.destructurePath(path);
         let routerFullPath = this.getAttribute('path') ?? "/";
-        let { pathname: routerComparePath, hash: routerCompareHash } = this.#splitPath(routerFullPath);
-        [ routerComparePath, routerCompareHash ] = this.destructurePath(routerComparePath);
+        // let { pathname: routerComparePath, hash: routerCompareHash } = this.#splitPath(routerFullPath);
+        const [ routerComparePath, routerCompareHash ] = this.destructurePath(routerFullPath);
         const queryPathArray = this.#getFormattedPathArray(queryPath);
-        let linkRoute = this.#getRouteElement(queryPathArray, this.#routeMap_pathToPageOrDialog);
+        let linkRoute = (queryPath == "" && routerComparePath == "") ? this.defaultRoute : this.#getRouteElement(queryPathArray, this.#routeMap_pathToPageOrDialog);
         if(linkRoute == null) { return false; }
 
         let matchingPath = (this.currentPageRoute == linkRoute);

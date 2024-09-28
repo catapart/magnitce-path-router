@@ -42,12 +42,12 @@ export class RouteDialogComponent extends HTMLDialogElement
     }
     async #open(path: string)
     {
+        this.dispatchEvent(new CustomEvent(PathRouteEvent.BeforeOpen, { detail: { path, properties: this.currentProperties }}));
+        await Promise.allSettled(this.blockingBeforeOpen.map(value => value()));
+
         this.setAttribute('data-entering', '');
 
         this.currentProperties = this.getProperties(path);
-  
-        this.dispatchEvent(new CustomEvent(PathRouteEvent.BeforeOpen, { detail: { path, properties: this.currentProperties }}));
-        await Promise.allSettled(this.blockingBeforeOpen.map(value => value()));
 
         const allowSubroute = (this.getAttribute('subrouting') ?? this.closest('path-router[subrouting]')?.getAttribute('subrouting')) != "false";
         if(allowSubroute == true)
@@ -61,10 +61,7 @@ export class RouteDialogComponent extends HTMLDialogElement
         }
   
   
-        await Promise.allSettled(this.getAnimations({ subtree: true }).map((animation) => animation.finished));
   
-  
-        this.removeAttribute('data-entering');
         if(this.dataset.modal != null)
         {
             this.showModal();
@@ -74,6 +71,10 @@ export class RouteDialogComponent extends HTMLDialogElement
             this.show();
         }
         this.setAttribute('aria-current', "page");
+  
+        await Promise.allSettled(this.getAnimations({ subtree: true }).map((animation) => animation.finished));
+        
+        this.removeAttribute('data-entering');
   
         this.dispatchEvent(new Event(PathRouteEvent.AfterOpen));
         await Promise.allSettled(this.blockingAfterOpen.map(value => value()));
@@ -93,18 +94,16 @@ export class RouteDialogComponent extends HTMLDialogElement
     }
     async #close()
     {
-        // this.dataset.exiting = '';
-        this.setAttribute('data-exiting', '');
-  
         this.dispatchEvent(new Event(PathRouteEvent.BeforeClose));
         await Promise.allSettled(this.blockingBeforeClose.map(value => value()));
-  
-  
-        await Promise.all(this.getAnimations({ subtree: true }).map((animation) => animation.finished));
-  
+
+        this.setAttribute('data-exiting', '');
         this.close();
         // router removes 'data-exiting' attribute by listening to close event
         this.removeAttribute('aria-current');
+  
+        await Promise.all(this.getAnimations({ subtree: true }).map((animation) => animation.finished));
+  
   
         this.dispatchEvent(new Event(PathRouteEvent.AfterClose));
         await Promise.allSettled(this.blockingAfterClose.map(value => value()));
