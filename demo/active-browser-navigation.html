@@ -4,171 +4,252 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Path Router Demo</title>
-    <link rel="stylesheet" href="./demo-page.css">
-    <link rel="stylesheet" href="./tabs.theme.css">
-    <link rel="stylesheet" href="./heading-nav.theme.css">
+    <!-- <link rel="stylesheet" href="./demo-page.css"> -->
+    <link rel="stylesheet" href="../dist/tabs.theme.css">
+    <link rel="stylesheet" href="../dist/sidebar.theme.css">
+    <link rel="stylesheet" href="../dist/heading-nav.theme.css">
 
     <style>
-        main
-        {
-            display: grid;
-        }
-        browser-mockup::part(document)
-        {
-            display: flex;
-            flex-direction: column;
-        }
+    html
+    {
+        color-scheme: light dark;
+        height: 100%;
+    }
+
+    html
+    ,body
+    {
+        margin: 0;
+        padding: 0;
+    }
+
+    body
+    {
+        display: flex;
+        min-height: 100dvh;
+        font-family: sans-serif;
+    }
+
+    :is(header,h1,h2,h3,h4,h5,h6)
+    {
+        color: rgb(121, 123, 216);
+    }
+    route-page[path="/help/:subpage"]
+    {
+        display: grid !important;
+        grid-template-columns: auto 1fr;
+        grid-template-rows: auto 1fr;
+    }
+    route-page[path="/help/:subpage"] > h2
+    {
+        grid-column: span 2;
+    }
     </style>
 </head>
 <body>
-    <menu id="demo-pages">
-        <a href="./index.html">Basic Routing</a>
-        <a href="./browser-navigation.html">Browser Navigation</a>
-        <a href="./active-browser-navigation.html">Active Browser Navigation</a>
-        <a href="./transitions.html">Transitions</a>
-        <a href="./themes.html">Themes</a>
-    </menu>
-    <div id="demo-content">
-        <header>Browser Navigation</header>
-        <div class="description">
-            <p>This page demonstrates how the path-router element's navigation events can be handled to manipulate your browser's history.</p>
-            <p>To see how this effect can work, without actually changing your current browser history, see <a href="./browser-navigation.html">the Browser Navigation demo</a>.</p>
-            <p>To see a demonstration that actually manipulates your browser's history, </p>
-        </div>
-        <main>
-            <browser-mockup url="https://www.path-router.com" tabs="1" collapsed-tabs="2" class="windows">
-                <div class="layout" data-theme="heading-nav">
-                    <menu id="page-menu">
-                        <a is="route-link" for="page-router" data-theme="heading-nav" path="/">Routing</a>
-                        <a is="route-link" for="page-router" data-theme="heading-nav" path="/user">User</a>
-                        <a is="route-link" for="page-router" data-theme="heading-nav" path="/help">Help</a>
-                        <a is="route-link" for="page-router" data-theme="heading-nav" path="/help/faq">FAQ</a>
-                        <a is="route-link" for="page-router" data-theme="heading-nav" path="/help/contact">Contact</a>
-                    </menu>
-                    <path-router id="page-router"data-theme="heading-nav" >
-                        <path-route path="/">
-                            <h3>Routing</h3>
-                            <p>Routes can define simple routes, nested routes, and dialog routes, which provide a secondary routing path for displaying dialogs over existing route content.</p>
-                            <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="#about">Open Dialog Route</button>
-                            <p>Routes can include variables by using a colon character before the variable name (ex: 'routeA/:id' defines the route variable of "id" for the "routeA" route).</p>
-                            <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="/user/1">Open User 1</button>
-                            <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="/user/2">Open User 2</button>
-                            <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="/user/3">Open User 3</button>
-                            <p>Nested routes can be linked to from top-level path-router elements by using variables.</p>
-                            <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="/user/1/contact/alice">Open Alice Contact</button>
-                            <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="/user/1/contact/bob">Open Bob Contact</button>
-                            <!-- Can't do this: -->
-                            <!-- <a is="route-link" for="app-router" path="/help#about">Open About Dialog</a> -->
-                            <!-- No automated way to know if the hash should be for the top level router, or a subrouter -->
-                            <!-- Can move the dialog to top level and change link target router, or script from a page open event -->
-                        </path-route>
-                        <path-route path="/user/:id">
-                            <h3>User</h3>
-                            <p>Routes can be nested by adding a path-router element as a child of a path-route element.</p>
-                            <nav>
-                                <a is="route-link" for="user-router" data-theme="tabs" path="1/profile">Profile</a>
-                                <a is="route-link" for="user-router" data-theme="tabs" path="1/contact">Contacts</a>
-                            </nav>
-                            <path-router id="user-router" data-theme="tabs">
-                                <path-route path=":id/profile">
-                                    <h4>User Profile</h4>
-                                    <p>By giving the route a variable, like ":subpage", the remanining route can be passed down to the nested path-router element.</p>
-                                </path-route>
-                                <path-route path=":id/contact/:contactId">
-                                    <path-router id="user-contact-router">
-                                        <path-route path=":contactId/">
-                                            <h4>User Contacts</h4>
-                                            <p>Nested routes can also have path-router elements.</p>
-                                            <p>By using variables and route-link elements, a nested path can be navigated to without any javascript needed for the implementer.</p>
-                                            <nav>
-                                                <style>
-                                                    .link-button { padding: 0 .2em; cursor: pointer; }
-                                                    .link-button:hover { text-decoration: underline ;}
-                                                </style>
-                                                <a is="route-link" for="user-contact-router" class="link-button" path="/alice">Alice</a>
-                                                <a is="route-link" for="user-contact-router" class="link-button" path="/bob">Bob</a>
-                                            </nav>
-                                        </path-route>
-                                        <path-route path="alice">
-                                            <h4>Alice</h4>
-                                            <p>Alice's Contact Info</p>
-                                            <a is="route-link" for="user-contact-router" class="link-button" path="/">Back</a>
-                                        </path-route>
-                                        <path-route path="bob">
-                                            <h4>Bob</h4>
-                                            <p>Bob's Contact Info</p>
-                                            <a is="route-link" for="user-contact-router" class="link-button" path="/">Back</a>
-                                        </path-route>
-                                    </path-router>
-                                </path-route>
-                            </path-router>
-                        </path-route>
-                        <path-route path="/help/:subpage">
-                            <h2>Help</h2>
-                            <nav>
-                                <a is="route-link" for="help-router" data-theme="tabs" path="/faq">FAQ</a>
-                                <a is="route-link" for="help-router" data-theme="tabs" path="/contact">Contact</a>
-                            </nav>
-                            <path-router id="help-router"data-theme="tabs">
-                                <path-route path="/faq">
-                                    <h3>Frequently Asked Questions</h3>
-                                    <p>Answer Content</p>
-                                </path-route>
-                                <path-route path="/contact">
-                                    <h3>Contact Us</h3>
-                                    <p>Contact Content</p>
-                                </path-route>
-                            </path-router>
-                        </path-route>
-                        <dialog is="route-dialog" path="about">
-                            <h2>About</h2>
-                            <p>About Content</p>
-                            <form method="dialog"><button method="dialog">Close</button></form>
-                        </dialog>
-                    </path-router>
-                </div>
-            </browser-mockup>
-        </main>
-    </div>
+    <main>
+        <menu id="page-menu">
+            <a is="route-link" for="page-router" data-theme="heading-nav" path="/">Routing</a>
+            <a is="route-link" for="page-router" data-theme="heading-nav" path="/user">User</a>
+            <a is="route-link" for="page-router" data-theme="heading-nav" path="/help">Help</a>
+            <a is="route-link" for="page-router" data-theme="heading-nav" path="/help/faq">FAQ</a>
+            <a is="route-link" for="page-router" data-theme="heading-nav" path="/help/contact">Contact</a>
+        </menu>
+        <path-router id="page-router" path="" data-theme="heading-nav" >
+            <route-page path="/">
+                <h3>Routing</h3>
+                <p>Routes can define simple routes, nested routes, and dialog routes, which provide a secondary routing path for displaying dialogs over existing route content.</p>
+                <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="#about">Open Dialog Route</button>
+                <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="#about/website">Open Dialog Subroute</button>
+                <p>Routes can include variables by using a colon character before the variable name (ex: 'routeA/:id' defines the route variable of "id" for the "routeA" route).</p>
+                <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="/user/1">Open User 1</button>
+                <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="/user/2">Open User 2</button>
+                <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="/user/3">Open User 3</button>
+                <p>Nested routes can be linked to from top-level path-router elements by using variables.</p>
+                <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="/user/1/contact/alice">Open Alice Contact</button>
+                <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="/user/1/contact/bob">Open Bob Contact</button>
+                <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="/user/1/contact/bob/#address">Open Bob Contact's address</button>
+                <!-- Can't do this: -->
+                <!-- <a is="route-link" for="app-router" path="/help#about">Open About Dialog</a> -->
+                <!-- No automated way to know if the hash should be for the top level router, or a subrouter -->
+                <!-- Can move the dialog to top level and change link target router, or script from a page open event -->
+            </route-page>
+            <route-page path="/user/:id">
+                <h3>User</h3>
+                <p>Routes can be nested by adding a path-router element as a child of a route-page element.</p>
+                <nav>
+                    <a is="route-link" for="user-router" data-theme="tabs" path=":id/profile">Profile</a>
+                    <a is="route-link" for="user-router" data-theme="tabs" path=":id/contact">Contacts</a>
+                </nav>
+                <path-router id="user-router" data-theme="tabs">
+                    <route-page path=":id/profile">
+                        <h4>User Profile</h4>
+                        <p>By giving the route a variable, like ":subpage", the remanining route can be passed down to the nested path-router element.</p>
+                    </route-page>
+                    <route-page path=":id/contact/:contactId">
+                        <path-router id="user-contact-router">
+                            <route-page path=":contactId/">
+                                <h4>User Contacts</h4>
+                                <p>Nested routes can also have path-router elements.</p>
+                                <p>By using variables and route-link elements, a nested path can be navigated to without any javascript needed for the implementer.</p>
+                                <nav>
+                                    <style>
+                                        .link-button { padding: 0 .2em; cursor: pointer; }
+                                        .link-button:hover { text-decoration: underline ;}
+                                    </style>
+                                    <a is="route-link" for="user-contact-router" class="link-button" path="/alice">Alice</a>
+                                    <a is="route-link" for="user-contact-router" class="link-button" path="/bob">Bob</a>
+                                </nav>
+                            </route-page>
+                            <route-page path="alice">
+                                <h4>Alice</h4>
+                                <p>Alice's Contact Info</p>
+                                <a is="route-link" for="user-contact-router" class="link-button" path=":contactId#address">See Address</a>
+                                <a is="route-link" for="user-contact-router" class="link-button" path="/">Back</a>
+                            </route-page>
+                            <route-page path="bob">
+                                <h4>Bob</h4>
+                                <p>Bob's Contact Info</p>
+                                <a is="route-link" for="user-contact-router" class="link-button" path=":contactId#address">See Address</a>
+                                <a is="route-link" for="user-contact-router" class="link-button" path="/">Back</a>
+                            </route-page>
+                            <dialog is="route-dialog" path="address">
+                                <h2>Contact Address</h2>
+                                <p>Contact Address Content</p>
+                                <form method="dialog"><button method="dialog">Close</button></form>
+                            </dialog>
+                        </path-router>
+                    </route-page>
+                </path-router>
+            </route-page>
+            <route-page path="/help/:subpage">
+                <h2>Help</h2>
+                <nav>
+                    <a is="route-link" for="help-router" data-theme="sidebar" path="/faq">FAQ</a>
+                    <a is="route-link" for="help-router" data-theme="sidebar" path="/contact">Contact</a>
+                </nav>
+                <path-router id="help-router"data-theme="sidebar">
+                    <route-page path="/faq">
+                        <h3>Frequently Asked Questions</h3>
+                        <p>Answer Content</p>
+                    </route-page>
+                    <route-page path="/contact">
+                        <h3>Contact Us</h3>
+                        <p>Contact Content</p>
+                    </route-page>
+                </path-router>
+            </route-page>
+            <dialog is="route-dialog" path="about/:subpage">
+                <h2>About</h2>
+                <p>About Content</p>
+                <nav>
+                    <a is="route-link" for="about-router" data-theme="tabs" path="/company">Company</a>
+                    <a is="route-link" for="about-router" data-theme="tabs" path="/website">Website</a>
+                </nav>
+                <path-router id="about-router">
+                    <route-page path="company">
+                        <h3>About Company</h3>
+                        <p>About Company Content</p>
+                    </route-page>
+                    <route-page path="website">
+                        <h3>About Website</h3>
+                        <p>About Website Content</p>
+                        <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="#disclaimer">See Disclaimer</button>
+                    </route-page>
+                </path-router>
+                <form method="dialog"><button method="dialog">Close</button></form>
+            </dialog>
+            <dialog is="route-dialog" path="disclaimer">
+                <h2>Disclaimer</h2>
+                <p>Disclaimer content</p>
+                <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="#about">Back to About</button>
+                <form method="dialog"><button method="dialog">Close</button></form>
+            </dialog>
+        </path-router>
+    </main>
     <script type="module" src="./browser-mockup.js"></script>
-    <script type="module" src="../dist/path-router.js"></script>
+    <!-- Browser Mockup library from here: https://github.com/catapart/magnitce-browser-mockup !-->
+    
     <script type="module">
+        import { PathRouterElement } from '../dist/path-router.js';
+        const pageRouter = document.querySelector('#page-router');
+        const userRouter = document.querySelector('#user-router');
+        const userContactRouter = document.querySelector('#user-contact-router');
+        const helpRouter = document.querySelector('#help-router');
+
+        // nested dialog path explanation: all dialog routes would need to be accessible
+        // to the top level router. instead, just hook into the beforeopen event and open
+        // the dialog from the variable name route properties example
         
-        this.findPart<PathRouterComponent>('app-router').addEventListener('pathchange', router_onPathChange.bind(this));
-        function router_onPathChange(event)
+        let historyIsUpdating = false;
+        window.addEventListener('popstate', async (event) =>
         {
-            if(!this.hasAttribute('update-url')) { return; }
-            const data = event.detail;
-            // console.log(data);
+            historyIsUpdating = true;
+            const route = window.location.pathname + window.location.hash;
+            await pageRouter.navigate(route);
+            historyIsUpdating = false;
+        });
 
-            const { windowPath, windowHash } = parseWindowPath();
+        pageRouter.addEventListener('pathcompose', pageRouter_onPathCompose);
+        function pageRouter_onPathCompose(event)
+        {
+            // prevent changing the url using events from subrouters
+            if(event.target != pageRouter) { return; }
 
-            let { pathName: routePath, hash: routeHash } = this.findPart<PathRouterComponent>('app-router').destructurePath(data.path);
-            if(routePath.startsWith('/')) { routePath = routePath.substring(1); }
-            routePath = routePath.trim();
-            if(routeHash.startsWith('#')) { routeHash = routeHash.substring(1); }
-            routeHash = routeHash.trim();
-
-            if(windowPath == routePath && windowHash == routeHash)
-            {
-                // don't update the url if we've
-                // gone back to the same page
-                return;
-            }
+            // if we're moving back or forward,
+            // we don't want to record that in history
+            // and the browser will update the url
+            if(historyIsUpdating == true) { return; } 
             
-            const newLocation = `${window.location.origin}/${routePath}${(routeHash != '') ? `#${routeHash}` : ''}${window.location.search}`;
-            if(windowHash != '' && routeHash != '')
+            const currentLocation = window.location;
+            let updatedPath = pageRouter.getAttribute('composed-path');
+            const origin = window.location.origin;
+            const updatedLocation = new URL(origin + updatedPath);
+
+            const { hasChanged, isReplacementChange } = pageRouter.compareLocations(currentLocation, updatedLocation);
+            if(hasChanged)
             {
-                // replace the url if only the hash changes
-                // otherwise back will cycle through every
-                // popup instead of just closing the dialog
-                window.history.replaceState(null, '', newLocation);
-                return;
+                if(isReplacementChange)
+                {
+                    window.history.replaceState(null, '', updatedLocation.href);
+                }
+                else
+                {
+                    window.history.pushState(null, '', updatedLocation.href);
+                }
+            }
+        }
+
+        const routeLinks = [...document.querySelectorAll('[is="route-link"],[is="route-button"]')];
+        for(let i = 0; i < routeLinks.length; i++)
+        {
+            routeLinks[i].onPreparePath = prepareRouteLink;
+        }
+        function prepareRouteLink(path)
+        {
+            const url = window.location.href;
+            const urlParameters = PathRouterElement.getUrlParameters(url);
+
+            if(path.indexOf(':id') > -1)
+            {
+                const idValue = urlParameters.user;
+                const id = parseInt(idValue);
+                const userId = isNaN(id) ? -1 : id;
+                if(userId > -1)
+                {
+                    path = path.replace(":id", userId);
+                }
+            }
+            if(path.indexOf(':contactId') > -1)
+            {
+                const idValue = urlParameters.contact;
+                const contactId = parseInt(idValue);
+                path = path.replace(":contactId", urlParameters.contact);
             }
 
-            // console.log(newLocation);
-            window.history.pushState(null, '', newLocation);
+            return path;
         }
+
     </script>
 </body>
 </html>

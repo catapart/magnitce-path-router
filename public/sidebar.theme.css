@@ -28,12 +28,6 @@ path-router[data-theme="sidebar"] > route-page[open] > [is="route-button"][aria-
     color: var(--theme-color);
 }
 
-/* [data-theme="sidebar"].layout
-{
-    display: grid;
-    grid-template-columns: auto 1fr;
-} */
-
 [is="route-link"][data-theme="sidebar"]
 {
     --theme-color: rgb(15, 121, 129);
@@ -44,12 +38,6 @@ path-router[data-theme="sidebar"] > route-page[open] > [is="route-button"][aria-
     font-family: sans-serif;
     margin-inline: 0;
 }
-/* [is="route-link"][data-theme="sidebar"].inline
-{
-    border-bottom: solid 2px;
-    display: inline-block;
-    color: var(--theme-color);
-} */
 
 [is="route-link"][data-theme="sidebar"]:hover
 ,[is="route-link"][data-theme="sidebar"][aria-current="page"]

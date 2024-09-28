@@ -5,22 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Path Router Demo</title>
     <link rel="stylesheet" href="./demo-page.css">
-    <link rel="stylesheet" href="./tabs.theme.css">
-    <link rel="stylesheet" href="./sidebar.theme.css">
-    <link rel="stylesheet" href="./heading-nav.theme.css">
+    <link rel="stylesheet" href="../dist/tabs.theme.css">
+    <link rel="stylesheet" href="../dist/sidebar.theme.css">
+    <link rel="stylesheet" href="../dist/heading-nav.theme.css">
 </head>
 <body>
-    <main id="demo-content">
+    <main>
         <header>Overview</header>
         <div class="overview">
             <div class="description">
                 <h2>Description</h2>
-                <p>The <code>path-router</code> element allows developers to show and hide sections of html contained in "routes" which can either be defined using <code>route-page</code> or <code>route-dialog</code> child elements.</p>
-                <p>Routing is done by matching the the <code>path-router</code> element's <code>path</code> attribute to one of its child route's <code>path</code> attribute.</p>
+                <p>The <code>&lt;path-router&gt;</code> element allows developers to show and hide sections of html contained in "routes" which can either be defined using <code>&lt;route-page&gt;</code> or <code>route-dialog</code> child elements.</p>
+                <p>Routing is done by matching the the <code>&lt;path-router&gt;</code> element's <code>path</code> attribute to one of its child route's <code>path</code> attribute.</p>
                 <p>Matching path values can be as simple as exact string matches. Many types of routing can be done without any type of dynamic content or subrouting.</p>
-                <p>The <code>path-router</code> element does, however, account for dynamic content and subrouting by allowing complex matching that uses common string patterns for variables, and partial-path matching so that subrouting can be done with the unmatched path content.</p>
-                <p>If the <code>path-router</code> element's <code>path</code> attribute finds a child route that matches, that route will be displayed.</p>
-                <p>If no route can be found that matches the <code>path-router</code> element's <code>path</code> attribute, no route will be displayed.</p>
+                <p>The <code>&lt;path-router&gt;</code> element does, however, account for dynamic content and subrouting by allowing complex matching that uses common string patterns for variables, and partial-path matching so that subrouting can be done with the unmatched path content.</p>
+                <p>If the <code>&lt;path-router&gt;</code> element's <code>path</code> attribute finds a child route that matches, that route will be displayed.</p>
+                <p>If no route can be found that matches the <code>&lt;path-router&gt;</code> element's <code>path</code> attribute, no route will be displayed.</p>
             </div>
             <div class="features">
                 <h2>Features</h2>
@@ -28,26 +28,93 @@
                     <header>Transitions</header>
                     <dl>
                         <dt>Blocking</dt>
-                        <dd>The <code>path-router</code> element dispatches events and allows for asynchronous blocking during route opening and closing procedures.</dd>
+                        <dd>The <code>&lt;path-router&gt;</code> element dispatches events and allows for asynchronous blocking during route opening and closing procedures.</dd>
                         <dt>CSS Integration</dt>
-                        <dd>CSS transitions and animations, including opacity fades and animation effects like bouncing or rotating, are awaited by the <code>path-router</code> element, allowing for event handling before and after animations without needing to set up timers or callbacks.</dd>
+                        <dd>CSS transitions and animations, including opacity fades and animation effects like bouncing or rotating, are awaited by the <code>&lt;path-router&gt;</code> element, allowing for event handling before and after animations without needing to set up timers or callbacks.</dd>
                     </dl>
                 </div>
                 <div>
                     <header>Dialog Routes</header>
-                    <p>To account for the common design pattern of dialog routes, while still maintaining best practices for route history manamgent, the <code>path-router</code> element uses the hash character (<code>#</code>) to match with any <code>route-dialog</code> child elements.</p>
+                    <p>To account for the common design pattern of dialog routes, while still maintaining best practices for route history manamgent, the <code>&lt;path-router&gt;</code> element uses the hash character (<code>#</code>) to match with any <code>route-dialog</code> child elements.</p>
                 </div>
                 <div>
                     <header>Links and Buttons</header>
-                    <p>As an additional convenience, this library also provides two optional elements: the <code>route-link</code> and <code>route-button</code> elements. These elements allow developers to set a <code>path</code> attribute that will then be applied to the <code>path-router</code>'s <code>path</code> attribute whenever either are clicked.</p>
+                    <p>As an additional convenience, this library also provides two optional elements: the <code>route-link</code> and <code>route-button</code> elements. These elements allow developers to set a <code>path</code> attribute that will then be applied to the <code>&lt;path-router&gt;</code>'s <code>path</code> attribute whenever either are clicked.</p>
                 </div>
             </div>
         </div>
         <header>Examples</header>
+        <!-- <article>
+            <header>Quick Reference</header>
+            <div class="description">
+                <p>This is the code used in the Quick Reference section of the README.</p>
+                <p>It is implemented, here, as a sanity check.</p>
+            </div>
+            <div class="example">
+                <menu>
+                    <a is="route-link" for="my-router" data-theme="heading-nav" path="/">Home</a>
+                    <a is="route-link" target="#my-router" data-theme="heading-nav" path="about">About</a>
+                    <a is="route-link" target=".router" data-theme="heading-nav" path="contact">Contact</a>
+                </menu>
+                <path-router path="home" id="my-router" class="router" data-theme="heading-nav">
+                    <route-page path="home">
+                        <header>Home</header>
+                        <div>
+                            <p>Welcome to the website!</p>
+                            <button is="route-button" data-theme="heading-nav" path="#config">
+                                Open Config
+                            </button>
+                            <button is="route-button" data-theme="heading-nav" path="#config/app">
+                                Open App Config
+                            </button>
+                        </div>
+                    </route-page>
+                    <route-page path="about">    
+                        <header>About</header>
+                        <div>
+                            <p>About this website:</p>
+                        </div>
+                    </route-page>
+                    <route-page path="contact">    
+                        <header>Contact</header>
+                        <div>
+                            <p>Contact Us:</p>
+                            <a>contact@mydomain.com</a>
+                        </div>
+                    </route-page>
+                    <dialog is="route-dialog" path="config/:subroute">    
+                        <header>Configuration</header>
+                        <menu data-theme="tabs">
+                            <a is="route-link" data-theme="tabs" for="config-router" path="/">User</a>
+                            <a is="route-link" data-theme="tabs" for="config-router" path="app">App</a>
+                        </menu>
+                        <path-router id="config-router" data-theme="tabs">
+                            <route-page path="/">
+                                <header>User</header>
+                                <div>
+                                    <p>User Setttings</p>
+                                </div>
+                            </route-page>
+                            <route-page path="app">
+                                <header>App</header>
+                                <div>
+                                    <p>App Setttings</p>
+                                </div>
+                            </route-page>
+                        </path-router>
+                        <footer>
+                            <form method="dialog">
+                                <button method="dialog">Close</button>
+                            </form>
+                        </footer>
+                    </dialog>
+                </path-router>
+            </div>
+        </article> -->
         <article>
             <header>Basic Example</header>
             <div class="description">
-                <p>The <code>path-router</code> element has no value set for the <code>path</code> attribute. This prevents the path-router from starting with a route open.</p>
+                <p>The <code>&lt;path-router&gt;</code> element has no value set for the <code>path</code> attribute. This prevents the path-router from starting with a route open.</p>
                 <p>To open a route, select an option from the menu below:</p>
             </div>
             <div class="example">
@@ -66,7 +133,7 @@
         <article>
             <header>Starting Route</header>
             <div class="description">
-                <p>Set the <code>path-router</code> element's <code>path</code> attribute to automatically navigate to the matching path when the page is opened.</p>
+                <p>Set the <code>&lt;path-router&gt;</code> element's <code>path</code> attribute to automatically navigate to the matching path when the page is opened.</p>
                 <p>The following example is set to open the "Route C" when the page is opened.</p>
             </div>
             <div class="example">
@@ -86,11 +153,11 @@
             <header>Default Route</header>
             <div class="description">
                 <p>
-                    As long as the <code>path-router</code> element's <code>path</code> attribute is set, the <code>path-router</code> will auto-navigate.
+                    As long as the <code>&lt;path-router&gt;</code> element's <code>path</code> attribute is set, the <code>&lt;path-router&gt;</code> will auto-navigate.
                     <br/>
                     If the <code>path</code> attribute is set to nothing, set to an empty string, or set to a path that does not match any routes, a default route (configurable, but usually the first child route) will be opened.
                 </p>
-                <p>The following example has the <code>path-router</code>'s <code>path</code> attribute set to an empty string. Note that the first route is opened.</p>
+                <p>The following example has the <code>&lt;path-router&gt;</code>'s <code>path</code> attribute set to an empty string. Note that the first route is opened.</p>
             </div>
             <div class="example">
                 <menu>
@@ -108,9 +175,9 @@
         <article>
             <header>Custom Default Route</header>
             <div class="description">
-                <p>Setting a <code>route-page</code>'s <code>default</code> attribute to any value will set that route to be the route opened in the case that a default route would be opened (no path set, path set to an unmatching value, etc...). </p>
-                <p>If multiple <code>route-page</code> elements have a <code>default</code> attribute, the last <code>route-page</code> listed with the attribute will be used.</p>
-                <p>The following example has the <code>path-router</code>'s <code>path</code> attribute set to an empty string. Note that the second route is opened.</p>
+                <p>Setting a <code>&lt;route-page&gt;</code>'s <code>default</code> attribute to any value will set that route to be the route opened in the case that a default route would be opened (no path set, path set to an unmatching value, etc...). </p>
+                <p>If multiple <code>&lt;route-page&gt;</code> elements have a <code>default</code> attribute, the last <code>&lt;route-page&gt;</code> listed with the attribute will be used.</p>
+                <p>The following example has the <code>&lt;path-router&gt;</code>'s <code>path</code> attribute set to an empty string. Note that the second route is opened.</p>
             </div>
             <div class="example">
                 <menu>
@@ -129,7 +196,7 @@
             <header>Route Properties</header>
             <div class="description">
                 <p>Route properties are defined with a <code>:</code> prefix. For example, <code>:id</code> defines a route property named "id".</p>
-                <p>Route properties allow multiple different paths to open the same route. When a <code>route-page</code> element has a route property defined in it's <code>path</code> attribute, that route can be accessed by any path that can match the value after substituting variables for the supplied values.</p>
+                <p>Route properties allow multiple different paths to open the same route. When a <code>&lt;route-page&gt;</code> element has a route property defined in it's <code>path</code> attribute, that route can be accessed by any path that can match the value after substituting variables for the supplied values.</p>
             </div>
             <div class="example">
                 <menu>
@@ -226,9 +293,9 @@
         <article>
             <header>Subrouting</header>
             <div class="description">
-                <p>Nesting one <code>path-router</code> element inside of another <code>path-router</code> element does <strong>not</strong> automatically engage subrouting. <code>path-router</code> elements may be used entirely independently of one another, on the same page.</p>
-                <p>For custom requirements, the parent <code>path-router</code> element's events can be handled in javascript, and the child <code>path-router</code> element's path can be set before transitions complete.</p>
-                <p>If your route design allows for specific composition, the <code>path-router</code> element can handle subrouting with convention, rather than with additional code. This allows subrouting without any custom javascript at all.</p>
+                <p>Nesting one <code>&lt;path-router&gt;</code> element inside of another <code>&lt;path-router&gt;</code> element does <strong>not</strong> automatically engage subrouting. <code>&lt;path-router&gt;</code> elements may be used entirely independently of one another, on the same page.</p>
+                <p>For custom requirements, the parent <code>&lt;path-router&gt;</code> element's events can be handled in javascript, and the child <code>&lt;path-router&gt;</code> element's path can be set before transitions complete.</p>
+                <p>If your route design allows for specific composition, the <code>&lt;path-router&gt;</code> element can handle subrouting with convention, rather than with additional code. This allows subrouting without any custom javascript at all.</p>
                 <p>Default subroute handling also includes handling for <code>route-link</code> and <code>route-button</code> elements to determine if they represent a link to the currently open route.</p>
             </div>
             <div class="example">
@@ -273,9 +340,7 @@
                 </menu>
                 <path-router id="dialog-route" path="about/mission">
                     <route-page path="/home">Home</route-page>
-                    <route-page path="/about">
-                        <header>About</header>
-                    </route-page>
+                    <route-page path="/about">About</route-page>
                     <dialog is="route-dialog" path="config">
                         <header>App Configuration</header>
                         <div>
@@ -292,14 +357,14 @@
         <article>
             <header>Transitions</header>
             <div class="description">
-                <p>The <code>&lt;route-page&gt;</code> and <code>&lt;route-dialog&gt;</code> elements dispatch custom events when navigation is occurring. There are four total events, but the events may be assigned in two ways: "normally" or "blocking". These are handled by two separate sets of event handlers, so you can specify the preference in implementation.</p>
+                <p>The <code>&lt;route-page&gt;</code> and <code>route-dialog</code> elements dispatch custom events when navigation is occurring. There are four total events, but the events may be assigned in two ways: "normally" or "blocking". These are handled by two separate sets of event handlers, so you can specify the preference in implementation.</p>
                 <p>Using the standard <code>addEventListener</code> function will add an event that does NOT block the page from transitioning. The handler will run simultaneously with the css transitions.</p>
                 <p>If you need to prevent a route from opening until after your handler has finished its work, you can use the custom <code>addBlockingEventListener</code>, in the same way, using the same event name.</p>
                 <p>Since the handlers will be awaited, you can use asynchronous code within the handler. This allows dynamic content to be set during the transitions.</p>
                 <p><code>before</code> events will fire before any css transitions or animations are applied and <code>after</code> events will fire after all css transitions and animations have finished.</p>
             </div>
             <div class="example">
-                <menu id="page-menu">
+                <menu>
                     <a is="route-link" for="transitions" path="/">Event Types</a>
                     <a is="route-link" for="transitions" path="/before-page-open">Blocking - Before Open</a>
                     <a is="route-link" for="transitions" path="/before-page-close">Blocking - Before Close</a>
@@ -529,9 +594,9 @@
                 const userContactRouter = document.querySelector('#user-contact-router');
                 const helpRouter = document.querySelector('#help-router');
 
-                // nested dialog path explanation: all dialog routes would need to be accessible to the top level router
-                // instead, just hook into the beforeopen event and open the dialog from the variable name 
-                // route properties example
+                // nested dialog path explanation: all dialog routes would need to be accessible
+                // to the top level router. instead, just hook into the beforeopen event and open
+                // the dialog from the variable name route properties example
                 
                 // fix dialog subroute
                 let historyIsUpdating = false;
@@ -539,10 +604,7 @@
                 pageRouter.addEventListener('pathcompose', pageRouter_onPathCompose);
                 function pageRouter_onPathCompose(event)
                 {
-                    // console.log(event);
-
                     // prevent changing the url using events from subrouters
-                    // console.log(event.target);
                     if(event.target != pageRouter) { return; }
 
                     // if we're moving back or forward,
@@ -552,9 +614,7 @@
                     
                     const currentLocation = new URL(browserMockup.getAttribute('url')); // equivalent to `window.location`
 
-                    // let updatedPath = pageRouter.composeRoutePath();
                     let updatedPath = pageRouter.getAttribute('composed-path');
-                    // console.log(updatedPath);
                     const origin = 'https://www.path-router.com' // reference window's origin with `window.location.origin`;
                     const updatedLocation = new URL(origin + updatedPath);
 
@@ -564,10 +624,12 @@
                         if(isReplacementChange)
                         {
                             browserMockup.history.replace(updatedLocation.href);
+                            // equivalent to `window.history.replaceState(null, '', updatedLocation.href);`
                         }
                         else
                         {
                             browserMockup.history.add(updatedLocation.href);
+                            // equivalent to `window.history.pushState(null, '', updatedLocation.href);`
                         }
                     }
                 }
@@ -699,7 +761,7 @@
                     <route-page path="c">Route C</route-page>
                 </path-router>
             </div>
-            <header><code>sidebar</code> <small><em>(note additional "display: flex" property on this example container)</em></small></header>
+            <header><code>sidebar</code><small><em>(note additional <code>display: flex</code> property on this example container)</em></small></header>
             <div class="example sidebar" style="display:flex;">
                 <menu>
                     <a is="route-link" for="theme-sidebar" data-theme="sidebar" path="a">Route A</a>
@@ -715,11 +777,11 @@
             <header><code>heading-nav</code></header>
             <div class="example heading-nav">
                 <menu>
-                    <a is="route-link" for="theme-header-nav" data-theme="heading-nav" path="a">Route A</a>
-                    <a is="route-link" for="theme-header-nav" data-theme="heading-nav" path="b">Route B</a>
-                    <a is="route-link" for="theme-header-nav" data-theme="heading-nav" path="c">Route C</a>
+                    <a is="route-link" for="theme-heading-nav" data-theme="heading-nav" path="a">Route A</a>
+                    <a is="route-link" for="theme-heading-nav" data-theme="heading-nav" path="b">Route B</a>
+                    <a is="route-link" for="theme-heading-nav" data-theme="heading-nav" path="c">Route C</a>
                 </menu>
-                <path-router id="theme-header-nav" data-theme="heading-nav" path="">
+                <path-router id="theme-heading-nav" data-theme="heading-nav" path="">
                     <route-page path="a">Route A</route-page>
                     <route-page path="b">Route B</route-page>
                     <route-page path="c">Route C</route-page>

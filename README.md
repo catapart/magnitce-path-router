@@ -7,12 +7,12 @@ Package size: ~12kb minified, ~22kb verbose.
 
 ## Quick Reference
 ```html
-<menu data-theme="heading-nav">
-    <a is="route-link" data-theme="heading-nav" path="/">Home</a>
-    <a is="route-link" data-theme="heading-nav" path="about">About</a>
-    <a is="route-link" data-theme="heading-nav" path="contact">Contact</a>
+<menu>
+    <a is="route-link" for="my-router" data-theme="heading-nav" path="/">Home</a>
+    <a is="route-link" target="#my-router" data-theme="heading-nav" path="about">About</a>
+    <a is="route-link" target=".router" data-theme="heading-nav" path="contact">Contact</a>
 </menu>
-<path-router path="home" data-theme="heading-nav">
+<path-router path="home" id="my-router" class="router" data-theme="heading-nav">
     <route-page path="home">
         <header>Home</header>
         <div>
@@ -38,11 +38,11 @@ Package size: ~12kb minified, ~22kb verbose.
             <a>contact@mydomain.com</a>
         </div>
     </route-page>
-    <route-dialog path="config">    
+    <dialog is="route-dialog" path="config/:subroute">    
         <header>Configuration</header>
         <menu data-theme="tabs">
-            <a is="route-link" data-theme="tabs" path="/">User</a>
-            <a is="route-link" data-theme="tabs" path="app">App</a>
+            <a is="route-link" data-theme="tabs" for="config-router" path="/">User</a>
+            <a is="route-link" data-theme="tabs" for="config-router" path="app">App</a>
         </menu>
         <path-router id="config-router" data-theme="tabs">
             <route-page path="/">
@@ -63,7 +63,7 @@ Package size: ~12kb minified, ~22kb verbose.
                 <button method="dialog">Close</button>
             </form>
         </footer>
-    </route-dialog>
+    </dialog>
 </path-router>
 <script type="module" src="/path/to/path-router[.min].js"></script>
 ```
@@ -174,9 +174,9 @@ import { PathRouter } from "@magnit-ce/path-router";
 ### Add a Theme
 ```html
 <menu data-theme="heading-nav"> <!-- New -->
-<a is="route-link" data-theme="heading-nav" path="/">Home</a> <!-- New -->
-<a is="route-link" data-theme="heading-nav" path="about">About</a> <!-- New -->
-<a is="route-link" data-theme="heading-nav" path="contact">Contact</a> <!-- New -->
+    <a is="route-link" data-theme="heading-nav" path="/">Home</a> <!-- New -->
+    <a is="route-link" data-theme="heading-nav" path="about">About</a> <!-- New -->
+    <a is="route-link" data-theme="heading-nav" path="contact">Contact</a> <!-- New -->
 </menu>
 <path-router path="home" data-theme="heading-nav"> <!-- New -->
     <route-page path="home">
@@ -201,12 +201,23 @@ import { PathRouter } from "@magnit-ce/path-router";
 </path-router>
 ```
 
-### Await Animations
-```js
-```
-
 ### Await Data
 ```js
+document.querySelector('route-page[path="home"]').addBlockingEventListener('beforeopen', async () =>
+{
+    // this handler will prevent the page from opening until it resolves
+
+    appState.welcomeVideo = await fetchVideoContent();
+});
+```
+
+### Await Animations
+```js
+document.querySelector('route-page[path="home"]').addEventListener('afteropen', () =>
+{
+    //this event will fire after the css transition has finished
+    startVideoContent(appState.welcomeVideo);
+});
 ```
 
 ### Add a Dialog Route
@@ -325,11 +336,55 @@ import { PathRouter } from "@magnit-ce/path-router";
 
 ### Manage History
 ```js
+const pageRouter = document.querySelector('page-router');
+
+// monitor window history to update routes
+let historyIsUpdating = false;
+window.addEventListener('popstate', async (event) =>
+{
+    historyIsUpdating = true;
+    const route = window.location.pathname + window.location.hash;
+    await pageRouter.navigate(route);
+    historyIsUpdating = false;
+});
+
+// monitor path changes on path-router
+// element, to set new url paths
+pageRouter.addEventListener('pathcompose', pageRouter_onPathCompose);
+function pageRouter_onPathCompose(event)
+{
+    // prevent changing the url using events from subrouters
+    if(event.target != pageRouter) { return; }
+
+    // if we're moving back or forward,
+    // we don't want to record that in history
+    // and the browser will update the url
+    if(historyIsUpdating == true) { return; } 
+    
+    const currentLocation = window.location;
+    let updatedPath = pageRouter.getAttribute('composed-path');
+    const origin = window.location.origin;
+    const updatedLocation = new URL(origin + updatedPath);
+
+    const { hasChanged, isReplacementChange } = pageRouter.compareLocations(currentLocation, updatedLocation);
+    if(hasChanged)
+    {
+        if(isReplacementChange)
+        {
+            window.history.replaceState(null, '', updatedLocation.href);
+        }
+        else
+        {
+            window.history.pushState(null, '', updatedLocation.href);
+        }
+    }
+}
 ```
 
 ---
 ---
 ---
+
 ## Overview
 ### Routes
 The `<path-router>` element is a custom element that allows you to show a single `<route-page>` element at a time, based on matching the `path` attributes. Here is a simple example:
@@ -340,32 +395,32 @@ The `<path-router>` element is a custom element that allows you to show a single
     <route-page path="/contact">Content</route-page>
 </path-router>
 ```
-In this example, the `route-page` with the `path` attribute set as "/home" will be visible. All other `<route-page>` children will be hidden using CSS.  
-If the `<path-router>` element's `path` attribute was set to "about", the `route-page` with the `path` attribute set as "/about" would be visible, instead.
+In this example, the `<route-page>` with the `path` attribute set as "/home" will be visible. All other `<route-page>` children will be hidden using CSS.  
+If the `<path-router>` element's `path` attribute was set to "about", the `<route-page>` with the `path` attribute set as "/about" would be visible, instead.
 
 "Path Routers" are a common method of displaying only relevant parts of an app or website. By representing "where" a user is in your app or website using a "path", a wide variety of views can be supported with relatively simple configuration.
 
 As demonstrated in the example above, it is trivial to show or hide content; the only requirement is to match the router's path to the route's path.
 
 ### Navigation
-When the `path-router` element needs to display a different `page-route`, this can be achieved by "navigating" to a different path. Navigating is done by setting the `path-router` element's `path` attribute.
+When the `<path-router>` element needs to display a different `<route-page>`, this can be achieved by "navigating" to a different path. Navigating is done by setting the `<path-router>` element's `path` attribute.
 
-While updating the path is as simple as changing the attribute, a "navigation" is a full process that includes closing the currently open route - if one is currently open - and then opening the `route-page` element that matches the requested path. The entire process includes any css transitions set for the opening/closing routes, along with multiple events which can asynchronously block the process. 
+While updating the path is as simple as changing the attribute, a "navigation" is a full process that includes closing the currently open route - if one is currently open - and then opening the `<route-page>` element that matches the requested path. The entire process includes any css transitions set for the opening/closing routes, along with multiple events which can asynchronously block the process. 
 
-The `path-router` element includes a `navigate` function which accepts a `path` string as its parameter. However, it is *not* required to use the `navigate` function; navigation will occur any time the `path` attribute is changed.  
+The `<path-router>` element includes a `navigate` function which accepts a `path` string as its parameter. However, it is *not* required to use the `navigate` function; navigation will occur any time the `path` attribute is changed.  
 Unlike changing the attribute directly, though, the `navigate` function is asynchronous and returns an awaitable Promise. This allow functionality to await the full navigation and transitions before occurring.
 
 ### Default Route
 If the `path` attribute is left empty, the path router will not attempt to route. This allows initialization functionality to be applied before loading the initial route.  
-If the `path` attribute is set to a string that cannot be matched to any `route-page` element's `path` attribute (see matching), the "Default" route will be loaded.
+If the `path` attribute is set to a string that cannot be matched to any `<route-page>` element's `path` attribute (see matching), the "Default" route will be loaded.
 
 The "Default" route is determine by the following cascade:
-- The last `route-page` element that has the `default` attribute will be set as the "Default" route. It is *expected* that there is only one default route, but multiples will just use the last `route-page` element.
-- If no `route-page` element has the `default` attribute, the last route that has its `path` attribute set to the "wildcard" value of asterisk (`*`) will be used as the default route.
-- If no `route-page` element has the `default` attribute and no `route-page` element's `path` attribute is set to "wildcard", the first `route-page` child in the `path-router` element will be used as the default route.
+- The last `<route-page>` element that has the `default` attribute will be set as the "Default" route. It is *expected* that there is only one default route, but multiples will just use the last `<route-page>` element.
+- If no `<route-page>` element has the `default` attribute, the last route that has its `path` attribute set to the "wildcard" value of asterisk (`*`) will be used as the default route.
+- If no `<route-page>` element has the `default` attribute and no `<route-page>` element's `path` attribute is set to "wildcard", the first `<route-page>` child in the `<path-router>` element will be used as the default route.
 
 ### Subrouting
-In many cases, routing can benefit from "subroutes" which is just a label to describe putting a `path-router` element inside of a `route-page` element and using a single path to update both path routers. To help clarify, see this example:
+In many cases, routing can benefit from "subroutes" which is just a label to describe putting a `<path-router>` element inside of a `<route-page>` element and using a single path to update both path routers. To help clarify, see this example:
 ```html
 <path-router path="home">
     <route-page path="/home">Home</route-page>
@@ -377,7 +432,7 @@ In many cases, routing can benefit from "subroutes" which is just a label to des
     <route-page path="/contact">Content</route-page>
 </path-router>
 ```
-In this example, there are many routes that have the same prefix - "about". While this example will work just fine, it can often be inefficient to repeat content across several `route-page` elements. For example, if each of the "about" routes used a complex header, instead of just the word "About", all of that content would need to be duplicated for each route.
+In this example, there are many routes that have the same prefix - "about". While this example will work just fine, it can often be inefficient to repeat content across several `<route-page>` elements. For example, if each of the "about" routes used a complex header, instead of just the word "About", all of that content would need to be duplicated for each route.
 
 To simplify, the above example can be rewritten like this:
 ```html
@@ -398,7 +453,7 @@ To simplify, the above example can be rewritten like this:
 In this updated example, you can see that all of the routes whose `path` attributes were prefixed with "about" have now been moved into a nested `<path-router>` element, and had their "about" prefixes removed.  
 From the top `<path-router>` element, the path is set to go to the top level route of "about" and then to the "subroute" of "mission". This causes the top `<path-router>` element to be routed to the `<route-page>` with the "/about" `path` attribute, and the nested `<path-router>` element to be routed to the `<route-page>` element with the "mission" `path` attribute.
 
-Note that in order to use subrouting, the `page-route` with the "/about" `path` attribute includes a route property named ":subroute". It is named ":subroute" in the example, for clarity, but the route property name can be anything. The route property is used for matching, as a way to differentiate between this example:
+Note that in order to use subrouting, the `<route-page>` with the "/about" `path` attribute includes a route property named ":subroute". It is named ":subroute" in the example, for clarity, but the route property name can be anything. The route property is used for matching, as a way to differentiate between this example:
 ```html
 <path-router path="about/unknown-path">
     <route-page path="/home">Home</route-page>
@@ -426,8 +481,8 @@ Route Properties are defined by using a slug prefixed with the `:` character:
 ```
 In this example, a route property named "id" is defined. Any url-safe string can be used as a route property name, including strings with hyphens.
 
-### `route.getProperties()`
-Any property that is defined by a `route-page` will be accessible in javascript by using the provided `getProperties` function. This function returns an object of key/value pairs that uses the defined property as a key, and the requested value from the `<path-router>` element's `path` attribute, as the value. For example:
+### `router.getProperties()`
+Any property that is defined by a `<route-page>` will be accessible in javascript by using the provided `getProperties` function. This function returns an object of key/value pairs that uses the defined property as a key, and the requested value from the `<path-router>` element's `path` attribute, as the value. For example:
 ```html
 <path-router path="/user/21/contact/gw2ozjh">
     <route-page path="/home">Home</route-page>
@@ -455,7 +510,7 @@ Note that these identifiers are *not* interchangeable. A button with an `is` att
 And, just to state this explicitly: trying to use `<route-link>` or `<route-button>` will *not* work. Those tags will be rendered in most browsers as simple `<div>` elements.
 
 ### `path` attribute
-The `path` attribute for these elements defines the exact path that you would like to open. Unlike the `path` attribute for `route-page` elements, this `path` attribute is not used for matching or in any other dynamic way. Whatever is provided as the string in the path will be what the `<path-router>` element's `path` attribute will be set to.
+The `path` attribute for these elements defines the exact path that you would like to open. Unlike the `path` attribute for `<route-page>` elements, this `path` attribute is not used for matching or in any other dynamic way. Whatever is provided as the string in the path will be what the `<path-router>` element's `path` attribute will be set to.
 ```html
 <button is="route-button" path="user">Users List</button>
 <button is="route-button" path="user/oiugx">Specific User</button>
@@ -598,19 +653,51 @@ For convenience, three basic themes have been included in the library to set som
 #### Tabs Theme
 This theme styles an element that contains `route-link` elements, as well as its `route-link` children to look like an inline set of tabs which can be placed on top of the `<page-router>` element to appear as if the user is switching between a stack of tabbed documents. Here is an example of applying the `tabs` theme:
 ```html
+<menu>
+    <a is="route-link" for="theme-tabs" data-theme="tabs" path="a">Route A</a>
+    <a is="route-link" for="theme-tabs" data-theme="tabs" path="b">Route B</a>
+    <a is="route-link" for="theme-tabs" data-theme="tabs" path="c">Route C</a>
+</menu>
+<path-router id="theme-tabs" data-theme="tabs" path="">
+    <route-page path="a">Route A</route-page>
+    <route-page path="b">Route B</route-page>
+    <route-page path="c">Route C</route-page>
+</path-router>
 ```
 
 #### Sidebar Theme
 This theme styles an element that contains `route-link` elements, as well as its `route-link` children to look like a list of menu items which can be placed on the left or the right of the `<page-router>` element to appear as if the user is switching between pages corresponding to options defined in the menu. Here is an example of applying the `sidebar` theme:
 ```html
+<div class="container" style="display:flex;">
+    <menu>
+        <a is="route-link" for="theme-sidebar" data-theme="sidebar" path="a">Route A</a>
+        <a is="route-link" for="theme-sidebar" data-theme="sidebar" path="b">Route B</a>
+        <a is="route-link" for="theme-sidebar" data-theme="sidebar" path="c">Route C</a>
+    </menu>
+    <path-router id="theme-sidebar" data-theme="sidebar" path="">
+        <route-page path="a">Route A</route-page>
+        <route-page path="b">Route B</route-page>
+        <route-page path="c">Route C</route-page>
+    </path-router>
+</div>
 ```
 
-#### Header Nav Theme
+#### Heading Nav Theme
 This theme styles an element that contains `route-link` elements, as well as its `route-link` children to look like an inline header menu of links.  
 Additionally, the `<page-router>` element will be styled to include a border and a maximum width that adheres to a common maximum width for webpage display.  
 Together, the links and the router resemble a popular page template design.
-Here is an example of applying the `header-nav` theme:
+Here is an example of applying the `heading-nav` theme:
 ```html
+<menu>
+    <a is="route-link" for="theme-heading-nav" data-theme="heading-nav" path="a">Route A</a>
+    <a is="route-link" for="theme-heading-nav" data-theme="heading-nav" path="b">Route B</a>
+    <a is="route-link" for="theme-heading-nav" data-theme="heading-nav" path="c">Route C</a>
+</menu>
+<path-router id="theme-heading-nav" data-theme="heading-nav" path="">
+    <route-page path="a">Route A</route-page>
+    <route-page path="b">Route B</route-page>
+    <route-page path="c">Route C</route-page>
+</path-router>
 ```
 
 ## Browser History and URL updates
@@ -618,10 +705,39 @@ The `<path-router>` element **DOES NOT** make changes to the browser's URL in an
 
 The `<path-router>` element does include helper functions to facilitate modifying the browser's URL and History, but those functions must be invoked by the implementing developer, and the results of them must be parsed and applied to the browsers URL/History manually. 
 
-In most cases, updating the browser history or url can be done by handling the `change` event and comparing the current url to the target url, like in this example:
+In most cases, updating the browser history or url can be done by handling the `pathcompose` event and comparing the current url to the target url, like in this example:
 ```js
+pageRouter.addEventListener('pathcompose', pageRouter_onPathCompose);
+function pageRouter_onPathCompose(event)
+{
+    // prevent changing the url using events from subrouters
+    if(event.target != pageRouter) { return; }
+
+    // if we're moving back or forward,
+    // we don't want to record that in history
+    // and the browser will update the url
+    if(historyIsUpdating == true) { return; } 
+    
+    const currentLocation = window.location;
+    let updatedPath = pageRouter.getAttribute('composed-path');
+    const origin = window.location.origin;
+    const updatedLocation = new URL(origin + updatedPath);
+
+    const { hasChanged, isReplacementChange } = pageRouter.compareLocations(currentLocation, updatedLocation);
+    if(hasChanged)
+    {
+        if(isReplacementChange)
+        {
+            window.history.replaceState(null, '', updatedLocation.href);
+        }
+        else
+        {
+            window.history.pushState(null, '', updatedLocation.href);
+        }
+    }
+}
 ```
-In this example, we listen for the `change` event and then use the `compareLocation` feature to determine the details of how our navigation state has been changed.  
+In this example, we listen for the `pathcompose` event and then use the `compareLocations` feature to determine the details of how our navigation state has been changed.  
 Once the navigation events are understood, the browser's history is updated by either replacing the current state, if we want to preserve the back function as an close command for a dialog, or by adding a new history entry if we want the back function to navigate us back to our previous route.
 
 

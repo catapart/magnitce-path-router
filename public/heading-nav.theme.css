@@ -3,13 +3,11 @@ path-router[data-theme="heading-nav"]
     --theme-color: rgb(85, 129, 15);
     margin: 30px 1em;
     flex: 1;
-    /* display: flex;
-    flex-direction: column; */
 }
 path-router[data-theme="heading-nav"] > route-page[open]
 {
     flex: 1;
-    display: block !important;
+    display: block;
     padding: 1em;
     border: solid 3px var(--theme-color);
     border-bottom-right-radius: 2px;
@@ -48,19 +46,6 @@ path-router[data-theme="heading-nav"] > route-page[open] > [is="route-button"][a
     background-color: transparent;
     color: var(--theme-color);
 }
-
-/* [data-theme="heading-nav"].layout
-{
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    width: calc(1170px + 2em);
-    margin: 0 auto;
-}
-[data-theme="heading-nav"].layout > menu
-{
-    align-self: flex-end;
-} */
 
 [is="route-link"][data-theme="heading-nav"]
 {

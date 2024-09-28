@@ -54,6 +54,11 @@ route-page[open]
 ,route-page[data-exiting]
 {
     visibility: visible;
+}
+[is="route-link"]
+,[is="route-button"]
+{
+    user-select: none;
 }`);
 
 const WILDCARD_INDICATOR = '*';
@@ -97,11 +102,6 @@ export class PathRouterElement extends HTMLElement
     constructor()
     {
         //todo:
-        // move themes into library
-        // style page for better light/dark display
-        // add lt; and gt; to path-router, page-route, and dialog-route references
-        // add documentation
-        // add missing code blocks to readme
         // add history to browser mockup
         // remove nested css from browser mockup
         // update browser mockup on npm
