@@ -156,12 +156,72 @@
                             <route-page path="1">User 1</route-page>
                             <route-page path="2">User 2</route-page>
                             <route-page path="3">User 3</route-page>
-                            <route-page path="4">User 4</route-page>
+                            <route-page path="4/:contactId">
+                                <header>User 4</header>
+                                <menu>
+                                    <a is="route-link" for="user-contacts" path="1">Contact 1</a>
+                                    <a is="route-link" for="user-contacts" path="2">Contact 2</a>
+                                    <a is="route-link" for="user-contacts" path="3">Contact 3</a>
+                                    <a is="route-link" for="user-contacts" path="4">Contact 4</a>
+                                </menu>
+                                <path-router id="user-contacts">
+                                    <route-page path=":contactId">
+                                        User Contact <span id="user-contact-id"></span>
+                                    </route-page>
+                                </path-router>
+                            </route-page>
                         </path-router>
                     </route-page>
                     <route-page path="/contact">Contact</route-page>
                 </path-router>
+                <div class="log">
+                    <header>
+                        <span class="title">Properties Log</span>
+                        <button type="button" id="invoke-get-properties">Invoke <code>getProperties()</code></button>
+                    </header>
+                    <ul id="properties-log"></ul>
+                </div>
             </div>
+            <script>
+                const routePropertiesRouter = document.getElementById('route-properties');
+                const invokeGetPropertiesButton = document.querySelector('#invoke-get-properties');
+                const propertiesLog = document.querySelector('#properties-log');
+                const userContactsRouter = document.querySelector('route-page[path=":contactId"]');
+                const userContactId = document.querySelector('#user-contact-id');
+
+                document.addEventListener('DOMContentLoaded', init);
+
+                async function init(example)
+                {
+                    invokeGetPropertiesButton.addEventListener('click', () =>
+                    {
+                        const properties = routePropertiesRouter.getRouteProperties();
+                        logResult(properties);
+                    });
+
+                    routePropertiesRouter.addEventListener('pathcompose', () =>
+                    {
+                        const properties = routePropertiesRouter.getRouteProperties();
+                        if(properties.contactId == null || properties.contactId.trim() == "")
+                        {
+                            userContactId.textContent = 's';
+                        }
+                        else
+                        {
+                            userContactId.textContent = properties.contactId;
+                        }
+                    });
+
+                }
+
+                function logResult(result)
+                {
+                    const entry = document.createElement('li');
+                    entry.textContent = JSON.stringify(result, null, 2);
+                    entry.classList.add('entry');
+                    propertiesLog.append(entry);
+                }
+            </script>
         </article>
         <article>
             <header>Subrouting</header>
@@ -267,7 +327,7 @@
                         <form method="dialog"><button method="dialog">Close</button></form>
                     </dialog>
                 </path-router>
-                <div class="event-log">
+                <div class="log">
                     <header>Event Log</header>
                     <ul id="transitions-event-log"></ul>
                 </div>
@@ -639,7 +699,7 @@
                     <route-page path="c">Route C</route-page>
                 </path-router>
             </div>
-            <header><code>sidebar</code></header>
+            <header><code>sidebar</code> <small><em>(note additional "display: flex" property on this example container)</em></small></header>
             <div class="example sidebar" style="display:flex;">
                 <menu>
                     <a is="route-link" for="theme-sidebar" data-theme="sidebar" path="a">Route A</a>

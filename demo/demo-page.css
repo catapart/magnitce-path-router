@@ -152,14 +152,14 @@ browser-mockup
     width: 640px;
 }
 
-.event-log
+.log
 {
     background: field;
     color: fieldtext;
     border: solid 1px #616161;
     border-radius: 2px;
     padding: 1em;
-    height: 300px;
+    height: 200px;
     overflow: auto;
     margin: 1em;
 }

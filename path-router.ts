@@ -97,7 +97,6 @@ export class PathRouterElement extends HTMLElement
     constructor()
     {
         //todo:
-        // todo: make sure getProperties returns full correct values
         // move themes into library
         // style page for better light/dark display
         // add lt; and gt; to path-router, page-route, and dialog-route references
@@ -107,7 +106,7 @@ export class PathRouterElement extends HTMLElement
         // remove nested css from browser mockup
         // update browser mockup on npm
         // update browser mockup reference
-        // adjust history management to use new browser mockup        
+        // adjust history management to use new browser mockup
 
         super();
 
@@ -737,6 +736,60 @@ export class PathRouterElement extends HTMLElement
         }
 
         return false;
+    }
+
+    getRouteProperties(result: { [key: string]: unknown } = {})
+    {
+        if(this.currentPageRoute == null) { return {}; }
+
+        const composedPath = this.getAttribute('path') ?? '/';
+        
+        const pathArray = this.#getFormattedPathArray(composedPath);
+        const routePathArray = this.#getFormattedPathArray(this.currentPageRoute.getAttribute('path') ?? '/');
+
+        let preceedingKey: string|undefined = undefined;
+        for(let i = 0; i < routePathArray.length; i++)
+        {
+            const routePathSlug = routePathArray[i];
+            if(routePathSlug.startsWith(":"))
+            {
+                // if first value is a property, just use
+                // the first value of the pathArray
+                if(preceedingKey == undefined)
+                {
+                    let value = pathArray[0];
+                    if(value.indexOf('#') > -1)
+                    {
+                        value = value.split('#')[0];
+                    }
+                    result[this.trimCharacter(routePathSlug, ":")] = value;
+                    continue;
+                }
+                for(let j = 0; j < pathArray.length - 1; j++)
+                {
+                    const pathSlug = pathArray[j];
+                    if(pathSlug == preceedingKey)
+                    {
+                        let value = pathArray[j + 1];
+                        if(value.indexOf('#') > -1)
+                        {
+                            value = value.split('#')[0];
+                        }
+                        result[this.trimCharacter(routePathSlug, ":")] = value;
+                    }
+                }
+            }
+            preceedingKey = routePathSlug;
+        }
+
+        const subrouter = this.currentPageRoute.querySelector('path-router') as PathRouterElement;
+        if(subrouter != null)
+        {
+            result = subrouter.getRouteProperties(result);
+        }
+        
+        return result;
+
     }
 
     static getUrlParameters(urlString: string)
