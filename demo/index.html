@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Path Router Demo</title>
     <link rel="stylesheet" href="./demo-page.css">
-    <link rel="stylesheet" href="../dist/tabs.theme.css">
-    <link rel="stylesheet" href="../dist/sidebar.theme.css">
-    <link rel="stylesheet" href="../dist/heading-nav.theme.css">
+    <link rel="stylesheet" href="../vanilla/tabs.theme.css">
+    <link rel="stylesheet" href="../vanilla/sidebar.theme.css">
+    <link rel="stylesheet" href="../vanilla/heading-nav.theme.css">
 </head>
 <body>
     <main>
@@ -587,7 +587,7 @@
             
             <script type="module" src="./browser-mockup.min.js"></script><!-- Browser Mockup library from here: https://github.com/catapart/magnitce-browser-mockup -->
             <script type="module">
-                import { PathRouterElement } from '../dist/path-router.js';
+                import { PathRouterElement } from '../vanilla/path-router.js';
                 const browserMockup = document.body.querySelector('browser-mockup');
                 const pageRouter = document.querySelector('#page-router');
                 const userRouter = document.querySelector('#user-router');
@@ -733,6 +733,6 @@
             </div>
         </article>
     </main>    
-    <script type="module" src="../dist/path-router.js"></script>
+    <script type="module" src="../vanilla/path-router.js"></script>
 </body>
 </html>
