@@ -438,8 +438,12 @@ route-page[open]
 ,route-page[data-exiting]
 {
     visibility: visible;
+}
+[is="route-link"]
+,[is="route-button"]
+{
+    user-select: none;
 }`);
-var WILDCARD_INDICATOR = "*";
 var COMPONENT_TAG_NAME = "path-router";
 var PathRouterElement5 = class extends HTMLElement {
   get routes() {
@@ -448,12 +452,16 @@ var PathRouterElement5 = class extends HTMLElement {
   get routeDialogs() {
     return Array.from(this.querySelectorAll(`:scope > [is="${COMPONENT_TAG_NAME3}"]`), (routeDialog) => routeDialog);
   }
+  /** The `<page-route>` element currently being navigated to. */
   targetPageRoute;
+  /** The `<page-route>` element that the router currently has open. */
   currentPageRoute;
+  /** The `route-dialog` element currently being navigated to. */
   targetDialogRoute;
+  /** The `route-dialog` element that the router currently has open. */
   currentDialogRoute;
+  /** The route that will be selected if no other routes match the current path. */
   defaultRoute;
-  wildcardRoute;
   get path() {
     return this.getAttribute("path");
   }
@@ -489,9 +497,6 @@ var PathRouterElement5 = class extends HTMLElement {
           }
           const path = route.getAttribute("path");
           const isDefault = route.hasAttribute("default");
-          if (path != null && path.trim() == "*") {
-            this.wildcardRoute = route;
-          }
           if (isDefault == true) {
             this.defaultRoute = route;
           }
@@ -549,9 +554,9 @@ var PathRouterElement5 = class extends HTMLElement {
     const [currentPage, currentHash] = this.destructurePath(previousPath);
     let openedPage = false;
     let openedDialog = false;
-    const pathHasChanged = currentPage != page;
+    const pageHasChanged = hash != "" && page == "" ? false : currentPage != page;
     const hashHasChanged = hash != currentHash;
-    if (pathHasChanged == false && hashHasChanged == false && this.querySelector("[open]") != null) {
+    if (pageHasChanged == false && hashHasChanged == false && this.querySelector("[open]") != null) {
       if (this.resolveNavigation != null) {
         this.resolveNavigation();
         this.resolveNavigation = void 0;
@@ -561,7 +566,7 @@ var PathRouterElement5 = class extends HTMLElement {
     await this.#awaitAllRouteProcesses();
     const [pageRoute, dialogRoute] = this.#getRouteElements(path);
     let openPagePromise;
-    if (pathHasChanged == true || this.querySelector("[open]") == null) {
+    if (pageHasChanged == true || this.querySelector("[open]") == null) {
       const closed = await this.#closeCurrentRoutePage();
       if (closed == false) {
         console.warn("Navigation was prevented.");
@@ -574,7 +579,7 @@ var PathRouterElement5 = class extends HTMLElement {
       }
       openPagePromise = this.#openRoutePage(pageRoute, page);
     }
-    if (pathHasChanged || currentHash != hash) {
+    if (pageHasChanged || currentHash != hash) {
       const closed = await this.#closeCurrentRouteDialog();
       if (closed != false) {
         this.targetDialogRoute = dialogRoute;
@@ -665,7 +670,7 @@ var PathRouterElement5 = class extends HTMLElement {
         return { match: false, resolved: false };
       }
       const isParameter = slug.startsWith(":");
-      if (isParameter == false && slug != WILDCARD_INDICATOR) {
+      if (isParameter == false) {
         if (slug != pathArray[i]) {
           return { match: false, resolved: false };
         }
@@ -677,9 +682,6 @@ var PathRouterElement5 = class extends HTMLElement {
   }
   async #openRoutePage(route, path) {
     this.targetPageRoute = route;
-    if (this.targetPageRoute == null && this.wildcardRoute != null) {
-      this.targetPageRoute = this.wildcardRoute;
-    }
     this.targetPageRoute = this.targetPageRoute || this.defaultRoute;
     if (this.targetPageRoute == null) {
       return false;
@@ -877,10 +879,9 @@ var PathRouterElement5 = class extends HTMLElement {
   pathIsActive(path) {
     const [queryPath, queryHash] = this.destructurePath(path);
     let routerFullPath = this.getAttribute("path") ?? "/";
-    let { pathname: routerComparePath, hash: routerCompareHash } = this.#splitPath(routerFullPath);
-    [routerComparePath, routerCompareHash] = this.destructurePath(routerComparePath);
+    const [routerComparePath, routerCompareHash] = this.destructurePath(routerFullPath);
     const queryPathArray = this.#getFormattedPathArray(queryPath);
-    let linkRoute = this.#getRouteElement(queryPathArray, this.#routeMap_pathToPageOrDialog);
+    let linkRoute = queryPath == "" && routerComparePath == "" ? this.defaultRoute : this.#getRouteElement(queryPathArray, this.#routeMap_pathToPageOrDialog);
     if (linkRoute == null) {
       return false;
     }
@@ -908,6 +909,44 @@ var PathRouterElement5 = class extends HTMLElement {
       return true;
     }
     return false;
+  }
+  getRouteProperties(result = {}) {
+    if (this.currentPageRoute == null) {
+      return {};
+    }
+    const composedPath = this.getAttribute("path") ?? "/";
+    const pathArray = this.#getFormattedPathArray(composedPath);
+    const routePathArray = this.#getFormattedPathArray(this.currentPageRoute.getAttribute("path") ?? "/");
+    let preceedingKey = void 0;
+    for (let i = 0; i < routePathArray.length; i++) {
+      const routePathSlug = routePathArray[i];
+      if (routePathSlug.startsWith(":")) {
+        if (preceedingKey == void 0) {
+          let value = pathArray[0];
+          if (value.indexOf("#") > -1) {
+            value = value.split("#")[0];
+          }
+          result[this.trimCharacter(routePathSlug, ":")] = value;
+          continue;
+        }
+        for (let j = 0; j < pathArray.length - 1; j++) {
+          const pathSlug = pathArray[j];
+          if (pathSlug == preceedingKey) {
+            let value = pathArray[j + 1];
+            if (value.indexOf("#") > -1) {
+              value = value.split("#")[0];
+            }
+            result[this.trimCharacter(routePathSlug, ":")] = value;
+          }
+        }
+      }
+      preceedingKey = routePathSlug;
+    }
+    const subrouter = this.currentPageRoute.querySelector("path-router");
+    if (subrouter != null) {
+      result = subrouter.getRouteProperties(result);
+    }
+    return result;
   }
   static getUrlParameters(urlString) {
     const url = new URL(urlString);

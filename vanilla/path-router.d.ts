@@ -68,12 +68,16 @@ declare class PathRouterElement extends HTMLElement {
     #private;
     get routes(): RoutePageElement[];
     get routeDialogs(): RouteDialogComponent[];
+    /** The `<page-route>` element currently being navigated to. */
     targetPageRoute: RoutePageElement | undefined;
+    /** The `<page-route>` element that the router currently has open. */
     currentPageRoute: RoutePageElement | undefined;
+    /** The `route-dialog` element currently being navigated to. */
     targetDialogRoute: RouteDialogComponent | undefined;
+    /** The `route-dialog` element that the router currently has open. */
     currentDialogRoute: RouteDialogComponent | undefined;
+    /** The route that will be selected if no other routes match the current path. */
     defaultRoute: RoutePageElement | undefined;
-    wildcardRoute: RoutePageElement | undefined;
     get path(): string | null;
     set path(value: string);
     subpaths: string[];
@@ -95,6 +99,11 @@ declare class PathRouterElement extends HTMLElement {
         isReplacementChange: boolean;
     };
     pathIsActive(path: string): boolean;
+    getRouteProperties(result?: {
+        [key: string]: unknown;
+    }): {
+        [key: string]: unknown;
+    };
     static getUrlParameters(urlString: string): {
         [key: string]: string;
     };

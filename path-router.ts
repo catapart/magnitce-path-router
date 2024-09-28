@@ -61,9 +61,6 @@ route-page[open]
     user-select: none;
 }`);
 
-const WILDCARD_INDICATOR = '*';
-
-
 export const COMPONENT_TAG_NAME = 'path-router';
 export class PathRouterElement extends HTMLElement
 {
@@ -76,18 +73,21 @@ export class PathRouterElement extends HTMLElement
         return Array.from(this.querySelectorAll(`:scope > [is="${ROUTEDIALOG_TAG_NAME}"]`) as NodeListOf<RouteDialogComponent>, (routeDialog: RouteDialogComponent) => routeDialog) as RouteDialogComponent[];
     }
 
+    /** The `<page-route>` element currently being navigated to. */
     targetPageRoute: RoutePageElement|undefined;
+    /** The `<page-route>` element that the router currently has open. */
     currentPageRoute: RoutePageElement|undefined;
+    /** The `route-dialog` element currently being navigated to. */
     targetDialogRoute: RouteDialogComponent|undefined;
+    /** The `route-dialog` element that the router currently has open. */
     currentDialogRoute: RouteDialogComponent|undefined;
 
+    /** The route that will be selected if no other routes match the current path. */
     defaultRoute: RoutePageElement|undefined;
-    wildcardRoute: RoutePageElement|undefined;
 
+    /** The path which controls the router's navigation. */
     get path(): string|null  { return this.getAttribute("path"); }
     set path(value: string)  { this.setAttribute("path", value); }
-    subpaths: string[] = [];
-    subrouting: boolean = true;
 
     isInitialized: boolean = false;
     #initializationPromise: Promise<void>;
@@ -97,12 +97,11 @@ export class PathRouterElement extends HTMLElement
     #routeMap_pathToDialog: Map<string, RouteDialogComponent|RoutePageElement> = new Map();
     #routeMap_pathToPageOrDialog: Map<string, RoutePageElement|RouteDialogComponent> = new Map();
 
+    // exposed for route-page and route-dialog elements, not the api;
     resolveNavigation?: () => void;
 
     constructor()
     {
-        //todo:
-        // add inline documentation
         super();
 
         this.addEventListener(PathRouterEvent.PathChange, (event) =>
@@ -131,10 +130,6 @@ export class PathRouterElement extends HTMLElement
                     if(this.defaultRoute == null) { this.defaultRoute = route; }
                     const path = route.getAttribute('path');
                     const isDefault = route.hasAttribute('default');
-                    if(path != null && path.trim() == "*")
-                    {
-                        this.wildcardRoute = route;
-                    }
                     if(isDefault == true)
                     {
                         this.defaultRoute = route;
@@ -206,14 +201,6 @@ export class PathRouterElement extends HTMLElement
             this.resolveNavigation = resolve;
             this.setAttribute('path', path);
         });
-        // console.log(this.id, pathName, hash);
-        // await this.#update(path);
-        // const newPath = `${pathName}${(hash.trim() != '') ? '#':''}${hash}`;
-        // this.#setPath(newPath);        
-        // this.targetRoute = undefined;
-        // this.targetRouteDialog = undefined;
-
-        // return this.navigationPromise;
     }
     async subnavigate(path: string)
     {
@@ -302,7 +289,7 @@ export class PathRouterElement extends HTMLElement
 
         this.removeAttribute('subnavigating');
 
-        this.dispatchEvent(new CustomEvent(PathRouterEvent.PathChange, { detail: { path, supaths: this.subpaths }, bubbles: true, cancelable: true }));
+        this.dispatchEvent(new CustomEvent(PathRouterEvent.PathChange, { detail: { path }, bubbles: true, cancelable: true }));
         
         return [ openedPage, openedDialog ];
     }
@@ -403,7 +390,7 @@ export class PathRouterElement extends HTMLElement
             }
 
             const isParameter = slug.startsWith(':');
-            if(isParameter == false && slug != WILDCARD_INDICATOR)
+            if(isParameter == false)
             {
                 if(slug != pathArray[i])
                 {
@@ -421,13 +408,9 @@ export class PathRouterElement extends HTMLElement
         this.targetPageRoute = route;
 
         // handle the case where no route has matched the path
-        if(this.targetPageRoute == null && this.wildcardRoute != null)
-        {
-            this.targetPageRoute = this.wildcardRoute;
-        }
         this.targetPageRoute = this.targetPageRoute || this.defaultRoute;
 
-        // if no route matches, and no default/wildcard routes are
+        // if no route matches, and no default routes are
         // available the navigation will fail
         if(this.targetPageRoute == null)
         {
@@ -511,6 +494,7 @@ export class PathRouterElement extends HTMLElement
         return value.replace(regex, '');
     }
 
+    // exposed for route-page and route-dialog elements, not the api;
     composeRoutePath()
     {
         const path = this.getAttribute('path') ?? "";
@@ -661,6 +645,13 @@ export class PathRouterElement extends HTMLElement
     
 
     // queries and tests
+
+    /**
+     * Compare two `URL` objects to determine whether they represet different locations and, if so, whether or not the new location is marked as a replacement change.
+     * @param currentLocation a url object representing the current location
+     * @param updatedLocation a url object representing the location to compare against
+     * @returns `{ hasChanged, isReplacementChange }`: Whether there was a change, and whether history management should add an entry, or replace the last entry.
+     */
     compareLocations(currentLocation: URL, updatedLocation: URL)
     {
         let hasChanged = false;
@@ -685,6 +676,11 @@ export class PathRouterElement extends HTMLElement
         return { hasChanged, isReplacementChange };
     }
 
+    /**
+     * Determine if a path represents the currently opened route.
+     * @param path the path to determine the active state of
+     * @returns `true` if the path matches the current route, `false` if the path does not match.
+     */
     pathIsActive(path: string)
     {
 
@@ -733,6 +729,11 @@ export class PathRouterElement extends HTMLElement
         return false;
     }
 
+    /**
+     * Get a key/value pair object with each key being a route-property name (ex: `:id`), and each value being the associated value from the current path value (ex: `123`).
+     * @param result A key/value pair object with each route property in the current path. This parameter allows recursion for subrouters and is not necessary for most uses.
+     * @returns A key/value pair object with each route property in the current path.
+     */
     getRouteProperties(result: { [key: string]: unknown } = {})
     {
         if(this.currentPageRoute == null) { return {}; }
@@ -841,7 +842,6 @@ export class PathRouterElement extends HTMLElement
         {
             if(newValue == "false")
             {
-                this.subrouting = false;
                 for(let i = 0; i < this.routes.length; i++)
                 {
                     this.routes[i].setAttribute(attributeName, 'false');
@@ -849,7 +849,6 @@ export class PathRouterElement extends HTMLElement
             }
             else
             {
-                this.subrouting = true;
                 for(let i = 0; i < this.routes.length; i++)
                 {
                     this.routes[i].removeAttribute('subrouting');

@@ -416,8 +416,7 @@ If the `path` attribute is set to a string that cannot be matched to any `<route
 
 The "Default" route is determine by the following cascade:
 - The last `<route-page>` element that has the `default` attribute will be set as the "Default" route. It is *expected* that there is only one default route, but multiples will just use the last `<route-page>` element.
-- If no `<route-page>` element has the `default` attribute, the last route that has its `path` attribute set to the "wildcard" value of asterisk (`*`) will be used as the default route.
-- If no `<route-page>` element has the `default` attribute and no `<route-page>` element's `path` attribute is set to "wildcard", the first `<route-page>` child in the `<path-router>` element will be used as the default route.
+- If no `<route-page>` element has the `default` attribute, the first `<route-page>` child in the `<path-router>` element will be used as the default route.
 
 ### Subrouting
 In many cases, routing can benefit from "subroutes" which is just a label to describe putting a `<path-router>` element inside of a `<route-page>` element and using a single path to update both path routers. To help clarify, see this example:
