@@ -78,10 +78,9 @@ declare class PathRouterElement extends HTMLElement {
     currentDialogRoute: RouteDialogComponent | undefined;
     /** The route that will be selected if no other routes match the current path. */
     defaultRoute: RoutePageElement | undefined;
+    /** The path which controls the router's navigation. */
     get path(): string | null;
     set path(value: string);
-    subpaths: string[];
-    subrouting: boolean;
     isInitialized: boolean;
     resolveNavigation?: () => void;
     constructor();
@@ -94,11 +93,27 @@ declare class PathRouterElement extends HTMLElement {
     destructurePath(path: string): string[];
     trimCharacter(value: string, character: string): string;
     composeRoutePath(): string;
+    /**
+     * Compare two `URL` objects to determine whether they represet different locations and, if so, whether or not the new location is marked as a replacement change.
+     * @param currentLocation a url object representing the current location
+     * @param updatedLocation a url object representing the location to compare against
+     * @returns `{ hasChanged, isReplacementChange }`: Whether there was a change, and whether history management should add an entry, or replace the last entry.
+     */
     compareLocations(currentLocation: URL, updatedLocation: URL): {
         hasChanged: boolean;
         isReplacementChange: boolean;
     };
+    /**
+     * Determine if a path represents the currently opened route.
+     * @param path the path to determine the active state of
+     * @returns `true` if the path matches the current route, `false` if the path does not match.
+     */
     pathIsActive(path: string): boolean;
+    /**
+     * Get a key/value pair object with each key being a route-property name (ex: `:id`), and each value being the associated value from the current path value (ex: `123`).
+     * @param result A key/value pair object with each route property in the current path. This parameter allows recursion for subrouters and is not necessary for most uses.
+     * @returns A key/value pair object with each route property in the current path.
+     */
     getRouteProperties(result?: {
         [key: string]: unknown;
     }): {

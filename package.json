@@ -13,9 +13,9 @@
     "build": "tsup path-router.ts --format cjs,esm --dts --publicDir --clean",
     "build-vanilla": "tsup path-router.ts --format esm --dts --publicDir --clean --outDir ./vanilla",
     "minify": "tsup path-router.ts --format esm --config ./tsup.config.min.ts --outDir ./vanilla --minify --publicDir",
-    "lint": "tsc",
+    "lint": "tsup path-router.ts --format esm",
     "package": "npm run build && npm run build-vanilla && npm run minify",
-    "release": "npm run build && npm run build-vanilla && npm run minify && changeset publish"
+    "release": "npm run package && changeset publish"
   },
   "keywords": [
     "custom",

@@ -462,20 +462,20 @@ var PathRouterElement5 = class extends HTMLElement {
   currentDialogRoute;
   /** The route that will be selected if no other routes match the current path. */
   defaultRoute;
+  /** The path which controls the router's navigation. */
   get path() {
     return this.getAttribute("path");
   }
   set path(value) {
     this.setAttribute("path", value);
   }
-  subpaths = [];
-  subrouting = true;
   isInitialized = false;
   #initializationPromise;
   #toUpdate = [];
   #routeMap_pathToPage = /* @__PURE__ */ new Map();
   #routeMap_pathToDialog = /* @__PURE__ */ new Map();
   #routeMap_pathToPageOrDialog = /* @__PURE__ */ new Map();
+  // exposed for route-page and route-dialog elements, not the api;
   resolveNavigation;
   constructor() {
     super();
@@ -595,7 +595,7 @@ var PathRouterElement5 = class extends HTMLElement {
     }
     this.#updateComposedPath();
     this.removeAttribute("subnavigating");
-    this.dispatchEvent(new CustomEvent("pathchange" /* PathChange */, { detail: { path, supaths: this.subpaths }, bubbles: true, cancelable: true }));
+    this.dispatchEvent(new CustomEvent("pathchange" /* PathChange */, { detail: { path }, bubbles: true, cancelable: true }));
     return [openedPage, openedDialog];
   }
   async #updateComposedPath() {
@@ -747,6 +747,7 @@ var PathRouterElement5 = class extends HTMLElement {
     const regex = new RegExp(`^\\${character}|${character}$`, "gm");
     return value.replace(regex, "");
   }
+  // exposed for route-page and route-dialog elements, not the api;
   composeRoutePath() {
     const path = this.getAttribute("path") ?? "";
     let [routerPagePath, routerDialogPath] = this.destructurePath(path);
@@ -863,6 +864,12 @@ var PathRouterElement5 = class extends HTMLElement {
     return path;
   }
   // queries and tests
+  /**
+   * Compare two `URL` objects to determine whether they represet different locations and, if so, whether or not the new location is marked as a replacement change.
+   * @param currentLocation a url object representing the current location
+   * @param updatedLocation a url object representing the location to compare against
+   * @returns `{ hasChanged, isReplacementChange }`: Whether there was a change, and whether history management should add an entry, or replace the last entry.
+   */
   compareLocations(currentLocation, updatedLocation) {
     let hasChanged = false;
     let isReplacementChange = false;
@@ -876,6 +883,11 @@ var PathRouterElement5 = class extends HTMLElement {
     }
     return { hasChanged, isReplacementChange };
   }
+  /**
+   * Determine if a path represents the currently opened route.
+   * @param path the path to determine the active state of
+   * @returns `true` if the path matches the current route, `false` if the path does not match.
+   */
   pathIsActive(path) {
     const [queryPath, queryHash] = this.destructurePath(path);
     let routerFullPath = this.getAttribute("path") ?? "/";
@@ -910,6 +922,11 @@ var PathRouterElement5 = class extends HTMLElement {
     }
     return false;
   }
+  /**
+   * Get a key/value pair object with each key being a route-property name (ex: `:id`), and each value being the associated value from the current path value (ex: `123`).
+   * @param result A key/value pair object with each route property in the current path. This parameter allows recursion for subrouters and is not necessary for most uses.
+   * @returns A key/value pair object with each route property in the current path.
+   */
   getRouteProperties(result = {}) {
     if (this.currentPageRoute == null) {
       return {};
@@ -982,12 +999,10 @@ var PathRouterElement5 = class extends HTMLElement {
       }
     } else if (attributeName == "subrouting") {
       if (newValue == "false") {
-        this.subrouting = false;
         for (let i = 0; i < this.routes.length; i++) {
           this.routes[i].setAttribute(attributeName, "false");
         }
       } else {
-        this.subrouting = true;
         for (let i = 0; i < this.routes.length; i++) {
           this.routes[i].removeAttribute("subrouting");
         }
