@@ -102,12 +102,7 @@ export class PathRouterElement extends HTMLElement
     constructor()
     {
         //todo:
-        // add history to browser mockup
-        // remove nested css from browser mockup
-        // update browser mockup on npm
-        // update browser mockup reference
-        // adjust history management to use new browser mockup
-
+        // add inline documentation
         super();
 
         this.addEventListener(PathRouterEvent.PathChange, (event) =>

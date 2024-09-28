@@ -585,7 +585,7 @@
                 </browser-mockup>
             </div>
             
-            <script type="module" src="./browser-mockup.js"></script><!-- Browser Mockup library from here: https://github.com/catapart/magnitce-browser-mockup -->
+            <script type="module" src="./browser-mockup.min.js"></script><!-- Browser Mockup library from here: https://github.com/catapart/magnitce-browser-mockup -->
             <script type="module">
                 import { PathRouterElement } from '../dist/path-router.js';
                 const browserMockup = document.body.querySelector('browser-mockup');
@@ -662,8 +662,7 @@
                     }
 
                     return path;
-                }
-                
+                }                
 
                 // equivalent to `window.addEventListener('popstate', [...])`;
                 browserMockup.addEventListener('popstate', async (event) =>
@@ -676,61 +675,6 @@
                     await pageRouter.navigate(route);
                     historyIsUpdating = false;
                 });
-            </script>
-            <script type="module">
-                // Setup code for mimicing browser history in mockup;
-                // unreleated to path-router component
-
-                const mockup = document.body.querySelector('browser-mockup');
-                const backButton = mockup.shadowRoot.querySelector('[part="button-back"]');
-                backButton.addEventListener('click', () =>
-                {
-                    mockup.history.back();
-                });
-                const forwardButton = mockup.shadowRoot.querySelector('[part="button-forward"]');
-                forwardButton.addEventListener('click', () =>
-                {
-                    mockup.history.forward();
-                });
-
-                class History 
-                {
-                    items = [mockup.getAttribute('url')];
-                    index = 0;
-
-                    add(value) 
-                    {
-                        this.index++;
-                        this.items[this.index] = value;
-                        mockup.setAttribute('url', this.items[this.index]);
-                        for(let i = this.items.length-1; i > this.index; i--)
-                        {
-                            this.items.splice(i, 1);
-                        }
-                    }
-                    replace(value) 
-                    {
-                        this.items[this.index] = value;
-                        mockup.setAttribute('url', this.items[this.index]);
-                    }
-                    back()
-                    {
-                        if(this.index == 0) { return; }
-                        this.index = Math.max(this.index - 1, 0);
-                        mockup.setAttribute('url', this.items[this.index]);
-                        mockup.dispatchEvent(new Event('popstate'));
-                    }
-                    forward() 
-                    {
-                        if(this.index == this.items.length-1) { return; }
-
-                        this.index = Math.min(this.index + 1, this.items.length-1);
-                        mockup.setAttribute('url', this.items[this.index]);
-                        mockup.dispatchEvent(new Event('popstate'));
-                    }
-                }
-                mockup.history = new History();
-
             </script>
         </article>
         <article class="themes">
