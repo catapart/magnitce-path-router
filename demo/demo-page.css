@@ -1,0 +1,220 @@
+html
+{
+    color-scheme: light dark;
+    height: 100%;
+}
+
+html
+,body
+{
+    margin: 0;
+    padding: 0;
+}
+
+body
+{
+    display: flex;
+    min-height: 100dvh;
+    font-family: sans-serif;
+}
+
+:is(header,h1,h2,h3,h4,h5,h6)
+{
+    color: rgb(121, 123, 216);
+}
+
+main
+{
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 1em;
+    align-items: center;
+}
+main > header
+{
+    padding: 1em 0;
+    font-size: 2em;
+}
+
+main :is(p, dl)
+{
+    max-width: 80ch;
+}
+
+main article
+{
+    padding: 2em;
+    border-radius: 10px;
+    border: solid 1px #999;
+    background-color: #f3f3f3;
+    color: buttontext;
+}
+@media (prefers-color-scheme: dark) 
+{
+    main article
+    {
+        background-color: #222;
+        border-color: #333;
+    }
+}
+
+main code
+{
+    background-color: field;
+    border: solid 1px buttonface;
+    color: #bb5d26;
+    padding: 2px 5px;
+    display: inline-block;
+    border-radius: 2px;
+}
+
+header
+{
+    font-size: 1.3em;
+}
+
+article menu
+{
+    padding: 0;
+    display: flex;
+    gap: 1em;
+}
+
+article .example
+{
+    margin-block: 1em;
+}
+
+[is="route-link"]:hover
+{
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+[is="route-link"][aria-current="page"]
+{
+    text-decoration: underline;
+    color: highlight;
+}
+
+[is="route-button"][aria-current="page"]
+{
+    color: highlight;
+    outline:solid 3px highlight;
+}
+
+path-router
+{
+    flex: 1;
+
+    background-color: field;
+    color: fieldtext;
+    padding: 2em;
+    border-radius: 3px;
+}
+
+path-router path-router
+{
+    background-color: canvas;
+    color: canvastext;
+    border: solid 1px buttonborder;
+}
+
+header:has(#invoke-get-properties)
+{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+browser-mockup
+{
+    width: 640px;
+}
+browser-mockup path-router path-router
+{
+    border: none;
+}
+browser-mockup route-page[path="/help/:subpage"]
+{
+    display: grid !important;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto 1fr;
+}
+browser-mockup route-page[path="/help/:subpage"] > h2
+{
+    grid-column: span 2;
+}
+
+header:has(small)
+{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+header > small
+{
+    font-size: .6em;
+}
+
+.log
+{
+    background: field;
+    color: fieldtext;
+    border: solid 1px #616161;
+    border-radius: 2px;
+    padding: 1em;
+    height: 200px;
+    overflow: auto;
+    margin: 1em;
+}
+
+
+#transitions path-route[data-entering]
+{
+    animation: fade-in 1s ease forwards;
+}
+
+#transitions path-route path-route[data-entering]
+{
+    animation: slide-in 1s ease forwards;
+}
+
+#transitions dialog[open]
+{
+    opacity: 1;
+    transition: opacity 2s ease;
+}
+@starting-style
+{
+    #transitions dialog[path]
+    {
+        opacity: 0;
+    }
+}
+
+@keyframes fade-in
+{
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+@keyframes slide-in
+{
+    0% { translate: 50px 0; }
+    100% { translate: 0 0; }
+}
+
+browser-mockup path-router
+,.themes path-router
+{
+    margin: 0;
+    padding: 0;
+}
+
+.themes menu
+{
+    margin: 0;
+    padding: 0;
+}

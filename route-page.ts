@@ -1,4 +1,4 @@
-import { PathRouterComponent, COMPONENT_TAG_NAME as ROUTER_TAG_NAME } from "./path-router";
+import { PathRouterElement, COMPONENT_TAG_NAME as ROUTER_TAG_NAME } from "./path-router";
 
 export enum PathRouteEvent
 {
@@ -11,10 +11,10 @@ export enum PathRouteEvent
 export type RouteProperties = { [key: string]: string };
 
 
-export const COMPONENT_TAG_NAME = 'path-route';
-export class PathRouteComponent extends HTMLElement
+export const COMPONENT_TAG_NAME = 'route-page';
+export class RoutePageElement extends HTMLElement
 {
-    get router(): PathRouterComponent | null
+    get router(): PathRouterElement | null
     {
         return this.closest(ROUTER_TAG_NAME);
     }
@@ -27,12 +27,13 @@ export class PathRouteComponent extends HTMLElement
     currentProcess: Promise<void>;
     canBeOpened: () => Promise<boolean>;
     canBeClosed: () => Promise<boolean>;
+    subrouting: boolean = true;
+
+    currentProperties: RouteProperties|undefined;
 
     constructor()
     {
         super();
-        this.attachShadow({ mode: "open" });
-        this.shadowRoot!.innerHTML = `<slot></slot>`;
         
         this.currentProcess = Promise.resolve();
         this.canBeOpened = async () => true;
@@ -52,13 +53,23 @@ export class PathRouteComponent extends HTMLElement
     }
     async #open(path: string)
     {
+        this.dispatchEvent(new CustomEvent(PathRouteEvent.BeforeOpen, { detail: { path, properties: this.currentProperties }}));
+        await Promise.allSettled(this.blockingBeforeOpen.map(value => value()));
+
         this.dataset.entering = '';
 
-        const properties = this.getProperties(path);
-  
-        this.dispatchEvent(new CustomEvent(PathRouteEvent.BeforeOpen, { detail: { path, properties }}));
-        await Promise.allSettled(this.blockingBeforeOpen.map(value => value()));
-  
+        this.currentProperties = this.getProperties(path);
+
+        const allowSubroute = (this.getAttribute('subrouting') ?? this.closest('path-router[subrouting]')?.getAttribute('subrouting')) != "false";
+        if(allowSubroute == true)
+        {
+            const subrouter = this.querySelector<PathRouterElement>(':scope > path-router');
+            if(subrouter != null)
+            {
+                const subroute = this.extractSubroute(path);
+                await subrouter.subnavigate(subroute);
+            }
+        }
   
         await Promise.allSettled(this.getAnimations({ subtree: true }).map((animation) => animation.finished));
   
@@ -86,18 +97,18 @@ export class PathRouteComponent extends HTMLElement
     }
     async #close()
     {
-        this.removeAttribute('open');
-        this.dataset.exiting = '';
-  
         this.dispatchEvent(new Event(PathRouteEvent.BeforeClose));
         await Promise.allSettled(this.blockingBeforeClose.map(value => value()));
-  
+
+        this.dataset.exiting = '';
+        this.removeAttribute('open');
   
         await Promise.all(this.getAnimations({ subtree: true }).map((animation) => animation.finished));
   
         delete this.dataset.exiting;
         this.removeAttribute('aria-current');
-  
+        this.currentProperties = undefined;
+
         this.dispatchEvent(new Event(PathRouteEvent.AfterClose));
         await Promise.allSettled(this.blockingAfterClose.map(value => value()));
     }
@@ -129,6 +140,19 @@ export class PathRouteComponent extends HTMLElement
         }
 
         return properties;
+    }
+    extractSubroute(targetPath: string)
+    {
+        const routePathAttribute = this.getAttribute('path') ?? "";
+        const routePath = (routePathAttribute.startsWith('/')) ? routePathAttribute.substring(1) : routePathAttribute;
+        const routeArray = routePath!.split('/');
+        const path = (targetPath.startsWith('/')) ? targetPath.substring(1) : targetPath;
+        const pathArray = path.split('/');
+
+        const lastNonParameterIndex = routeArray.findLastIndex(item => !item.startsWith(':')) + 1;
+
+        const subPathArray = pathArray.slice(lastNonParameterIndex);
+        return subPathArray.join('/');
     }
 
     applyEventListener<K extends (keyof HTMLElementEventMap|'beforeopen'|'afteropen'|'beforeclose'|'afterclose')>(type: K, listener: (this: HTMLElement, ev: Event|CustomEvent) => void|Promise<void>, options?: boolean | AddEventListenerOptions | undefined)
@@ -178,5 +202,5 @@ export class PathRouteComponent extends HTMLElement
 }
 if(customElements.get(COMPONENT_TAG_NAME) == null)
 {
-    customElements.define(COMPONENT_TAG_NAME, PathRouteComponent);
+    customElements.define(COMPONENT_TAG_NAME, RoutePageElement);
 }
