@@ -8,6 +8,8 @@ import { RoutePageElement, COMPONENT_TAG_NAME as ROUTE_TAG_NAME, RouteProperties
 import { RouteLinkElement } from './route-link';
 import { RouteButtonElement } from './route-button';
 
+export { RoutePageElement, RouteDialogElement, RouteLinkElement, RouteButtonElement }
+
 export enum PathRouterEvent
 {
     /** Fires when a route is opened or closed.  */
@@ -873,5 +875,3 @@ class RouteComposition
     properties: RouteProperties = {};
     isDialogRoute: boolean = true;
 }
-
-export { RoutePageElement, RouteDialogElement, RouteLinkElement, RouteButtonElement }
