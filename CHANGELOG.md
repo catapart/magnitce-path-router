@@ -1,5 +1,11 @@
 # @magnit-ce/path-router
 
+## 0.1.3
+
+### Patch Changes
+
+- e135c3d: updated distribution code
+
 ## 0.1.2
 
 ### Patch Changes
