@@ -143,7 +143,7 @@ if (customElements.get(COMPONENT_TAG_NAME2) == null) {
 
 // route-dialog.ts
 var COMPONENT_TAG_NAME3 = "route-dialog";
-var RouteDialogComponent = class extends HTMLDialogElement {
+var RouteDialogElement = class extends HTMLDialogElement {
   get router() {
     return this.closest(COMPONENT_TAG_NAME);
   }
@@ -273,12 +273,12 @@ var RouteDialogComponent = class extends HTMLDialogElement {
   }
 };
 if (customElements.get(COMPONENT_TAG_NAME3) == null) {
-  customElements.define(COMPONENT_TAG_NAME3, RouteDialogComponent, { extends: "dialog" });
+  customElements.define(COMPONENT_TAG_NAME3, RouteDialogElement, { extends: "dialog" });
 }
 
 // route-link.ts
 var COMPONENT_TAG_NAME4 = "route-link";
-var RouteLinkComponent = class extends HTMLAnchorElement {
+var RouteLinkElement = class extends HTMLAnchorElement {
   constructor() {
     super();
   }
@@ -337,12 +337,12 @@ var RouteLinkComponent = class extends HTMLAnchorElement {
   }
 };
 if (customElements.get(COMPONENT_TAG_NAME4) == null) {
-  customElements.define(COMPONENT_TAG_NAME4, RouteLinkComponent, { extends: "a" });
+  customElements.define(COMPONENT_TAG_NAME4, RouteLinkElement, { extends: "a" });
 }
 
 // route-button.ts
 var COMPONENT_TAG_NAME5 = "route-button";
-var RouteButtonComponent = class extends HTMLButtonElement {
+var RouteButtonElement = class extends HTMLButtonElement {
   constructor() {
     super();
   }
@@ -399,7 +399,7 @@ var RouteButtonComponent = class extends HTMLButtonElement {
   }
 };
 if (customElements.get(COMPONENT_TAG_NAME5) == null) {
-  customElements.define(COMPONENT_TAG_NAME5, RouteButtonComponent, { extends: "button" });
+  customElements.define(COMPONENT_TAG_NAME5, RouteButtonElement, { extends: "button" });
 }
 
 // path-router.ts
@@ -1024,5 +1024,9 @@ var RouteComposition = class {
 export {
   COMPONENT_TAG_NAME,
   PathRouterElement5 as PathRouterElement,
-  PathRouterEvent
+  PathRouterEvent,
+  RouteButtonElement,
+  RouteDialogElement,
+  RouteLinkElement,
+  RoutePageElement
 };

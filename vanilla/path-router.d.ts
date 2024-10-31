@@ -29,7 +29,7 @@ declare class RoutePageElement extends HTMLElement {
     applyBlockingEventListener(eventName: PathRouteEvent, handler: () => void | Promise<void>): void;
 }
 
-declare class RouteDialogComponent extends HTMLDialogElement {
+declare class RouteDialogElement extends HTMLDialogElement {
     #private;
     get router(): PathRouterElement | null;
     private blockingBeforeOpen;
@@ -47,6 +47,34 @@ declare class RouteDialogComponent extends HTMLDialogElement {
     extractSubroute(targetPath: string): string;
     applyEventListener<K extends (keyof HTMLElementEventMap | 'beforeopen' | 'afteropen' | 'beforeclose' | 'afterclose')>(type: K, listener: (this: HTMLElement, ev: Event | CustomEvent) => void | Promise<void>, options?: boolean | AddEventListenerOptions | undefined): void;
     addBlockingEventListener(eventName: PathRouteEvent, handler: () => void | Promise<void>): void;
+}
+
+declare class RouteLinkElement extends HTMLAnchorElement {
+    #private;
+    constructor();
+    connectedCallback(): void;
+    onClick(target: PathRouterElement): void;
+    /**
+     * An override-able string transformation function for preparing the static path attribute value.
+     * @param staticPath the path that is set in the route-link's html
+     * @returns a new path that has been transformed to the exact path expected for navigation
+     * @description Useful for replacing variables.
+     */
+    onPreparePath(staticPath: string): string;
+}
+
+declare class RouteButtonElement extends HTMLButtonElement {
+    #private;
+    constructor();
+    connectedCallback(): void;
+    onClick(target: PathRouterElement): void;
+    /**
+     * An override-able string transformation function for preparing the static path attribute value.
+     * @param staticPath the path that is set in the route-link's html
+     * @returns a new path that has been transformed to the exact path expected for navigation
+     * @description Useful for replacing variables.
+     */
+    onPreparePath(staticPath: string): string;
 }
 
 declare enum PathRouterEvent {
@@ -67,15 +95,15 @@ declare const COMPONENT_TAG_NAME = "path-router";
 declare class PathRouterElement extends HTMLElement {
     #private;
     get routes(): RoutePageElement[];
-    get routeDialogs(): RouteDialogComponent[];
+    get routeDialogs(): RouteDialogElement[];
     /** The `<page-route>` element currently being navigated to. */
     targetPageRoute: RoutePageElement | undefined;
     /** The `<page-route>` element that the router currently has open. */
     currentPageRoute: RoutePageElement | undefined;
     /** The `route-dialog` element currently being navigated to. */
-    targetDialogRoute: RouteDialogComponent | undefined;
+    targetDialogRoute: RouteDialogElement | undefined;
     /** The `route-dialog` element that the router currently has open. */
-    currentDialogRoute: RouteDialogComponent | undefined;
+    currentDialogRoute: RouteDialogElement | undefined;
     /** The route that will be selected if no other routes match the current path. */
     defaultRoute: RoutePageElement | undefined;
     /** The path which controls the router's navigation. */
@@ -127,4 +155,4 @@ declare class PathRouterElement extends HTMLElement {
     attributeChangedCallback(attributeName: string, oldValue: string, newValue: string): void;
 }
 
-export { COMPONENT_TAG_NAME, type PathRouterAttributes, PathRouterElement, PathRouterEvent };
+export { COMPONENT_TAG_NAME, type PathRouterAttributes, PathRouterElement, PathRouterEvent, RouteButtonElement, RouteDialogElement, RouteLinkElement, RoutePageElement };
