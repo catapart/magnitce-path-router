@@ -3,8 +3,10 @@ import './route-dialog';
 import './route-link';
 import './route-button';
 
-import { RouteDialogComponent, COMPONENT_TAG_NAME as ROUTEDIALOG_TAG_NAME } from "./route-dialog";
+import { RouteDialogElement, COMPONENT_TAG_NAME as ROUTEDIALOG_TAG_NAME } from "./route-dialog";
 import { RoutePageElement, COMPONENT_TAG_NAME as ROUTE_TAG_NAME, RouteProperties } from "./route-page";
+import { RouteLinkElement } from './route-link';
+import { RouteButtonElement } from './route-button';
 
 export enum PathRouterEvent
 {
@@ -70,7 +72,7 @@ export class PathRouterElement extends HTMLElement
     }
     get routeDialogs()
     {
-        return Array.from(this.querySelectorAll(`:scope > [is="${ROUTEDIALOG_TAG_NAME}"]`) as NodeListOf<RouteDialogComponent>, (routeDialog: RouteDialogComponent) => routeDialog) as RouteDialogComponent[];
+        return Array.from(this.querySelectorAll(`:scope > [is="${ROUTEDIALOG_TAG_NAME}"]`) as NodeListOf<RouteDialogElement>, (routeDialog: RouteDialogElement) => routeDialog) as RouteDialogElement[];
     }
 
     /** The `<page-route>` element currently being navigated to. */
@@ -78,9 +80,9 @@ export class PathRouterElement extends HTMLElement
     /** The `<page-route>` element that the router currently has open. */
     currentPageRoute: RoutePageElement|undefined;
     /** The `route-dialog` element currently being navigated to. */
-    targetDialogRoute: RouteDialogComponent|undefined;
+    targetDialogRoute: RouteDialogElement|undefined;
     /** The `route-dialog` element that the router currently has open. */
-    currentDialogRoute: RouteDialogComponent|undefined;
+    currentDialogRoute: RouteDialogElement|undefined;
 
     /** The route that will be selected if no other routes match the current path. */
     defaultRoute: RoutePageElement|undefined;
@@ -93,9 +95,9 @@ export class PathRouterElement extends HTMLElement
     #initializationPromise: Promise<void>;
     #toUpdate: {newValue: string, oldValue: string}[] = [];
 
-    #routeMap_pathToPage: Map<string, RoutePageElement|RouteDialogComponent> = new Map();
-    #routeMap_pathToDialog: Map<string, RouteDialogComponent|RoutePageElement> = new Map();
-    #routeMap_pathToPageOrDialog: Map<string, RoutePageElement|RouteDialogComponent> = new Map();
+    #routeMap_pathToPage: Map<string, RoutePageElement|RouteDialogElement> = new Map();
+    #routeMap_pathToDialog: Map<string, RouteDialogElement|RoutePageElement> = new Map();
+    #routeMap_pathToPageOrDialog: Map<string, RoutePageElement|RouteDialogElement> = new Map();
 
     // exposed for route-page and route-dialog elements, not the api;
     resolveNavigation?: () => void;
@@ -163,10 +165,10 @@ export class PathRouterElement extends HTMLElement
                 
 
                 this.#routeMap_pathToPage = new Map(this.routes
-                .map(element => [element.getAttribute('path') ?? "", element] as [string, RoutePageElement|RouteDialogComponent]));
+                .map(element => [element.getAttribute('path') ?? "", element] as [string, RoutePageElement|RouteDialogElement]));
                 
                 this.#routeMap_pathToDialog = new Map(this.routeDialogs
-                .map(element => [element.getAttribute('path') ?? "", element] as [string, RouteDialogComponent|RoutePageElement]));
+                .map(element => [element.getAttribute('path') ?? "", element] as [string, RouteDialogElement|RoutePageElement]));
                 
                 this.#routeMap_pathToPageOrDialog = new Map([...this.#routeMap_pathToPage, ...this.#routeMap_pathToDialog]);
 
@@ -317,23 +319,23 @@ export class PathRouterElement extends HTMLElement
 
         let foundPage: RoutePageElement|undefined = this.#getRouteElement<RoutePageElement>(pagePathArray, this.#routeMap_pathToPage);
 
-        let foundDialog: RouteDialogComponent|undefined = undefined;
+        let foundDialog: RouteDialogElement|undefined = undefined;
         if(dialogPath != "")
         {
             const dialogPathArray = this.#getFormattedPathArray(dialogPath);
-            foundDialog = this.#getRouteElement<RouteDialogComponent>(dialogPathArray, this.#routeMap_pathToDialog);
+            foundDialog = this.#getRouteElement<RouteDialogElement>(dialogPathArray, this.#routeMap_pathToDialog);
         }
 
-        return [ foundPage, foundDialog ] as [RoutePageElement, RouteDialogComponent];
+        return [ foundPage, foundDialog ] as [RoutePageElement, RouteDialogElement];
     }
     #getFormattedPathArray(path: string)
     {
         path = this.trimCharacter(path, '/');
         return path.split('/');
     }
-    #getRouteElement<T extends RoutePageElement|RouteDialogComponent>(pagePathArray: string[], routeMap: Map<string, RoutePageElement|RouteDialogComponent>)
+    #getRouteElement<T extends RoutePageElement|RouteDialogElement>(pagePathArray: string[], routeMap: Map<string, RoutePageElement|RouteDialogElement>)
     {
-        let foundRoute: RoutePageElement|RouteDialogComponent|undefined = undefined;
+        let foundRoute: RoutePageElement|RouteDialogElement|undefined = undefined;
 
         for(let [routePath, element] of routeMap)
         {
@@ -425,7 +427,7 @@ export class PathRouterElement extends HTMLElement
         }
         return opened;
     }
-    async #openRouteDialog(route: RouteDialogComponent, path: string)
+    async #openRouteDialog(route: RouteDialogElement, path: string)
     {
         this.targetDialogRoute = route;
 
@@ -549,7 +551,7 @@ export class PathRouterElement extends HTMLElement
         }
         return composition;
     }
-    #getCurrentDialogRouteComposition(route: RouteDialogComponent|null|undefined, composition: RouteComposition = new RouteComposition())
+    #getCurrentDialogRouteComposition(route: RouteDialogElement|null|undefined, composition: RouteComposition = new RouteComposition())
     {
         if(route != null)
         {
@@ -871,3 +873,5 @@ class RouteComposition
     properties: RouteProperties = {};
     isDialogRoute: boolean = true;
 }
+
+export { RoutePageElement, RouteDialogElement, RouteLinkElement, RouteButtonElement }

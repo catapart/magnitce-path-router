@@ -2,7 +2,7 @@ import { RouteProperties, PathRouteEvent } from "./route-page";
 import { PathRouterElement, COMPONENT_TAG_NAME as ROUTER_TAG_NAME } from "./path-router";
 
 export const COMPONENT_TAG_NAME = 'route-dialog';
-export class RouteDialogComponent extends HTMLDialogElement
+export class RouteDialogElement extends HTMLDialogElement
 {
     get router(): PathRouterElement | null
     {
@@ -181,5 +181,5 @@ export class RouteDialogComponent extends HTMLDialogElement
 }
 if(customElements.get(COMPONENT_TAG_NAME) == null)
 {
-    customElements.define(COMPONENT_TAG_NAME, RouteDialogComponent, { extends: 'dialog' });
+    customElements.define(COMPONENT_TAG_NAME, RouteDialogElement, { extends: 'dialog' });
 }
