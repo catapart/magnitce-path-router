@@ -1,7 +1,7 @@
 import { PathRouterElement, PathRouterEvent } from "./path-router";
 
 export const COMPONENT_TAG_NAME = 'route-link';
-export class RouteLinkComponent extends HTMLAnchorElement
+export class RouteLinkElement extends HTMLAnchorElement
 {
     constructor()
     {
@@ -78,5 +78,5 @@ export class RouteLinkComponent extends HTMLAnchorElement
 }
 if(customElements.get(COMPONENT_TAG_NAME) == null)
 {
-    customElements.define(COMPONENT_TAG_NAME, RouteLinkComponent, { extends: 'a' });
+    customElements.define(COMPONENT_TAG_NAME, RouteLinkElement, { extends: 'a' });
 }

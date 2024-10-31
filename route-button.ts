@@ -1,7 +1,7 @@
 import { PathRouterElement, PathRouterEvent } from "./path-router";
 
 export const COMPONENT_TAG_NAME = 'route-button';
-export class RouteButtonComponent extends HTMLButtonElement
+export class RouteButtonElement extends HTMLButtonElement
 {
     constructor()
     {
@@ -77,5 +77,5 @@ export class RouteButtonComponent extends HTMLButtonElement
 }
 if(customElements.get(COMPONENT_TAG_NAME) == null)
 {
-    customElements.define(COMPONENT_TAG_NAME, RouteButtonComponent, { extends: 'button' });
+    customElements.define(COMPONENT_TAG_NAME, RouteButtonElement, { extends: 'button' });
 }
