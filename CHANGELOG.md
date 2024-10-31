@@ -1,5 +1,11 @@
 # @magnit-ce/path-router
 
+## 0.1.2
+
+### Patch Changes
+
+- 994fb18: updated element names and exported sub elements
+
 ## 0.1.1
 
 ### Patch Changes
