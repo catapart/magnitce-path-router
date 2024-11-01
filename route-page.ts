@@ -53,12 +53,11 @@ export class RoutePageElement extends HTMLElement
     }
     async #open(path: string)
     {
+        this.currentProperties = this.getProperties(path);
         this.dispatchEvent(new CustomEvent(PathRouteEvent.BeforeOpen, { detail: { path, properties: this.currentProperties }}));
         await Promise.allSettled(this.blockingBeforeOpen.map(value => value()));
 
         this.dataset.entering = '';
-
-        this.currentProperties = this.getProperties(path);
 
         const allowSubroute = (this.getAttribute('subrouting') ?? this.closest('path-router[subrouting]')?.getAttribute('subrouting')) != "false";
         if(allowSubroute == true)

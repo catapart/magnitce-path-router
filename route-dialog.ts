@@ -42,12 +42,11 @@ export class RouteDialogElement extends HTMLDialogElement
     }
     async #open(path: string)
     {
+        this.currentProperties = this.getProperties(path);
         this.dispatchEvent(new CustomEvent(PathRouteEvent.BeforeOpen, { detail: { path, properties: this.currentProperties }}));
         await Promise.allSettled(this.blockingBeforeOpen.map(value => value()));
 
         this.setAttribute('data-entering', '');
-
-        this.currentProperties = this.getProperties(path);
 
         const allowSubroute = (this.getAttribute('subrouting') ?? this.closest('path-router[subrouting]')?.getAttribute('subrouting')) != "false";
         if(allowSubroute == true)
