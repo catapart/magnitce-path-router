@@ -1,5 +1,11 @@
 # @magnit-ce/path-router
 
+## 0.1.4
+
+### Patch Changes
+
+- 7e40716: fixed route open function to reference properties before dispatching event
+
 ## 0.1.3
 
 ### Patch Changes
