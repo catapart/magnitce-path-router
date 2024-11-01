@@ -31,10 +31,10 @@ var RoutePageElement = class extends HTMLElement {
     return true;
   }
   async #open(path) {
+    this.currentProperties = this.getProperties(path);
     this.dispatchEvent(new CustomEvent("beforeopen" /* BeforeOpen */, { detail: { path, properties: this.currentProperties } }));
     await Promise.allSettled(this.blockingBeforeOpen.map((value) => value()));
     this.dataset.entering = "";
-    this.currentProperties = this.getProperties(path);
     const allowSubroute = (this.getAttribute("subrouting") ?? this.closest("path-router[subrouting]")?.getAttribute("subrouting")) != "false";
     if (allowSubroute == true) {
       const subrouter = this.querySelector(":scope > path-router");
@@ -173,10 +173,10 @@ var RouteDialogElement = class extends HTMLDialogElement {
     return true;
   }
   async #open(path) {
+    this.currentProperties = this.getProperties(path);
     this.dispatchEvent(new CustomEvent("beforeopen" /* BeforeOpen */, { detail: { path, properties: this.currentProperties } }));
     await Promise.allSettled(this.blockingBeforeOpen.map((value) => value()));
     this.setAttribute("data-entering", "");
-    this.currentProperties = this.getProperties(path);
     const allowSubroute = (this.getAttribute("subrouting") ?? this.closest("path-router[subrouting]")?.getAttribute("subrouting")) != "false";
     if (allowSubroute == true) {
       const subrouter = this.querySelector(":scope > path-router");
