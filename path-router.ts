@@ -1,14 +1,10 @@
 import './route-page';
 import './route-dialog';
-import './route-link';
-import './route-button';
 
 import { RouteDialogElement, COMPONENT_TAG_NAME as ROUTEDIALOG_TAG_NAME } from "./route-dialog";
-import { RoutePageElement, COMPONENT_TAG_NAME as ROUTE_TAG_NAME, RouteProperties } from "./route-page";
-import { RouteLinkElement } from './route-link';
-import { RouteButtonElement } from './route-button';
+import { RoutePageElement, COMPONENT_TAG_NAME as ROUTE_TAG_NAME, RouteProperties, PathRouteEvent } from "./route-page";
 
-export { RoutePageElement, RouteDialogElement, RouteLinkElement, RouteButtonElement }
+export { RoutePageElement, RouteDialogElement }
 
 export enum PathRouterEvent
 {
@@ -16,16 +12,12 @@ export enum PathRouterEvent
     Change = 'change',
     /** Fires when the router's `path` attribute is updated. */
     PathChange = 'pathchange',
-    /** Fires when the router's `path` attribute is combined with all subroute paths to update the `composed-path` attribute. */
-    PathCompose = 'pathcompose',
 }
 
 export type PathRouterAttributes =
 {
     /** The target path for the router to route to. */
     path?: string;
-    /** The composition of the router's current path along with any subroute paths. */
-    get composedPath(): string|undefined;
 }
 
 
@@ -107,15 +99,6 @@ export class PathRouterElement extends HTMLElement
     constructor()
     {
         super();
-
-        this.addEventListener(PathRouterEvent.PathChange, (event) =>
-        {
-            if(event.target != this)
-            {
-                this.#updateComposedPath();
-            }
-        })
-
         this.#initializationPromise = this.#init();
         this.#dispatchInitialNavigation();
     }
@@ -125,14 +108,12 @@ export class PathRouterElement extends HTMLElement
         {
             document.addEventListener('DOMContentLoaded', async () =>
             {
-                // const promises: Promise<boolean>[] = [];
                 for(let i = 0; i < this.routes.length; i++)
                 {
                     const route = this.routes[i];
-                    // promises.push(route.close());
 
                     if(this.defaultRoute == null) { this.defaultRoute = route; }
-                    const path = route.getAttribute('path');
+                    // const path = route.getAttribute('path');
                     const isDefault = route.hasAttribute('default');
                     if(isDefault == true)
                     {
@@ -154,14 +135,6 @@ export class PathRouterElement extends HTMLElement
                         }
                         dialogs[i].removeAttribute('data-exiting');
                     })
-                }
-
-                // await Promise.allSettled(promises);
-
-                const subrouters = [...this.querySelectorAll('path-router')] as PathRouterElement[];
-                for(let i = 0; i < subrouters.length; i++)
-                {
-                    subrouters[i].toggleAttribute('subrouter', true);
                 }
 
                 
@@ -206,11 +179,7 @@ export class PathRouterElement extends HTMLElement
             this.setAttribute('path', path);
         });
     }
-    async subnavigate(path: string)
-    {
-        this.toggleAttribute('subnavigating', true);
-        return this.navigate(path);
-    }
+
     async #update(path: string, previousPath: string)
     {
         await this.#initializationPromise;
@@ -226,13 +195,15 @@ export class PathRouterElement extends HTMLElement
         // otherwise, if the pages don't match, it's a page change.
         const pageHasChanged = (hash != "" && page == "") ? false : currentPage != page;
         const hashHasChanged = hash != currentHash;
-        if(pageHasChanged == false && hashHasChanged == false && this.querySelector('[open]') != null)
+        const currentlyOpen = this.querySelector('[open]');
+        if(pageHasChanged == false && hashHasChanged == false && currentlyOpen != null)
         {
             if(this.resolveNavigation != null)
             { 
                 this.resolveNavigation();
                 this.resolveNavigation = undefined;
             }
+            currentlyOpen.dispatchEvent(new CustomEvent(PathRouteEvent.Refresh, { detail: { path }, bubbles: true, cancelable: true }));
             return [ openedPage, openedDialog ];
         }
         
@@ -289,23 +260,10 @@ export class PathRouterElement extends HTMLElement
             this.resolveNavigation();
             this.resolveNavigation = undefined;
         }
-        this.#updateComposedPath();
-
-        this.removeAttribute('subnavigating');
 
         this.dispatchEvent(new CustomEvent(PathRouterEvent.PathChange, { detail: { path }, bubbles: true, cancelable: true }));
         
         return [ openedPage, openedDialog ];
-    }
-    async #updateComposedPath()
-    {
-        const previousComposedPath = this.getAttribute('composedPath');
-        const composedPath = this.composeRoutePath();
-        this.setAttribute('composed-path', composedPath);
-        if(this.getAttribute('subrouter') == null)
-        {
-            this.dispatchEvent(new CustomEvent(PathRouterEvent.PathCompose, { detail: { composedPath, previousComposedPath }, bubbles: true, cancelable: true }));
-        }
     }
     async #awaitAllRouteProcesses()
     {
@@ -498,156 +456,6 @@ export class PathRouterElement extends HTMLElement
         return value.replace(regex, '');
     }
 
-    // exposed for route-page and route-dialog elements, not the api;
-    composeRoutePath()
-    {
-        const path = this.getAttribute('path') ?? "";
-        let [ routerPagePath, routerDialogPath ] = this.destructurePath(path);
-
-        let composition = new RouteComposition();
-        composition.path = routerPagePath;
-        composition.hash = routerDialogPath;
-        const routePage = this.targetPageRoute ?? this.currentPageRoute;
-        if(routePage != null)
-        {
-            composition = this.#getCurrentPageRouteComposition(routePage, composition);
-        }
-        const routeDialog = this.targetDialogRoute ?? this.currentDialogRoute;
-        if(routeDialog != null)
-        {
-            composition.isDialogRoute = false;
-            composition = this.#getCurrentDialogRouteComposition(routeDialog, composition);
-        }
-
-        return this.#composeRoutePath(composition.path, composition.hash, composition.subroutePath, composition.subrouteHash, composition.properties);
-    }
-    #getCurrentPageRouteComposition(route: RoutePageElement|null|undefined, composition: RouteComposition = new RouteComposition())
-    {
-        if(route != null)
-        {
-            Object.assign(composition.properties, route.currentProperties);
-            const routePathAttribute = route.getAttribute('path') ?? "";
-            const [ routePath, routeHash ] = this.destructurePath(routePathAttribute);
-
-            composition.path = routePath ?? composition.path;
-            composition.hash = (routeHash.trim() == "") ? composition.hash : routeHash;
-            
-            // console.log(routerPath, routerHash, routePath, routeHash);
-            const subrouter = (route.querySelector('path-router') as PathRouterElement);
-            if(subrouter != null)
-            {
-                const subrouteFullPath = subrouter.composeRoutePath();
-                let subrouteHash = "";
-                [ composition.subroutePath, subrouteHash ] = this.destructurePath(subrouteFullPath);
-                if(composition.isDialogRoute == true)
-                {
-                    composition.subrouteHash = subrouteHash;
-                }
-                const subroute = subrouter.targetPageRoute ?? subrouter.currentPageRoute;
-                if(subroute != null)
-                {
-                    Object.assign(composition.properties, subroute.currentProperties);
-                }
-                // console.log(subrouteFullPath, subroutePath, subrouteHash);
-            }
-        }
-        return composition;
-    }
-    #getCurrentDialogRouteComposition(route: RouteDialogElement|null|undefined, composition: RouteComposition = new RouteComposition())
-    {
-        if(route != null)
-        {
-            Object.assign(composition.properties, route.currentProperties);
-            const subrouter = (route.querySelector('path-router') as PathRouterElement);
-            if(subrouter != null)
-            {
-                const subrouteFullPath = subrouter.composeRoutePath();
-                let [ subroutePath ] = this.destructurePath(subrouteFullPath);
-                const subroute = subrouter.targetPageRoute ?? subrouter.currentPageRoute;
-                if(subroute != null)
-                {
-                    Object.assign(composition.properties, subroute.currentProperties);
-                }
-
-                let currentPath = route.getAttribute('path')!;                
-                subroutePath = currentPath.replace(/:[\s\S]*/gm, subroutePath);
-                subroutePath = this.trimCharacter(subroutePath, "/");
-                
-                const subroutePathArray = subroutePath.split('/');
-
-                let hashArray = composition.hash.split('/');
-                for(let i = 0; i < subroutePathArray.length; i++)
-                {
-                    if(subroutePathArray[i] == hashArray[i])
-                    {
-                        continue;
-                    }
-                    if(hashArray[i] != undefined)
-                    {
-                        hashArray[i] = subroutePathArray[i];
-                    }
-                    else
-                    {
-                        hashArray.push(subroutePathArray[i]);
-                    }
-                }
-                composition.hash = hashArray.join('/');
-            }
-        }
-        return composition;
-    }
-    #composeRoutePath(path: string, hash: string, subroutePath: string, subrouteHash: string, properties: RouteProperties)
-    {
-        const pathArray = path.split('/');
-        const subpathArray = subroutePath.split('/');
-        const replaceLastPathSlug = pathArray[pathArray.length - 1].startsWith(':');
-
-        const hashArray = hash.split('/');
-        const subhashArray = subrouteHash.split('/');
-        const replaceLastHashSlug = hashArray[hashArray.length - 1].startsWith(':');
-
-        // console.log(pathArray, subpathArray, hashArray, subhashArray);
-
-        for(const [key, value] of Object.entries(properties))
-        {
-            const pathIndex = pathArray.indexOf(`:${key}`);
-            if(pathIndex > -1) { pathArray[pathIndex] = value; }
-            const subpathIndex = subpathArray.indexOf(`:${key}`);
-            if(subpathIndex > -1) { subpathArray[subpathIndex] = value; }
-            
-            const hashIndex = hashArray.indexOf(`:${key}`);
-            if(hashIndex > -1) { hashArray[hashIndex] = value; }
-            const subhashIndex = subhashArray.indexOf(`:${key}`);
-            if(subhashIndex > -1) { subhashArray[subhashIndex] = value; }
-        }
-        if(replaceLastPathSlug == true)
-        {
-            pathArray[pathArray.length - 1] = subpathArray[0];
-            subpathArray.shift();
-        }
-        if(replaceLastHashSlug == true)
-        {
-            hashArray[hashArray.length - 1] = subhashArray[0];
-            subhashArray.shift();
-        }
-
-        const fullPathArray = pathArray.concat(subpathArray);
-        path = fullPathArray.join('/');
-        
-        const fullHashArray = hashArray.concat(subhashArray).filter(item => item.trim() != "");
-        const fullHashPath = fullHashArray.join('/');
-        if(fullHashPath.trim() != "")
-        {
-            path = path.endsWith('/') ? path.substring(0, path.length - 1) : path;
-            path += `#${fullHashPath}`;
-        }
-        path = path.replace('//', '/');
-
-
-        return path;
-    }
-    
-
     // queries and tests
 
     /**
@@ -681,65 +489,12 @@ export class PathRouterElement extends HTMLElement
     }
 
     /**
-     * Determine if a path represents the currently opened route.
-     * @param path the path to determine the active state of
-     * @returns `true` if the path matches the current route, `false` if the path does not match.
-     */
-    pathIsActive(path: string)
-    {
-
-        const [ queryPath, queryHash ] = this.destructurePath(path);
-        let routerFullPath = this.getAttribute('path') ?? "/";
-        // let { pathname: routerComparePath, hash: routerCompareHash } = this.#splitPath(routerFullPath);
-        const [ routerComparePath, routerCompareHash ] = this.destructurePath(routerFullPath);
-        const queryPathArray = this.#getFormattedPathArray(queryPath);
-        let linkRoute = (queryPath == "" && routerComparePath == "") ? this.defaultRoute : this.#getRouteElement(queryPathArray, this.#routeMap_pathToPageOrDialog);
-        if(linkRoute == null) { return false; }
-
-        let matchingPath = (this.currentPageRoute == linkRoute);
-        if(matchingPath == true)
-        {
-            // highlight the link, if the parent route already matches, and the link routes to the currently open subroute
-            const subroute = linkRoute.extractSubroute(queryPath)
-            if(linkRoute.getAttribute('subrouting') != "false" && subroute != "")
-            {
-                const subrouter = linkRoute.querySelector<PathRouterElement>(':scope > path-router');
-                if(subrouter != null)
-                {
-                    matchingPath = subrouter.pathIsActive(subroute);
-                }
-            } 
-        }
-
-        let matchingHash = false;
-        if(queryHash == routerCompareHash) { matchingHash = true; }
-
-        // path matches, and has no hash value
-        if(matchingPath == true && path.indexOf('#') == -1)
-        {
-            return true;
-        }
-        // path matches, path has a hash value, and hash matches
-        if(matchingPath == true && matchingHash == true)
-        {
-            return true;
-        }
-        // path has no path value, and the hash matches
-        if(path.startsWith('#') && matchingHash == true)
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
      * Get a key/value pair object with each key being a route-property name (ex: `:id`), and each value being the associated value from the current path value (ex: `123`).
-     * @param result A key/value pair object with each route property in the current path. This parameter allows recursion for subrouters and is not necessary for most uses.
      * @returns A key/value pair object with each route property in the current path.
      */
-    getRouteProperties(result: { [key: string]: unknown } = {})
+    getRouteProperties()
     {
+        const result: { [key: string]: unknown } = {};
         if(this.currentPageRoute == null) { return {}; }
 
         const composedPath = this.getAttribute('path') ?? '/';
@@ -781,12 +536,6 @@ export class PathRouterElement extends HTMLElement
             }
             preceedingKey = routePathSlug;
         }
-
-        const subrouter = this.currentPageRoute.querySelector('path-router') as PathRouterElement;
-        if(subrouter != null)
-        {
-            result = subrouter.getRouteProperties(result);
-        }
         
         return result;
 
@@ -797,6 +546,10 @@ export class PathRouterElement extends HTMLElement
         const url = new URL(urlString);
         const targetPath = url.pathname;
         const path = (targetPath.startsWith('/')) ? targetPath.substring(1) : targetPath;
+        return this.getPathParameters(path);
+    }
+    static getPathParameters(path: string)
+    {
         const pathArray = path.split('/');
         
         const properties: { [key:string]: string } = {};
@@ -828,7 +581,7 @@ export class PathRouterElement extends HTMLElement
         }
     }
     
-    static observedAttributes = [ "path", "subrouting" ];
+    static observedAttributes = [ "path" ];
     attributeChangedCallback(attributeName: string, oldValue: string, newValue: string) 
     {
         if(attributeName == "path")
@@ -842,23 +595,35 @@ export class PathRouterElement extends HTMLElement
                 this.#toUpdate.push({ newValue, oldValue: oldValue ?? "" });
             }
         }
-        else if(attributeName == "subrouting")
+    }
+
+
+    /**
+     * Adds simple click handling to a parent element that contains all of the 
+     * route links that you want to use for the target `<path-router>` element.
+     * @param parent An element that will contain every link that should be listened for. If no parent is provided, the document `<body>` will be used.
+     * @param linkQuery A query that will be used to de-select all route links. This can be customized for use-cases like nested path routers which may benefit from scoped selectors. By default, the query is `a[data-route],button[data-route]`.
+     */
+    addRouteLinkClickHandlers(parent?: HTMLElement, linkQuery: string = "a[data-route],button[data-route]")
+    {
+        parent = parent ?? document.body;
+        parent.addEventListener('click', (event) =>
         {
-            if(newValue == "false")
+            const targetLink = (event.target as HTMLElement).closest('a[data-route],button[data-route]');
+            if(targetLink != null && parent.contains(targetLink))
             {
-                for(let i = 0; i < this.routes.length; i++)
+                // clear existing selection
+                const links = [...parent.querySelectorAll(linkQuery)];
+                for(let i = 0; i < links.length; i++)
                 {
-                    this.routes[i].setAttribute(attributeName, 'false');
+                    links[i].removeAttribute('aria-current');
                 }
+
+                const path = (targetLink as HTMLElement).dataset.route!; // if no path attribute, would have been null from query.
+                this.setAttribute('path', path);
+                targetLink.setAttribute('aria-current', "page");
             }
-            else
-            {
-                for(let i = 0; i < this.routes.length; i++)
-                {
-                    this.routes[i].removeAttribute('subrouting');
-                }
-            }
-        }
+        });
     }
 }
 if(customElements.get(COMPONENT_TAG_NAME) == null)
@@ -870,8 +635,6 @@ class RouteComposition
 {
     path: string = "";
     hash: string = "";
-    subroutePath: string = "";
-    subrouteHash: string = "";
     properties: RouteProperties = {};
     isDialogRoute: boolean = true;
 }

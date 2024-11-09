@@ -5,7 +5,8 @@ export enum PathRouteEvent
     BeforeOpen = "beforeopen",
     AfterOpen = "afteropen",
     BeforeClose = "beforeclose",
-    AfterClose = "afterclose"
+    AfterClose = "afterclose",
+    Refresh = 'refresh',
 }
 
 export type RouteProperties = { [key: string]: string };
@@ -58,17 +59,6 @@ export class RoutePageElement extends HTMLElement
         await Promise.allSettled(this.blockingBeforeOpen.map(value => value()));
 
         this.dataset.entering = '';
-
-        const allowSubroute = (this.getAttribute('subrouting') ?? this.closest('path-router[subrouting]')?.getAttribute('subrouting')) != "false";
-        if(allowSubroute == true)
-        {
-            const subrouter = this.querySelector<PathRouterElement>(':scope > path-router');
-            if(subrouter != null)
-            {
-                const subroute = this.extractSubroute(path);
-                await subrouter.subnavigate(subroute);
-            }
-        }
   
         await Promise.allSettled(this.getAnimations({ subtree: true }).map((animation) => animation.finished));
   
@@ -113,15 +103,25 @@ export class RoutePageElement extends HTMLElement
     }
 
     
-    getProperties(targetPath: string): RouteProperties
+    getProperties(targetPath?: string|null): RouteProperties
     {
         const routePathAttribute = this.getAttribute('path') ?? "";
         const routePath = (routePathAttribute.startsWith('/')) ? routePathAttribute.substring(1) : routePathAttribute;
         const routeArray = routePath!.split('/');
+
+        const properties: RouteProperties = {};
+        if(targetPath == null)
+        {
+            const parentRouter = this.closest('path-router');
+            if(parentRouter == null) { return properties; }
+            targetPath = parentRouter.getAttribute('path');
+        }
+        if(targetPath == null) { return properties };
+        targetPath = targetPath ?? this.closest('path-router');
+
         const path = (targetPath.startsWith('/')) ? targetPath.substring(1) : targetPath;
         const pathArray = path.split('/');
         
-        const properties: RouteProperties = {};
 
         // first element is always empty string
         for(let i = 0; i < routeArray.length; i++)
@@ -139,19 +139,6 @@ export class RoutePageElement extends HTMLElement
         }
 
         return properties;
-    }
-    extractSubroute(targetPath: string)
-    {
-        const routePathAttribute = this.getAttribute('path') ?? "";
-        const routePath = (routePathAttribute.startsWith('/')) ? routePathAttribute.substring(1) : routePathAttribute;
-        const routeArray = routePath!.split('/');
-        const path = (targetPath.startsWith('/')) ? targetPath.substring(1) : targetPath;
-        const pathArray = path.split('/');
-
-        const lastNonParameterIndex = routeArray.findLastIndex(item => !item.startsWith(':')) + 1;
-
-        const subPathArray = pathArray.slice(lastNonParameterIndex);
-        return subPathArray.join('/');
     }
 
     applyEventListener<K extends (keyof HTMLElementEventMap|'beforeopen'|'afteropen'|'beforeclose'|'afterclose')>(type: K, listener: (this: HTMLElement, ev: Event|CustomEvent) => void|Promise<void>, options?: boolean | AddEventListenerOptions | undefined)

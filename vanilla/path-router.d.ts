@@ -2,7 +2,8 @@ declare enum PathRouteEvent {
     BeforeOpen = "beforeopen",
     AfterOpen = "afteropen",
     BeforeClose = "beforeclose",
-    AfterClose = "afterclose"
+    AfterClose = "afterclose",
+    Refresh = "refresh"
 }
 type RouteProperties = {
     [key: string]: string;
@@ -22,8 +23,7 @@ declare class RoutePageElement extends HTMLElement {
     constructor();
     open(path: string): Promise<boolean>;
     close(): Promise<boolean>;
-    getProperties(targetPath: string): RouteProperties;
-    extractSubroute(targetPath: string): string;
+    getProperties(targetPath?: string | null): RouteProperties;
     applyEventListener<K extends (keyof HTMLElementEventMap | 'beforeopen' | 'afteropen' | 'beforeclose' | 'afterclose')>(type: K, listener: (this: HTMLElement, ev: Event | CustomEvent) => void | Promise<void>, options?: boolean | AddEventListenerOptions | undefined): void;
     addBlockingEventListener(eventName: PathRouteEvent, handler: () => void | Promise<void>): void;
     applyBlockingEventListener(eventName: PathRouteEvent, handler: () => void | Promise<void>): void;
@@ -44,52 +44,19 @@ declare class RouteDialogElement extends HTMLDialogElement {
     openRoute(path: string): Promise<boolean>;
     closeRoute(): Promise<boolean>;
     getProperties(targetPath: string): RouteProperties;
-    extractSubroute(targetPath: string): string;
     applyEventListener<K extends (keyof HTMLElementEventMap | 'beforeopen' | 'afteropen' | 'beforeclose' | 'afterclose')>(type: K, listener: (this: HTMLElement, ev: Event | CustomEvent) => void | Promise<void>, options?: boolean | AddEventListenerOptions | undefined): void;
     addBlockingEventListener(eventName: PathRouteEvent, handler: () => void | Promise<void>): void;
-}
-
-declare class RouteLinkElement extends HTMLAnchorElement {
-    #private;
-    constructor();
-    connectedCallback(): void;
-    onClick(target: PathRouterElement): void;
-    /**
-     * An override-able string transformation function for preparing the static path attribute value.
-     * @param staticPath the path that is set in the route-link's html
-     * @returns a new path that has been transformed to the exact path expected for navigation
-     * @description Useful for replacing variables.
-     */
-    onPreparePath(staticPath: string): string;
-}
-
-declare class RouteButtonElement extends HTMLButtonElement {
-    #private;
-    constructor();
-    connectedCallback(): void;
-    onClick(target: PathRouterElement): void;
-    /**
-     * An override-able string transformation function for preparing the static path attribute value.
-     * @param staticPath the path that is set in the route-link's html
-     * @returns a new path that has been transformed to the exact path expected for navigation
-     * @description Useful for replacing variables.
-     */
-    onPreparePath(staticPath: string): string;
 }
 
 declare enum PathRouterEvent {
     /** Fires when a route is opened or closed.  */
     Change = "change",
     /** Fires when the router's `path` attribute is updated. */
-    PathChange = "pathchange",
-    /** Fires when the router's `path` attribute is combined with all subroute paths to update the `composed-path` attribute. */
-    PathCompose = "pathcompose"
+    PathChange = "pathchange"
 }
 type PathRouterAttributes = {
     /** The target path for the router to route to. */
     path?: string;
-    /** The composition of the router's current path along with any subroute paths. */
-    get composedPath(): string | undefined;
 };
 declare const COMPONENT_TAG_NAME = "path-router";
 declare class PathRouterElement extends HTMLElement {
@@ -117,10 +84,8 @@ declare class PathRouterElement extends HTMLElement {
      * @param path route path
      */
     navigate(path: string): Promise<void>;
-    subnavigate(path: string): Promise<void>;
     destructurePath(path: string): string[];
     trimCharacter(value: string, character: string): string;
-    composeRoutePath(): string;
     /**
      * Compare two `URL` objects to determine whether they represet different locations and, if so, whether or not the new location is marked as a replacement change.
      * @param currentLocation a url object representing the current location
@@ -132,27 +97,28 @@ declare class PathRouterElement extends HTMLElement {
         isReplacementChange: boolean;
     };
     /**
-     * Determine if a path represents the currently opened route.
-     * @param path the path to determine the active state of
-     * @returns `true` if the path matches the current route, `false` if the path does not match.
-     */
-    pathIsActive(path: string): boolean;
-    /**
      * Get a key/value pair object with each key being a route-property name (ex: `:id`), and each value being the associated value from the current path value (ex: `123`).
-     * @param result A key/value pair object with each route property in the current path. This parameter allows recursion for subrouters and is not necessary for most uses.
      * @returns A key/value pair object with each route property in the current path.
      */
-    getRouteProperties(result?: {
-        [key: string]: unknown;
-    }): {
+    getRouteProperties(): {
         [key: string]: unknown;
     };
     static getUrlParameters(urlString: string): {
         [key: string]: string;
     };
+    static getPathParameters(path: string): {
+        [key: string]: string;
+    };
     connectedCallback(): void;
     static observedAttributes: string[];
     attributeChangedCallback(attributeName: string, oldValue: string, newValue: string): void;
+    /**
+     * Adds simple click handling to a parent element that contains all of the
+     * route links that you want to use for the target `<path-router>` element.
+     * @param parent An element that will contain every link that should be listened for. If no parent is provided, the document `<body>` will be used.
+     * @param linkQuery A query that will be used to de-select all route links. This can be customized for use-cases like nested path routers which may benefit from scoped selectors. By default, the query is `a[data-route],button[data-route]`.
+     */
+    addRouteLinkClickHandlers(parent?: HTMLElement, linkQuery?: string): void;
 }
 
-export { COMPONENT_TAG_NAME, type PathRouterAttributes, PathRouterElement, PathRouterEvent, RouteButtonElement, RouteDialogElement, RouteLinkElement, RoutePageElement };
+export { COMPONENT_TAG_NAME, type PathRouterAttributes, PathRouterElement, PathRouterEvent, RouteDialogElement, RoutePageElement };
