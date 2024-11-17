@@ -101,28 +101,46 @@ export class RoutePageElement extends HTMLElement
         this.dispatchEvent(new Event(PathRouteEvent.AfterClose));
         await Promise.allSettled(this.blockingAfterClose.map(value => value()));
     }
-
     
     getProperties(targetPath?: string|null): RouteProperties
     {
-        const routePathAttribute = this.getAttribute('path') ?? "";
-        const routePath = (routePathAttribute.startsWith('/')) ? routePathAttribute.substring(1) : routePathAttribute;
-        const routeArray = routePath!.split('/');
+        const properties: RouteProperties = { };
+        
+        // const ancestorRoutePaths = this.#getAncestorRoutePaths();
 
-        const properties: RouteProperties = {};
+        // // capture any fulfilled route properties
+        // for(let i = 0; i < ancestorRoutePaths.length; i++)
+        // {
+        //     let nextPath = ancestorRoutePaths[i + 1];
+        //     if(nextPath == null) { break; }
+            
+        //     const currentPath = (ancestorRoutePaths[i].startsWith('/')) ? ancestorRoutePaths[i].substring(1) : ancestorRoutePaths[i];
+        //     const currentPathArray = currentPath.split('/');
+        //     nextPath = (nextPath.startsWith('/')) ? nextPath.substring(1) : nextPath;
+        //     const nextPathArray = nextPath.split('/');
+        //     if(currentPathArray[currentPathArray.length - 1].indexOf(':') != -1)
+        //     {
+        //         properties[currentPathArray[currentPathArray.length - 1].substring(1)] = nextPathArray[0];
+        //     }
+        // }
+
         if(targetPath == null)
         {
             const parentRouter = this.closest('path-router');
             if(parentRouter == null) { return properties; }
             targetPath = parentRouter.getAttribute('path');
         }
-        if(targetPath == null) { return properties };
-        targetPath = targetPath ?? this.closest('path-router');
+        if(targetPath == null) { return properties; }
+        properties.targetPath = targetPath;
 
         const path = (targetPath.startsWith('/')) ? targetPath.substring(1) : targetPath;
         const pathArray = path.split('/');
         
+        const routePathAttribute = this.getAttribute('path') ?? "";
+        const routePath = (routePathAttribute.startsWith('/')) ? routePathAttribute.substring(1) : routePathAttribute;
+        const routeArray = routePath!.split('/');
 
+        let subroute = targetPath;
         // first element is always empty string
         for(let i = 0; i < routeArray.length; i++)
         {
@@ -135,10 +153,42 @@ export class RoutePageElement extends HTMLElement
                     propertyName = propertyName.substring(0, propertyName.length-1);
                 }
                 properties[propertyName] = (i < pathArray.length) ? pathArray[i] : "";
+                subroute = subroute.substring(subroute.indexOf(properties[propertyName]));
+                
+                // if the route has a variable, and this is in a
+                // parent route element, values are substituted
+                // if they have an exact name match.
+                // const parentRoute = this.parentElement?.closest('route-page,[is="route-dialog"]');
+                // if(parentRoute != null)
+                // {
+                //     const parentProperties = (parentRoute as RoutePageElement).getProperties();
+                //     if(parentProperties[propertyName] != null)
+                //     {
+                //         properties[propertyName] = parentProperties[propertyName];
+                //     }
+                // }
+            }
+            else
+            {
+                subroute = subroute.substring(slug.length);
             }
         }
 
+        properties.subroute = subroute;
+
         return properties;
+    }
+
+    #getAncestorRoutePaths()
+    {
+        let parentRoute = this.parentElement?.closest('route-page,[is="route-dialog"]');
+        const pathArray: string[] = [this.getAttribute('path') ?? ""];
+        while(parentRoute != null)
+        {
+            pathArray.push(parentRoute.getAttribute('path') ?? "");
+            parentRoute = parentRoute.parentElement?.closest('route-page,[is="route-dialog"]');
+        }
+        return pathArray.toReversed();
     }
 
     applyEventListener<K extends (keyof HTMLElementEventMap|'beforeopen'|'afteropen'|'beforeclose'|'afterclose')>(type: K, listener: (this: HTMLElement, ev: Event|CustomEvent) => void|Promise<void>, options?: boolean | AddEventListenerOptions | undefined)
