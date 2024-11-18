@@ -1,7 +1,7 @@
 import style from './path-router.css?raw';
-import { Route, RouteType } from './route';
+import { PathRouteEvent, Route, RouteType } from './route';
 import { RouteDialogElement, COMPONENT_TAG_NAME as ROUTEDIALOG_TAG_NAME } from "./route-dialog.route";
-import { RoutePageElement, COMPONENT_TAG_NAME as ROUTE_TAG_NAME } from "./route-page.route";
+import { RoutePageElement, COMPONENT_TAG_NAME as ROUTEPAGE_TAG_NAME } from "./route-page.route";
 
 export enum PathRouterEvent
 {
@@ -35,7 +35,7 @@ export class PathRouterElement extends HTMLElement
     
     get routePages()
     {
-        return Array.from(this.querySelectorAll(`:scope > ${ROUTE_TAG_NAME}`) as NodeListOf<RoutePageElement>, (route: RoutePageElement) => route) as RoutePageElement[];
+        return Array.from(this.querySelectorAll(`:scope > ${ROUTEPAGE_TAG_NAME}, ${COMPONENT_TAG_NAME} :not(${COMPONENT_TAG_NAME}) ${ROUTEPAGE_TAG_NAME}`) as NodeListOf<RoutePageElement>, (route: RoutePageElement) => route) as RoutePageElement[];
     }
     get routeDialogs()
     {
@@ -43,44 +43,326 @@ export class PathRouterElement extends HTMLElement
     }
     get routes()
     {
-        return [...this.routePages, ...this.routeDialogs];
+        return Array.from(this.querySelectorAll(`:scope > ${ROUTEPAGE_TAG_NAME},${COMPONENT_TAG_NAME} :not(${COMPONENT_TAG_NAME}) ${ROUTEPAGE_TAG_NAME},:scope > [is="${ROUTEDIALOG_TAG_NAME}"]`) as NodeListOf<Route>, (route: Route) => route) as Route[];
     }
 
+    /** The `<page-route>` element currently being navigated to. */
+    targetPageRoute: RoutePageElement|undefined;
+    /** The `<page-route>` element that the router currently has open. */
+    currentPageRoute: RoutePageElement|undefined;
+    /** The `route-dialog` element currently being navigated to. */
+    targetDialogRoute: RouteDialogElement|undefined;
+    /** The `route-dialog` element that the router currently has open. */
+    currentDialogRoute: RouteDialogElement|undefined;
+
+    /** The route that will be selected if no other routes match the current path. */
+    defaultRoute: RoutePageElement|undefined;
+
+    /** The path which controls the router's navigation. */
+    get path(): string|null  { return this.getAttribute("path"); }
+    set path(value: string)  { this.setAttribute("path", value); }
+
+
+    #activationPromise?: Promise<void>;
+    #toUpdate: {newValue: string, oldValue: string}[] = [];
+    #resolveNavigation?: () => void;
+
+    /**
+     * Navigate to a route path.
+     * @param path route path
+     */
     async navigate(path: string)
     {
-
+        return new Promise<void>((resolve) =>
+        {
+            this.#resolveNavigation = resolve;
+            this.setAttribute('path', path);
+        });
     }
-    async enterRoute()
+    
+    /**
+     * Adds simple click handling to a parent element that contains all of the 
+     * route links that you want to use for the target `<path-router>` element.
+     * @param parent An element that will contain every link that should be listened for. If no parent is provided, the document `<body>` will be used.
+     * @param linkQuery A query that will be used to de-select all route links. This can be customized for use-cases like nested path routers which may benefit from scoped selectors. By default, the query is `a[data-route],button[data-route]`.
+     */
+    addRouteLinkClickHandlers(parent?: HTMLElement, linkQuery: string = "a[data-route],button[data-route]")
     {
+        parent = parent ?? document.body;
+        parent.addEventListener('click', (event) =>
+        {
+            const targetLink = (event.target as HTMLElement).closest('a[data-route],button[data-route]');
+            if(targetLink != null && parent.contains(targetLink))
+            {
+                // clear existing selection
+                const links = [...parent.querySelectorAll(linkQuery)];
+                for(let i = 0; i < links.length; i++)
+                {
+                    links[i].removeAttribute('aria-current');
+                }
 
-    }
-    async exitRoute()
-    {
+                let path = (targetLink as HTMLElement).dataset.route!; // if no path attribute, would have been null from query.
 
+                // if the route has a variable, and this is in a
+                // parent route element, values are substituted
+                // if they have an exact name match.
+                if(path.indexOf(':') != -1)
+                {
+                    const parentRoute = this.closest('route-page,[is="route-dialog"]');
+                    if(parentRoute != null)
+                    {
+                        const parentProperties = (parentRoute as RoutePageElement).getProperties();
+                        const linkProperties = path.split('/').filter(item => item.startsWith(':'));
+                        for(let i = 0; i < linkProperties.length; i++)
+                        {
+                            const linkPropertyName = linkProperties[i].substring(1);
+                            if(parentProperties[linkPropertyName] != null)
+                            {
+                                path = path.replace(`:${linkPropertyName}`, parentProperties[linkPropertyName]);
+                            }
+                        }
+                    }
+                }
+
+
+                // if this link is only made to open a dialog
+                // the path shouldn't change the page route,
+                // instead, it should only change the dialog route
+                if(path.startsWith('#'))
+                {
+                    const currentPath = this.path ?? "";
+                    const currentPathArray = currentPath.split('#');
+                    currentPathArray[1] = path.substring(1);
+                    path = currentPathArray.join('#');
+                }
+
+                this.setAttribute('path', path);
+                targetLink.setAttribute('aria-current', "page");
+            }
+        });
     }
     
 
-    #update(path: string)
+    async #update(path: string, previousPath: string)
     {
+        if(this.#isActivated == false) { throw new Error("Unable to update path-router before activation."); }
+
+        const [ pagePath, dialogPath ] = this.#getTypedPaths(path);
+        const [ currentPagePath, currentDialogPath ]= this.#getTypedPaths(previousPath);
+        
+        let openedPage = false;
+        let openedDialog = false;
+
+        // if we're only navigating the dialog route, we don't need to indicate that the empty
+        // route used for the page is a direction to set the route to the default.
+        // otherwise, if the pages don't match, it's a page change.
+        const pageHasChanged = (dialogPath != "" && pagePath == "") ? false : currentPagePath != pagePath;
+        const hashHasChanged = dialogPath != currentDialogPath;
+        const currentlyOpen = this.querySelector('[open]');
+        if(pageHasChanged == false && hashHasChanged == false && currentlyOpen != null)
+        {
+            if(this.#resolveNavigation != null)
+            { 
+                this.#resolveNavigation();
+                this.#resolveNavigation = undefined;
+            }
+            currentlyOpen.dispatchEvent(new CustomEvent(PathRouteEvent.Refresh, { detail: { path }, bubbles: true, cancelable: true }));
+            return [ openedPage, openedDialog ];
+        }
+        
+        // await any currently running processes
+        await this.#awaitAllRouteProcesses();
+
+        // find routes by path
+        const matchingRoutes = this.#findMatchingRoutes(path);
+        const matchingPageRoutes = matchingRoutes.filter(item => item.route instanceof RoutePageElement);
+        const matchingDialogRoutes = matchingRoutes.filter(item => item.route instanceof RouteDialogElement);
+        // const [ pageRoute, dialogRoute ] = this.#getRouteElements(path);
+        let openPagePromise: Promise<boolean> = new Promise(resolve => resolve(false));
+
+        let hasClosedPages = false;
+        const pagesToRemainOpen = matchingPageRoutes.map(item => item.route);
+        if(pageHasChanged == true || currentlyOpen == null)
+        {
+            // close the route that is currently open
+            const closed = await this.#closeCurrentRoutePages(pagesToRemainOpen);
+            if(closed == false) 
+            {
+                // if closing the current route failed, router
+                // assumes the implementer prevented navigation.
+                console.warn('Navigation was prevented.');
+                console.info(`Requested path: ${path}`);
+                
+                if(this.#resolveNavigation != null)
+                { 
+                    this.#resolveNavigation();
+                    this.#resolveNavigation = undefined;
+                }
+
+                return false; 
+            }
+            hasClosedPages = true;
+
+            for(let i = 0; i < matchingPageRoutes.length; i++)
+            {
+                const routeData = matchingPageRoutes[i];
+                openPagePromise = this.#openRoutePage(routeData.route, dialogPath);
+                this.#assignRouteProperties(routeData.route, routeData.properties);
+            }
+        }
+
+
+        if(pageHasChanged || currentDialogPath != dialogPath)
+        {
+            // close any dialog routes that were open and are not currently matching
+            const closed = await this.#closeCurrentRouteDialogs(matchingDialogRoutes.map(item => item.route));
+            // if closing the current route failed, router
+            // assumes the implementer prevented navigation.
+            if(closed != false) 
+            {
+                for(let i = 0; i < matchingDialogRoutes.length; i++)
+                {
+                    const routeData = matchingDialogRoutes[i];
+                    openedDialog = await this.#openRouteDialog(routeData.route, dialogPath);
+                    this.#assignRouteProperties(routeData.route, routeData.properties);
+                    
+                    if(hasClosedPages == false)
+                    {
+                        const subroutes = [...routeData.route.querySelectorAll('route-page')] as RoutePageElement[];
+                        for(let i = 0; i < subroutes.length; i++)
+                        {
+                            if(pagesToRemainOpen.indexOf(subroutes[i]) > -1) { continue; }
+                            await subroutes[i].exit();
+                        }
+                    }
+                }
+
+
+                // dialog may contain subroutes which would be pages
+                for(let i = 0; i < matchingPageRoutes.length; i++)
+                {
+                    const routeData = matchingPageRoutes[i];
+                    if(routeData.route.closest(`[is="${ROUTEDIALOG_TAG_NAME}"][open]`) != null)
+                    {
+                        openPagePromise = this.#openRoutePage(routeData.route, dialogPath);
+                        this.#assignRouteProperties(routeData.route, routeData.properties);
+                    }
+                }
+            }
+        }
+
+        openedPage = await openPagePromise; // deferred awaiting because the dialog does not need to await the page opening/transitions
+
+        this.targetPageRoute = undefined;
+        this.targetDialogRoute = undefined;
+        if(this.#resolveNavigation != null)
+        { 
+            this.#resolveNavigation();
+            this.#resolveNavigation = undefined;
+        }
+
+        this.dispatchEvent(new CustomEvent(PathRouterEvent.PathChange, { detail: { path }, bubbles: true, cancelable: true }));
+        
+        return [ openedPage, openedDialog ];
+    }
+    #getTypedPaths(path: string)
+    {
+        const pathArray = path.split('#');
+        const pagePath = pathArray[0];
+        const remainingPath = (path.length > 1) ? pathArray[1] : null;
+        const remainingPathArray = (remainingPath == null) ? [""] : remainingPath.split('?');
+        const dialogPath = (remainingPathArray == null) ? "" : remainingPathArray[0];
+
+        return [ pagePath, dialogPath ];
+    }
+    #findMatchingRoutes(path: string)
+    {
+        const routes: { route: Route, properties: PropertyValues }[] = [];
+        const previousMatches: Route[] = [];
         for(let i = 0; i < this.routes.length; i++)
         {
             const route = this.routes[i];
-            this.#closeRoute(route);
-            const [ routeMatches, properties ] = this.routeMatchesPath(route, path, route.classList.contains('dialog'));
-            this.#assignRouteProperties(route, properties);
+            const [ routeMatches, properties ] = this.routeMatchesPath(route, path, previousMatches, route instanceof RouteDialogElement);
             if(routeMatches == true)
             {
-                this.#openRoute(route);
+                routes.push({ route, properties });
+                previousMatches.push(route);
             }
         }
+        return routes;
+    }
+    async #awaitAllRouteProcesses()
+    {
+        return Promise.allSettled(this.routes.map((route) =>
+        {
+            return route.currentProcess;
+        }));
     }
 
-    #openRoute(route: Route)
+
+    async #openRoutePage(route: RoutePageElement|undefined, path: string)
     {
-        // beforeOpenRoute(route);
-        // route.classList.add('match');
-        route.enter("");
+        this.targetPageRoute = route;
+
+        // handle the case where no route has matched the path
+        this.targetPageRoute = this.targetPageRoute || this.defaultRoute;
+
+        // if no route matches, and no default routes are
+        // available the navigation will fail
+        if(this.targetPageRoute == null)
+        {
+            return false;
+        }
+
+        const opened = await this.targetPageRoute!.enter(path);
+        if(opened)
+        {
+            this.currentPageRoute = this.targetPageRoute!;
+            this.dispatchEvent(new CustomEvent(PathRouterEvent.Change, { detail: { route: this.targetPageRoute, path } }));
+        }
+        return opened;
     }
+    async #openRouteDialog(route: RouteDialogElement, path: string)
+    {
+        this.targetDialogRoute = route;
+
+        if(this.targetDialogRoute == null)
+        {
+            return false;
+        }
+
+        const opened = await this.targetDialogRoute.enter(path);
+        if(opened)
+        {
+            this.currentDialogRoute = this.targetDialogRoute;
+            this.dispatchEvent(new CustomEvent(PathRouterEvent.Change, { detail: { route: this.targetDialogRoute, path } }))
+        }
+        return opened;
+        
+    }
+    async #closeCurrentRoutePages(toRemainOpen: RoutePageElement[])
+    {
+        const openPages = this.routePages.filter(item => item.getAttribute('aria-current') == "page");
+        let closed = true;
+        for(let i = 0; i < openPages.length; i++)
+        {
+            if(toRemainOpen.indexOf(openPages[i]) > -1) { continue; }
+            closed = (closed == false) ? closed : await openPages[i].exit();
+        }
+        return closed;
+    }
+    async #closeCurrentRouteDialogs(toRemainOpen: RouteDialogElement[])
+    {
+        const openDialogs = this.routeDialogs.filter(item => item.getAttribute('aria-current') == "page");
+        let closed = true;
+        for(let i = 0; i < openDialogs.length; i++)
+        {
+            if(toRemainOpen.indexOf(openDialogs[i]) > -1) { continue; }
+            closed = (closed == false) ? closed : await openDialogs[i].exit();
+        }
+        return closed;
+    }
+
     #assignRouteProperties(route: Route, properties: PropertyValues)
     {
         for(const [key, value] of Object.entries<string>(properties))
@@ -89,26 +371,9 @@ export class PathRouterElement extends HTMLElement
             route.dataset[dataKey] = value;
         }
     }
-    #closeRoute(route: Route)
+
+    routeMatchesPath(route: Route, queryPath: string, previousMatches: Route[], isDialog = false): MatchValues
     {
-        route.classList.remove('match');
-    }
-
-    routeMatchesPath(route: Route, queryPath: string, isDialog = false): MatchValues
-    {
-        // console.log(route, queryPath);
-        const routePath = route.getAttribute('path') ?? "";
-
-        // handle special cases / early exits
-        if(routePath.trim() == "" || routePath == "/" && isDialog == false)
-        {
-            return [ (queryPath.trim() == "" || queryPath == "/"), {} ];
-        }
-
-        if(routePath.trim() == queryPath.trim() && isDialog == false)
-        {
-            return [ true, {} ];
-        }
         
         // split query path into page and dialog paths
         const queryPathArray = queryPath.split('#');
@@ -116,6 +381,7 @@ export class PathRouterElement extends HTMLElement
         const dialogPath = (queryPathArray.length > 1) ? queryPathArray[1] : null;
 
         // break paths into arrays
+        const routePath = route.getAttribute('path') ?? "";
         const routePathArray = routePath.split('/');
         const pagePathArray = pagePath.split('/');
 
@@ -123,14 +389,14 @@ export class PathRouterElement extends HTMLElement
         // if a route is nested in a dialog, we still want
         // to use the dialog part of the route to handle
         // the matching for that nested route.
-        const pathType = route.closest('.dialog') == null
+        const pathType = route.closest(`[is="${ROUTEDIALOG_TAG_NAME}"]`) == null
         ? 'Page'
         : 'Dialog';
 
         // handle page path matching
         if(pathType == "Page")
         {
-            return this.routeTypeMatches(route, pagePathArray, routePathArray, 'route-page');
+            return this.routeTypeMatches(route, pagePathArray, routePathArray, `${ROUTEPAGE_TAG_NAME}`, previousMatches);
         }
         else if(dialogPath == null)
         {
@@ -139,10 +405,10 @@ export class PathRouterElement extends HTMLElement
 
         // handle dialog path matching
         const dialogPathArray = dialogPath.split('/');
-        return this.routeTypeMatches(route, dialogPathArray, routePathArray, '[is="route-dialog"]');
+        return this.routeTypeMatches(route, dialogPathArray, routePathArray, `${ROUTEPAGE_TAG_NAME},[is="${ROUTEDIALOG_TAG_NAME}"]`, previousMatches);
     }
 
-    routeTypeMatches(route: Route, queryPathArray: string[], routePathArray: string[], parentRouteSelector: string): MatchValues
+    routeTypeMatches(route: Route, queryPathArray: string[], routePathArray: string[], parentRouteSelector: string, previousMatches: Route[]): MatchValues
     {
         if(queryPathArray.length == 1 && queryPathArray[0].trim() == "")
         {
@@ -155,7 +421,7 @@ export class PathRouterElement extends HTMLElement
         {
             // early exit for nested items; only match if
             // parents have already matched
-            if(parentRoute.classList.contains('match') == false) { return [ false, {} ]; }
+            if(previousMatches.indexOf(parentRoute as Route) == -1) { return [ false, {} ]; }
 
             parentRoutes.push(parentRoute);
             parentRoute = parentRoute.parentElement?.closest(parentRouteSelector);
@@ -233,32 +499,91 @@ export class PathRouterElement extends HTMLElement
 
 
 
-    connectedCallback()
+    async connectedCallback()
     {
-        this.activateRouteManagement();
+        this.#activationPromise = this.#activateRouteManagement();
+        this.#injectStyles();
+
+        await this.#activationPromise;
+        this.#openPreActivationRoutes();
     }
     disconnectedCallback()
     {
-        this.deactivateRouteManagement();
+        this.#deactivateRouteManagement();
     }
 
     #isActivated: boolean = false;
-    async activateRouteManagement()
+    async #activateRouteManagement()
     {
         await DOMCONTENTLOADED_PROMISE;
-        this.#isActivated = true;
 
-        if(this.hasAttribute('debug'))
+        this.#assignDefaultRoute();
+        this.#addDialogCloseHandlers();
+
+        this.#isActivated = true;
+    }
+    #assignDefaultRoute()
+    {
+        this.defaultRoute = this.querySelector('route-page[default]') as RoutePageElement;
+        if(this.defaultRoute == null)
         {
-            console.info('Activated Router');
+            this.defaultRoute = this.querySelector('route-page') as RoutePageElement;
         }
     }
-    async deactivateRouteManagement()
+    async #openPreActivationRoutes()
     {
-        this.#isActivated = false;
-        if(this.hasAttribute('debug'))
+        for(let i = 0; i < this.#toUpdate.length; i++)
         {
-            console.info('Deactivated Router');
+            await this.#update(this.#toUpdate[i].newValue, this.#toUpdate[i].oldValue);
+        }
+    }
+
+    #boundDialogOnCloseHandler = this.#dialog_onClose.bind(this);
+    #addDialogCloseHandlers()
+    {
+        for(let i = 0; i < this.routeDialogs.length; i++)
+        {
+            this.routeDialogs[i].addEventListener('close', this.#boundDialogOnCloseHandler)
+        }
+    }
+    async #dialog_onClose(event: Event)
+    {
+        const dialog = event.target as HTMLDialogElement;
+        const isExiting = dialog.getAttribute('data-exiting') != null;
+        if(!isExiting)
+        {
+            const pathAttribute = this.getAttribute('path') ?? '/';
+            const path = pathAttribute.split('#')[0];
+            await this.navigate(path);
+        }
+        dialog.removeAttribute('data-exiting');
+    }
+
+    #deactivateRouteManagement()
+    {
+        this.#unassignDefaultRoute();
+        this.#removeDialogCloseHandler();
+
+        this.#activationPromise = undefined;
+
+        this.#isActivated = false;
+    }
+    #unassignDefaultRoute()
+    {
+        if(this.defaultRoute != null) { this.defaultRoute = undefined; }
+    }
+    #removeDialogCloseHandler()
+    {
+        this.removeEventListener('close', this.#boundDialogOnCloseHandler);
+    }
+    
+
+    #injectStyles()
+    {
+        let parent = this.getRootNode() as Document|ShadowRoot;
+        if(parent.adoptedStyleSheets.indexOf(COMPONENT_STYLESHEET) == -1)
+        {
+            parent.adoptedStyleSheets.push(COMPONENT_STYLESHEET);
         }
     }
     
@@ -270,12 +595,12 @@ export class PathRouterElement extends HTMLElement
         {
             if(this.#isActivated == true)
             {
-                this.#update(newValue);
+                this.#update(newValue, oldValue);
             }
-            // else
-            // {
-            //     this.#toUpdate.push({ newValue, oldValue: oldValue ?? "" });
-            // }
+            else
+            {
+                this.#toUpdate.push({ newValue, oldValue: oldValue ?? "" });
+            }
         }
     }
 }

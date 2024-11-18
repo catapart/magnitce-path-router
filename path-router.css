@@ -8,7 +8,10 @@ path-router
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
 }
-route-page:not([open],[data-entering],[data-exiting]) path-router { display: none; /* browser bug when rendering visibility? */ }
+
+route-page:not([open],[data-entering],[data-exiting]) path-router
+{ display: none; /* browser bug when rendering visibility? */ }
+
 route-page
 {
     display: var(--route-display, block);

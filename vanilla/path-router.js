@@ -1,23 +1,62 @@
 // path-router.css?raw
-var path_router_default = {};
+var path_router_default = '/* \r\n   Animations will not be awaitable in code if they have a display of none.\r\n   Instead, the routes are stacked in a grid.\r\n */\r\npath-router\r\n{ \r\n    display: var(--router-display, grid);\r\n    grid-template-columns: 1fr;\r\n    grid-template-rows: 1fr;\r\n}\r\n\r\nroute-page:not([open],[data-entering],[data-exiting]) path-router\r\n{ display: none; /* browser bug when rendering visibility? */ }\r\n\r\nroute-page\r\n{\r\n    display: var(--route-display, block);\r\n    visibility: hidden;\r\n    grid-row: 1;\r\n    grid-column: 1;\r\n}\r\n/* \r\n   Visibility is visible during the entering and exiting phases\r\n   to allow for animations to be awaited.\r\n */\r\nroute-page[open]\r\n,route-page[data-entering]\r\n,route-page[data-exiting]\r\n{\r\n    visibility: visible;\r\n}\r\n[is="route-link"]\r\n,[is="route-button"]\r\n{\r\n    user-select: none;\r\n}';
 
 // route.ts
 var RouteType = (elementType = HTMLElement) => {
   return class extends elementType {
-    static value = "Hello";
+    currentProcess = Promise.resolve();
+    canBeOpened = async () => true;
+    canBeClosed = async () => true;
     async enter(path) {
+      const canNavigate = await this.canBeOpened();
+      if (!canNavigate) {
+        console.info("Navigation blocked by validity check.");
+        return false;
+      }
+      this.currentProcess = this.#enter(path);
+      await this.currentProcess;
+      this.currentProcess = Promise.resolve();
+      return true;
     }
     async #enter(path) {
       this.dispatchEvent(new CustomEvent("beforeopen" /* BeforeOpen */, { detail: { path, properties: this.getProperties() } }));
+      await Promise.allSettled(this.#blockingBeforeOpen.map((value) => value()));
       this.dataset.entering = "";
       await Promise.allSettled(this.getAnimations({ subtree: true }).map((animation) => animation.finished));
+      delete this.dataset.entering;
       this.#open();
       this.dispatchEvent(new Event("afteropen" /* AfterOpen */));
+      await Promise.allSettled(this.#blockingAfterOpen.map((value) => value()));
     }
     async #open() {
-      delete this.dataset.entering;
       this.toggleAttribute("open", true);
       this.setAttribute("aria-current", "page");
+    }
+    async exit() {
+      const canNavigate = await this.canBeClosed();
+      if (canNavigate == false) {
+        console.info("Navigation blocked by validity check.");
+        return false;
+      }
+      this.currentProcess = this.#exit();
+      await this.currentProcess;
+      this.currentProcess = Promise.resolve();
+      return true;
+    }
+    async #exit() {
+      this.dispatchEvent(new Event("beforeclose" /* BeforeClose */));
+      await Promise.allSettled(this.#blockingBeforeClose.map((value) => value()));
+      this.dataset.exiting = "";
+      this.removeAttribute("open");
+      await Promise.all(this.getAnimations({ subtree: true }).map((animation) => animation.finished));
+      this.#close();
+      delete this.dataset.exiting;
+      this.dispatchEvent(new Event("afterclose" /* AfterClose */));
+      await Promise.allSettled(this.#blockingAfterClose.map((value) => value()));
+    }
+    #close() {
+      this.toggleAttribute("open", false);
+      this.removeAttribute("aria-current");
     }
     getProperties() {
       const dataValues = Object.entries(this.dataset);
@@ -33,6 +72,44 @@ var RouteType = (elementType = HTMLElement) => {
       }, {});
       return properties;
     }
+    #blockingBeforeOpen = [];
+    #blockingAfterOpen = [];
+    #blockingBeforeClose = [];
+    #blockingAfterClose = [];
+    applyEventListener(type, listener, options) {
+      const isOpen = this.getAttribute("open") != null;
+      this.addEventListener(type, listener, options);
+      if ((type == "beforeopen" /* BeforeOpen */.toString() || type == "afteropen" /* AfterOpen */.toString()) && isOpen == true) {
+        this.dispatchEvent(new Event(type));
+      } else if (type == "beforeclose" /* BeforeClose */.toString() || type == "afterclose" /* AfterClose */.toString() && isOpen == false) {
+        this.dispatchEvent(new Event(type));
+      }
+    }
+    addBlockingEventListener(eventName, handler) {
+      switch (eventName) {
+        case "beforeopen" /* BeforeOpen */:
+          this.#blockingBeforeOpen.push(handler);
+          break;
+        case "afteropen" /* AfterOpen */:
+          this.#blockingAfterOpen.push(handler);
+          break;
+        case "beforeclose" /* BeforeClose */:
+          this.#blockingBeforeClose.push(handler);
+          break;
+        case "afterclose" /* AfterClose */:
+          this.#blockingAfterClose.push(handler);
+          break;
+      }
+    }
+    applyBlockingEventListener(eventName, handler) {
+      const isOpen = this.getAttribute("open") != null;
+      this.addBlockingEventListener(eventName, handler);
+      if ((eventName == "beforeopen" /* BeforeOpen */.toString() || eventName == "afteropen" /* AfterOpen */.toString()) && isOpen == true) {
+        this.dispatchEvent(new Event(eventName));
+      } else if (eventName == "beforeclose" /* BeforeClose */.toString() || eventName == "afterclose" /* AfterClose */.toString() && isOpen == false) {
+        this.dispatchEvent(new Event(eventName));
+      }
+    }
   };
 };
 
@@ -40,6 +117,9 @@ var RouteType = (elementType = HTMLElement) => {
 var COMPONENT_TAG_NAME = "route-dialog";
 var RouteDialogElement = class extends RouteType(HTMLDialogElement) {
 };
+if (customElements.get(COMPONENT_TAG_NAME) == null) {
+  customElements.define(COMPONENT_TAG_NAME, RouteDialogElement, { extends: "dialog" });
+}
 
 // route-page.route.ts
 var COMPONENT_TAG_NAME2 = "route-page";
@@ -62,33 +142,236 @@ var ROUTEPROPERTY_DATA_ATTRIBUTE_KEYWORD = "property";
 var COMPONENT_TAG_NAME3 = "path-router";
 var PathRouterElement = class extends HTMLElement {
   get routePages() {
-    return Array.from(this.querySelectorAll(`:scope > ${COMPONENT_TAG_NAME2}`), (route) => route);
+    return Array.from(this.querySelectorAll(`:scope > ${COMPONENT_TAG_NAME2}, ${COMPONENT_TAG_NAME3} :not(${COMPONENT_TAG_NAME3}) ${COMPONENT_TAG_NAME2}`), (route) => route);
   }
   get routeDialogs() {
     return Array.from(this.querySelectorAll(`:scope > [is="${COMPONENT_TAG_NAME}"]`), (routeDialog) => routeDialog);
   }
   get routes() {
-    return [...this.routePages, ...this.routeDialogs];
+    return Array.from(this.querySelectorAll(`:scope > ${COMPONENT_TAG_NAME2},${COMPONENT_TAG_NAME3} :not(${COMPONENT_TAG_NAME3}) ${COMPONENT_TAG_NAME2},:scope > [is="${COMPONENT_TAG_NAME}"]`), (route) => route);
   }
+  /** The `<page-route>` element currently being navigated to. */
+  targetPageRoute;
+  /** The `<page-route>` element that the router currently has open. */
+  currentPageRoute;
+  /** The `route-dialog` element currently being navigated to. */
+  targetDialogRoute;
+  /** The `route-dialog` element that the router currently has open. */
+  currentDialogRoute;
+  /** The route that will be selected if no other routes match the current path. */
+  defaultRoute;
+  /** The path which controls the router's navigation. */
+  get path() {
+    return this.getAttribute("path");
+  }
+  set path(value) {
+    this.setAttribute("path", value);
+  }
+  #activationPromise;
+  #toUpdate = [];
+  #resolveNavigation;
+  /**
+   * Navigate to a route path.
+   * @param path route path
+   */
   async navigate(path) {
+    return new Promise((resolve) => {
+      this.#resolveNavigation = resolve;
+      this.setAttribute("path", path);
+    });
   }
-  async enterRoute() {
+  /**
+   * Adds simple click handling to a parent element that contains all of the 
+   * route links that you want to use for the target `<path-router>` element.
+   * @param parent An element that will contain every link that should be listened for. If no parent is provided, the document `<body>` will be used.
+   * @param linkQuery A query that will be used to de-select all route links. This can be customized for use-cases like nested path routers which may benefit from scoped selectors. By default, the query is `a[data-route],button[data-route]`.
+   */
+  addRouteLinkClickHandlers(parent, linkQuery = "a[data-route],button[data-route]") {
+    parent = parent ?? document.body;
+    parent.addEventListener("click", (event) => {
+      const targetLink = event.target.closest("a[data-route],button[data-route]");
+      if (targetLink != null && parent.contains(targetLink)) {
+        const links = [...parent.querySelectorAll(linkQuery)];
+        for (let i = 0; i < links.length; i++) {
+          links[i].removeAttribute("aria-current");
+        }
+        let path = targetLink.dataset.route;
+        if (path.indexOf(":") != -1) {
+          const parentRoute = this.closest('route-page,[is="route-dialog"]');
+          if (parentRoute != null) {
+            const parentProperties = parentRoute.getProperties();
+            const linkProperties = path.split("/").filter((item) => item.startsWith(":"));
+            for (let i = 0; i < linkProperties.length; i++) {
+              const linkPropertyName = linkProperties[i].substring(1);
+              if (parentProperties[linkPropertyName] != null) {
+                path = path.replace(`:${linkPropertyName}`, parentProperties[linkPropertyName]);
+              }
+            }
+          }
+        }
+        if (path.startsWith("#")) {
+          const currentPath = this.path ?? "";
+          const currentPathArray = currentPath.split("#");
+          currentPathArray[1] = path.substring(1);
+          path = currentPathArray.join("#");
+        }
+        this.setAttribute("path", path);
+        targetLink.setAttribute("aria-current", "page");
+      }
+    });
   }
-  async exitRoute() {
-  }
-  #update(path) {
-    for (let i = 0; i < this.routes.length; i++) {
-      const route = this.routes[i];
-      this.#closeRoute(route);
-      const [routeMatches, properties] = this.routeMatchesPath(route, path, route.classList.contains("dialog"));
-      this.#assignRouteProperties(route, properties);
-      if (routeMatches == true) {
-        this.#openRoute(route);
+  async #update(path, previousPath) {
+    if (this.#isActivated == false) {
+      throw new Error("Unable to update path-router before activation.");
+    }
+    const [pagePath, dialogPath] = this.#getTypedPaths(path);
+    const [currentPagePath, currentDialogPath] = this.#getTypedPaths(previousPath);
+    let openedPage = false;
+    let openedDialog = false;
+    const pageHasChanged = dialogPath != "" && pagePath == "" ? false : currentPagePath != pagePath;
+    const hashHasChanged = dialogPath != currentDialogPath;
+    const currentlyOpen = this.querySelector("[open]");
+    if (pageHasChanged == false && hashHasChanged == false && currentlyOpen != null) {
+      if (this.#resolveNavigation != null) {
+        this.#resolveNavigation();
+        this.#resolveNavigation = void 0;
+      }
+      currentlyOpen.dispatchEvent(new CustomEvent("refresh" /* Refresh */, { detail: { path }, bubbles: true, cancelable: true }));
+      return [openedPage, openedDialog];
+    }
+    await this.#awaitAllRouteProcesses();
+    const matchingRoutes = this.#findMatchingRoutes(path);
+    const matchingPageRoutes = matchingRoutes.filter((item) => item.route instanceof RoutePageElement);
+    const matchingDialogRoutes = matchingRoutes.filter((item) => item.route instanceof RouteDialogElement);
+    let openPagePromise = new Promise((resolve) => resolve(false));
+    let hasClosedPages = false;
+    const pagesToRemainOpen = matchingPageRoutes.map((item) => item.route);
+    if (pageHasChanged == true || currentlyOpen == null) {
+      const closed = await this.#closeCurrentRoutePages(pagesToRemainOpen);
+      if (closed == false) {
+        console.warn("Navigation was prevented.");
+        console.info(`Requested path: ${path}`);
+        if (this.#resolveNavigation != null) {
+          this.#resolveNavigation();
+          this.#resolveNavigation = void 0;
+        }
+        return false;
+      }
+      hasClosedPages = true;
+      for (let i = 0; i < matchingPageRoutes.length; i++) {
+        const routeData = matchingPageRoutes[i];
+        openPagePromise = this.#openRoutePage(routeData.route, dialogPath);
+        this.#assignRouteProperties(routeData.route, routeData.properties);
       }
     }
+    if (pageHasChanged || currentDialogPath != dialogPath) {
+      const closed = await this.#closeCurrentRouteDialogs(matchingDialogRoutes.map((item) => item.route));
+      if (closed != false) {
+        for (let i = 0; i < matchingDialogRoutes.length; i++) {
+          const routeData = matchingDialogRoutes[i];
+          openedDialog = await this.#openRouteDialog(routeData.route, dialogPath);
+          this.#assignRouteProperties(routeData.route, routeData.properties);
+          if (hasClosedPages == false) {
+            const subroutes = [...routeData.route.querySelectorAll("route-page")];
+            for (let i2 = 0; i2 < subroutes.length; i2++) {
+              if (pagesToRemainOpen.indexOf(subroutes[i2]) > -1) {
+                continue;
+              }
+              await subroutes[i2].exit();
+            }
+          }
+        }
+        for (let i = 0; i < matchingPageRoutes.length; i++) {
+          const routeData = matchingPageRoutes[i];
+          if (routeData.route.closest(`[is="${COMPONENT_TAG_NAME}"][open]`) != null) {
+            openPagePromise = this.#openRoutePage(routeData.route, dialogPath);
+            this.#assignRouteProperties(routeData.route, routeData.properties);
+          }
+        }
+      }
+    }
+    openedPage = await openPagePromise;
+    this.targetPageRoute = void 0;
+    this.targetDialogRoute = void 0;
+    if (this.#resolveNavigation != null) {
+      this.#resolveNavigation();
+      this.#resolveNavigation = void 0;
+    }
+    this.dispatchEvent(new CustomEvent("pathchange" /* PathChange */, { detail: { path }, bubbles: true, cancelable: true }));
+    return [openedPage, openedDialog];
   }
-  #openRoute(route) {
-    route.enter("");
+  #getTypedPaths(path) {
+    const pathArray = path.split("#");
+    const pagePath = pathArray[0];
+    const remainingPath = path.length > 1 ? pathArray[1] : null;
+    const remainingPathArray = remainingPath == null ? [""] : remainingPath.split("?");
+    const dialogPath = remainingPathArray == null ? "" : remainingPathArray[0];
+    return [pagePath, dialogPath];
+  }
+  #findMatchingRoutes(path) {
+    const routes = [];
+    const previousMatches = [];
+    for (let i = 0; i < this.routes.length; i++) {
+      const route = this.routes[i];
+      const [routeMatches, properties] = this.routeMatchesPath(route, path, previousMatches, route instanceof RouteDialogElement);
+      if (routeMatches == true) {
+        routes.push({ route, properties });
+        previousMatches.push(route);
+      }
+    }
+    return routes;
+  }
+  async #awaitAllRouteProcesses() {
+    return Promise.allSettled(this.routes.map((route) => {
+      return route.currentProcess;
+    }));
+  }
+  async #openRoutePage(route, path) {
+    this.targetPageRoute = route;
+    this.targetPageRoute = this.targetPageRoute || this.defaultRoute;
+    if (this.targetPageRoute == null) {
+      return false;
+    }
+    const opened = await this.targetPageRoute.enter(path);
+    if (opened) {
+      this.currentPageRoute = this.targetPageRoute;
+      this.dispatchEvent(new CustomEvent("change" /* Change */, { detail: { route: this.targetPageRoute, path } }));
+    }
+    return opened;
+  }
+  async #openRouteDialog(route, path) {
+    this.targetDialogRoute = route;
+    if (this.targetDialogRoute == null) {
+      return false;
+    }
+    const opened = await this.targetDialogRoute.enter(path);
+    if (opened) {
+      this.currentDialogRoute = this.targetDialogRoute;
+      this.dispatchEvent(new CustomEvent("change" /* Change */, { detail: { route: this.targetDialogRoute, path } }));
+    }
+    return opened;
+  }
+  async #closeCurrentRoutePages(toRemainOpen) {
+    const openPages = this.routePages.filter((item) => item.getAttribute("aria-current") == "page");
+    let closed = true;
+    for (let i = 0; i < openPages.length; i++) {
+      if (toRemainOpen.indexOf(openPages[i]) > -1) {
+        continue;
+      }
+      closed = closed == false ? closed : await openPages[i].exit();
+    }
+    return closed;
+  }
+  async #closeCurrentRouteDialogs(toRemainOpen) {
+    const openDialogs = this.routeDialogs.filter((item) => item.getAttribute("aria-current") == "page");
+    let closed = true;
+    for (let i = 0; i < openDialogs.length; i++) {
+      if (toRemainOpen.indexOf(openDialogs[i]) > -1) {
+        continue;
+      }
+      closed = closed == false ? closed : await openDialogs[i].exit();
+    }
+    return closed;
   }
   #assignRouteProperties(route, properties) {
     for (const [key, value] of Object.entries(properties)) {
@@ -96,39 +379,30 @@ var PathRouterElement = class extends HTMLElement {
       route.dataset[dataKey] = value;
     }
   }
-  #closeRoute(route) {
-    route.classList.remove("match");
-  }
-  routeMatchesPath(route, queryPath, isDialog = false) {
-    const routePath = route.getAttribute("path") ?? "";
-    if (routePath.trim() == "" || routePath == "/" && isDialog == false) {
-      return [queryPath.trim() == "" || queryPath == "/", {}];
-    }
-    if (routePath.trim() == queryPath.trim() && isDialog == false) {
-      return [true, {}];
-    }
+  routeMatchesPath(route, queryPath, previousMatches, isDialog = false) {
     const queryPathArray = queryPath.split("#");
     const pagePath = queryPathArray[0];
     const dialogPath = queryPathArray.length > 1 ? queryPathArray[1] : null;
+    const routePath = route.getAttribute("path") ?? "";
     const routePathArray = routePath.split("/");
     const pagePathArray = pagePath.split("/");
-    const pathType = route.closest(".dialog") == null ? "Page" : "Dialog";
+    const pathType = route.closest(`[is="${COMPONENT_TAG_NAME}"]`) == null ? "Page" : "Dialog";
     if (pathType == "Page") {
-      return this.routeTypeMatches(route, pagePathArray, routePathArray, "route-page");
+      return this.routeTypeMatches(route, pagePathArray, routePathArray, `${COMPONENT_TAG_NAME2}`, previousMatches);
     } else if (dialogPath == null) {
       return [false, {}];
     }
     const dialogPathArray = dialogPath.split("/");
-    return this.routeTypeMatches(route, dialogPathArray, routePathArray, '[is="route-dialog"]');
+    return this.routeTypeMatches(route, dialogPathArray, routePathArray, `${COMPONENT_TAG_NAME2},[is="${COMPONENT_TAG_NAME}"]`, previousMatches);
   }
-  routeTypeMatches(route, queryPathArray, routePathArray, parentRouteSelector) {
+  routeTypeMatches(route, queryPathArray, routePathArray, parentRouteSelector, previousMatches) {
     if (queryPathArray.length == 1 && queryPathArray[0].trim() == "") {
       return [false, {}];
     }
     const parentRoutes = [];
     let parentRoute = route.parentElement?.closest(parentRouteSelector);
     while (parentRoute != null) {
-      if (parentRoute.classList.contains("match") == false) {
+      if (previousMatches.indexOf(parentRoute) == -1) {
         return [false, {}];
       }
       parentRoutes.push(parentRoute);
@@ -181,31 +455,76 @@ var PathRouterElement = class extends HTMLElement {
     }
     return { match: routeMatchesPath, properties };
   }
-  connectedCallback() {
-    this.activateRouteManagement();
+  async connectedCallback() {
+    this.#activationPromise = this.#activateRouteManagement();
+    this.#injectStyles();
+    await this.#activationPromise;
+    this.#openPreActivationRoutes();
   }
   disconnectedCallback() {
-    this.deactivateRouteManagement();
+    this.#deactivateRouteManagement();
   }
   #isActivated = false;
-  async activateRouteManagement() {
+  async #activateRouteManagement() {
     await DOMCONTENTLOADED_PROMISE;
+    this.#assignDefaultRoute();
+    this.#addDialogCloseHandlers();
     this.#isActivated = true;
-    if (this.hasAttribute("debug")) {
-      console.info("Activated Router");
+  }
+  #assignDefaultRoute() {
+    this.defaultRoute = this.querySelector("route-page[default]");
+    if (this.defaultRoute == null) {
+      this.defaultRoute = this.querySelector("route-page");
     }
   }
-  async deactivateRouteManagement() {
+  async #openPreActivationRoutes() {
+    for (let i = 0; i < this.#toUpdate.length; i++) {
+      await this.#update(this.#toUpdate[i].newValue, this.#toUpdate[i].oldValue);
+    }
+  }
+  #boundDialogOnCloseHandler = this.#dialog_onClose.bind(this);
+  #addDialogCloseHandlers() {
+    for (let i = 0; i < this.routeDialogs.length; i++) {
+      this.routeDialogs[i].addEventListener("close", this.#boundDialogOnCloseHandler);
+    }
+  }
+  async #dialog_onClose(event) {
+    const dialog = event.target;
+    const isExiting = dialog.getAttribute("data-exiting") != null;
+    if (!isExiting) {
+      const pathAttribute = this.getAttribute("path") ?? "/";
+      const path = pathAttribute.split("#")[0];
+      await this.navigate(path);
+    }
+    dialog.removeAttribute("data-exiting");
+  }
+  #deactivateRouteManagement() {
+    this.#unassignDefaultRoute();
+    this.#removeDialogCloseHandler();
+    this.#activationPromise = void 0;
     this.#isActivated = false;
-    if (this.hasAttribute("debug")) {
-      console.info("Deactivated Router");
+  }
+  #unassignDefaultRoute() {
+    if (this.defaultRoute != null) {
+      this.defaultRoute = void 0;
+    }
+  }
+  #removeDialogCloseHandler() {
+    this.removeEventListener("close", this.#boundDialogOnCloseHandler);
+  }
+  #injectStyles() {
+    let parent = this.getRootNode();
+    if (parent.adoptedStyleSheets.indexOf(COMPONENT_STYLESHEET) == -1) {
+      parent.adoptedStyleSheets.push(COMPONENT_STYLESHEET);
     }
   }
   static observedAttributes = ["path"];
   attributeChangedCallback(attributeName, oldValue, newValue) {
     if (attributeName == "path") {
       if (this.#isActivated == true) {
-        this.#update(newValue);
+        this.#update(newValue, oldValue);
+      } else {
+        this.#toUpdate.push({ newValue, oldValue: oldValue ?? "" });
       }
     }
   }

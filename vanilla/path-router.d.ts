@@ -1,11 +1,24 @@
 declare const RouteDialogElement_base: {
     new (): {
-        enter(path: string): Promise<void>;
+        currentProcess: Promise<void>;
+        canBeOpened: () => Promise<boolean>;
+        canBeClosed: () => Promise<boolean>;
+        enter(path: string): Promise<boolean>;
         "__#1@#enter"(path: string): Promise<void>;
         "__#1@#open"(): Promise<void>;
+        exit(): Promise<boolean>;
+        "__#1@#exit"(): Promise<void>;
+        "__#1@#close"(): void;
         getProperties(): {
             [key: string]: string | null | undefined;
         };
+        "__#1@#blockingBeforeOpen": (() => void | Promise<void>)[];
+        "__#1@#blockingAfterOpen": (() => void | Promise<void>)[];
+        "__#1@#blockingBeforeClose": (() => void | Promise<void>)[];
+        "__#1@#blockingAfterClose": (() => void | Promise<void>)[];
+        applyEventListener<K extends (keyof HTMLElementEventMap | "beforeopen" | "afteropen" | "beforeclose" | "afterclose")>(type: K, listener: (this: HTMLElement, ev: Event | CustomEvent) => void | Promise<void>, options?: boolean | AddEventListenerOptions | undefined): void;
+        addBlockingEventListener(eventName: PathRouteEvent, handler: () => void | Promise<void>): void;
+        applyBlockingEventListener(eventName: PathRouteEvent, handler: () => void | Promise<void>): void;
         accessKey: string;
         readonly accessKeyLabel: string;
         autocapitalize: string;
@@ -334,19 +347,31 @@ declare const RouteDialogElement_base: {
         blur(): void;
         focus(options?: FocusOptions): void;
     };
-    value: string;
 };
 declare class RouteDialogElement extends RouteDialogElement_base {
 }
 
 declare const RoutePageElement_base: {
     new (): {
-        enter(path: string): Promise<void>;
+        currentProcess: Promise<void>;
+        canBeOpened: () => Promise<boolean>;
+        canBeClosed: () => Promise<boolean>;
+        enter(path: string): Promise<boolean>;
         "__#1@#enter"(path: string): Promise<void>;
         "__#1@#open"(): Promise<void>;
+        exit(): Promise<boolean>;
+        "__#1@#exit"(): Promise<void>;
+        "__#1@#close"(): void;
         getProperties(): {
             [key: string]: string | null | undefined;
         };
+        "__#1@#blockingBeforeOpen": (() => void | Promise<void>)[];
+        "__#1@#blockingAfterOpen": (() => void | Promise<void>)[];
+        "__#1@#blockingBeforeClose": (() => void | Promise<void>)[];
+        "__#1@#blockingAfterClose": (() => void | Promise<void>)[];
+        applyEventListener<K extends (keyof HTMLElementEventMap | "beforeopen" | "afteropen" | "beforeclose" | "afterclose")>(type: K, listener: (this: HTMLElement, ev: Event | CustomEvent) => void | Promise<void>, options?: boolean | AddEventListenerOptions | undefined): void;
+        addBlockingEventListener(eventName: PathRouteEvent, handler: () => void | Promise<void>): void;
+        applyBlockingEventListener(eventName: PathRouteEvent, handler: () => void | Promise<void>): void;
         accessKey: string;
         readonly accessKeyLabel: string;
         autocapitalize: string;
@@ -675,11 +700,17 @@ declare const RoutePageElement_base: {
         blur(): void;
         focus(options?: FocusOptions): void;
     };
-    value: string;
 };
 declare class RoutePageElement extends RoutePageElement_base {
 }
 
+declare enum PathRouteEvent {
+    BeforeOpen = "beforeopen",
+    AfterOpen = "afteropen",
+    BeforeClose = "beforeclose",
+    AfterClose = "afterclose",
+    Refresh = "refresh"
+}
 type Route = RoutePageElement | RouteDialogElement;
 
 declare enum PathRouterEvent {
@@ -702,21 +733,41 @@ declare class PathRouterElement extends HTMLElement {
     #private;
     get routePages(): RoutePageElement[];
     get routeDialogs(): RouteDialogElement[];
-    get routes(): (RoutePageElement | RouteDialogElement)[];
+    get routes(): Route[];
+    /** The `<page-route>` element currently being navigated to. */
+    targetPageRoute: RoutePageElement | undefined;
+    /** The `<page-route>` element that the router currently has open. */
+    currentPageRoute: RoutePageElement | undefined;
+    /** The `route-dialog` element currently being navigated to. */
+    targetDialogRoute: RouteDialogElement | undefined;
+    /** The `route-dialog` element that the router currently has open. */
+    currentDialogRoute: RouteDialogElement | undefined;
+    /** The route that will be selected if no other routes match the current path. */
+    defaultRoute: RoutePageElement | undefined;
+    /** The path which controls the router's navigation. */
+    get path(): string | null;
+    set path(value: string);
+    /**
+     * Navigate to a route path.
+     * @param path route path
+     */
     navigate(path: string): Promise<void>;
-    enterRoute(): Promise<void>;
-    exitRoute(): Promise<void>;
-    routeMatchesPath(route: Route, queryPath: string, isDialog?: boolean): MatchValues;
-    routeTypeMatches(route: Route, queryPathArray: string[], routePathArray: string[], parentRouteSelector: string): MatchValues;
+    /**
+     * Adds simple click handling to a parent element that contains all of the
+     * route links that you want to use for the target `<path-router>` element.
+     * @param parent An element that will contain every link that should be listened for. If no parent is provided, the document `<body>` will be used.
+     * @param linkQuery A query that will be used to de-select all route links. This can be customized for use-cases like nested path routers which may benefit from scoped selectors. By default, the query is `a[data-route],button[data-route]`.
+     */
+    addRouteLinkClickHandlers(parent?: HTMLElement, linkQuery?: string): void;
+    routeMatchesPath(route: Route, queryPath: string, previousMatches: Route[], isDialog?: boolean): MatchValues;
+    routeTypeMatches(route: Route, queryPathArray: string[], routePathArray: string[], parentRouteSelector: string, previousMatches: Route[]): MatchValues;
     getRouteProperties(route?: Route): {};
     pathArraySelectsRouteArray(pathArray: string[], routeArray: string[]): {
         match: boolean;
         properties: PropertyValues;
     };
-    connectedCallback(): void;
+    connectedCallback(): Promise<void>;
     disconnectedCallback(): void;
-    activateRouteManagement(): Promise<void>;
-    deactivateRouteManagement(): Promise<void>;
     static observedAttributes: string[];
     attributeChangedCallback(attributeName: string, oldValue: string, newValue: string): void;
 }

@@ -59,20 +59,38 @@
                     <a data-route="first">Route First</a>
                     <a data-route="second">Route Second</a>
                     <a data-route="third">Route Third</a>
+                    <a data-route="fourth">Route Fourth</a>
+                    <a data-route="fourth/fifth/and">Route Fifth</a>
+                    <a data-route="test">Route Test</a>
+                    <a data-route="#dialog/home">Route Dialog</a>
+                    <a data-route="#dialog/second">Route Dialog - Second</a>
                 </menu>
                 <path-router id="default-route" path="" debug>
                     <route-page path="first">Route First</route-page>
                     <route-page path="second">Route Second</route-page>
                     <route-page path="third">Route Third</route-page>
+                    <route-page path="fourth">
+                        Route Fourth
+                        <route-page path="fifth/:test">Route Fifth</route-page>
+                    </route-page>
+                    <path-router>
+                        <route-page path="test"></route-page>
+                    </path-router>
+                    <dialog is="route-dialog" path="dialog">
+                        Dialog
+                        <route-page path="home">Dialog Default</route-page>
+                        <route-page path="second">Dialog Second</route-page>
+                        <form method="dialog"><button>Close</button></form>
+                    </dialog>
                 </path-router>
             </div>
             <script type="module">
-                // const defaultRouteRouter = document.querySelector('article.default-route path-router');
-                // document.addEventListener('DOMContentLoaded', () =>
-                // {
-                //     const linksParent = document.querySelector('article.default-route menu');
-                //     defaultRouteRouter.addRouteLinkClickHandlers(linksParent);
-                // });
+                const defaultRouteRouter = document.querySelector('article.default-route path-router');
+                document.addEventListener('DOMContentLoaded', () =>
+                {
+                    const linksParent = document.querySelector('article.default-route menu');
+                    defaultRouteRouter.addRouteLinkClickHandlers(linksParent);
+                });
             </script>
         </article>
     </main>    
