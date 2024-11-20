@@ -30,6 +30,26 @@ export const RouteType = (elementType: typeof HTMLElement = HTMLElement) =>
         canBeOpened: () => Promise<boolean> = async () => true;
         canBeClosed: () => Promise<boolean> = async () => true;
 
+        getProperties()
+        {
+            const dataValues = Object.entries(this.dataset);
+
+            const properties = dataValues.reduce((result, item) =>
+            {
+                const dataItemName = item[0];
+                if(!dataItemName.startsWith(ROUTEPROPERTY_DATA_ATTRIBUTE_KEYWORD)) { return result; }
+
+                const key = dataItemName[ROUTEPROPERTY_DATA_ATTRIBUTE_KEYWORD.length].toLowerCase() // lowercase first letter of property name
+                + dataItemName.substring(ROUTEPROPERTY_DATA_ATTRIBUTE_KEYWORD.length + 1); // remove keyword and first letter of property name
+                const value = item[1];
+
+                result[key] = value;
+                return result;
+            }, {} as { [key: string]: string|undefined|null });
+
+            return properties;
+        }
+
         async enter(path: string)
         {
             const canNavigate = await this.canBeOpened();
@@ -93,33 +113,11 @@ export const RouteType = (elementType: typeof HTMLElement = HTMLElement) =>
             this.dispatchEvent(new Event(PathRouteEvent.AfterClose));
             await Promise.allSettled(this.#blockingAfterClose.map(value => value()));
         }
-        
         #close()
         {
             this.toggleAttribute('open', false);
             this.removeAttribute('aria-current');
         }
-
-        getProperties()
-        {
-            const dataValues = Object.entries(this.dataset);
-
-            const properties = dataValues.reduce((result, item) =>
-            {
-                const dataItemName = item[0];
-                if(!dataItemName.startsWith(ROUTEPROPERTY_DATA_ATTRIBUTE_KEYWORD)) { return result; }
-
-                const key = dataItemName[ROUTEPROPERTY_DATA_ATTRIBUTE_KEYWORD.length].toLowerCase() // lowercase first letter of property name
-                + dataItemName.substring(ROUTEPROPERTY_DATA_ATTRIBUTE_KEYWORD.length + 1); // remove keyword and first letter of property name
-                const value = item[1];
-
-                result[key] = value;
-                return result;
-            }, {} as { [key: string]: string|undefined|null });
-
-            return properties;
-        }
-
         
         #blockingBeforeOpen: (() => void|Promise<void>)[] = [];
         #blockingAfterOpen: (() => void|Promise<void>)[] = [];

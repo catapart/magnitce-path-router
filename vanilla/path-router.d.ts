@@ -3,15 +3,15 @@ declare const RouteDialogElement_base: {
         currentProcess: Promise<void>;
         canBeOpened: () => Promise<boolean>;
         canBeClosed: () => Promise<boolean>;
+        getProperties(): {
+            [key: string]: string | null | undefined;
+        };
         enter(path: string): Promise<boolean>;
         "__#1@#enter"(path: string): Promise<void>;
         "__#1@#open"(): Promise<void>;
         exit(): Promise<boolean>;
         "__#1@#exit"(): Promise<void>;
         "__#1@#close"(): void;
-        getProperties(): {
-            [key: string]: string | null | undefined;
-        };
         "__#1@#blockingBeforeOpen": (() => void | Promise<void>)[];
         "__#1@#blockingAfterOpen": (() => void | Promise<void>)[];
         "__#1@#blockingBeforeClose": (() => void | Promise<void>)[];
@@ -356,15 +356,15 @@ declare const RoutePageElement_base: {
         currentProcess: Promise<void>;
         canBeOpened: () => Promise<boolean>;
         canBeClosed: () => Promise<boolean>;
+        getProperties(): {
+            [key: string]: string | null | undefined;
+        };
         enter(path: string): Promise<boolean>;
         "__#1@#enter"(path: string): Promise<void>;
         "__#1@#open"(): Promise<void>;
         exit(): Promise<boolean>;
         "__#1@#exit"(): Promise<void>;
         "__#1@#close"(): void;
-        getProperties(): {
-            [key: string]: string | null | undefined;
-        };
         "__#1@#blockingBeforeOpen": (() => void | Promise<void>)[];
         "__#1@#blockingAfterOpen": (() => void | Promise<void>)[];
         "__#1@#blockingBeforeClose": (() => void | Promise<void>)[];

@@ -7,6 +7,20 @@ var RouteType = (elementType = HTMLElement) => {
     currentProcess = Promise.resolve();
     canBeOpened = async () => true;
     canBeClosed = async () => true;
+    getProperties() {
+      const dataValues = Object.entries(this.dataset);
+      const properties = dataValues.reduce((result, item) => {
+        const dataItemName = item[0];
+        if (!dataItemName.startsWith(ROUTEPROPERTY_DATA_ATTRIBUTE_KEYWORD)) {
+          return result;
+        }
+        const key = dataItemName[ROUTEPROPERTY_DATA_ATTRIBUTE_KEYWORD.length].toLowerCase() + dataItemName.substring(ROUTEPROPERTY_DATA_ATTRIBUTE_KEYWORD.length + 1);
+        const value = item[1];
+        result[key] = value;
+        return result;
+      }, {});
+      return properties;
+    }
     async enter(path) {
       const canNavigate = await this.canBeOpened();
       if (!canNavigate) {
@@ -57,20 +71,6 @@ var RouteType = (elementType = HTMLElement) => {
     #close() {
       this.toggleAttribute("open", false);
       this.removeAttribute("aria-current");
-    }
-    getProperties() {
-      const dataValues = Object.entries(this.dataset);
-      const properties = dataValues.reduce((result, item) => {
-        const dataItemName = item[0];
-        if (!dataItemName.startsWith(ROUTEPROPERTY_DATA_ATTRIBUTE_KEYWORD)) {
-          return result;
-        }
-        const key = dataItemName[ROUTEPROPERTY_DATA_ATTRIBUTE_KEYWORD.length].toLowerCase() + dataItemName.substring(ROUTEPROPERTY_DATA_ATTRIBUTE_KEYWORD.length + 1);
-        const value = item[1];
-        result[key] = value;
-        return result;
-      }, {});
-      return properties;
     }
     #blockingBeforeOpen = [];
     #blockingAfterOpen = [];
@@ -197,8 +197,8 @@ var PathRouterElement = class extends HTMLElement {
         }
         let path = targetLink.dataset.route;
         if (path.indexOf(":") != -1) {
-          const parentRoute = this.closest('route-page,[is="route-dialog"]');
-          if (parentRoute != null) {
+          let parentRoute = targetLink.closest('route-page,[is="route-dialog"]');
+          while (parentRoute != null) {
             const parentProperties = parentRoute.getProperties();
             const linkProperties = path.split("/").filter((item) => item.startsWith(":"));
             for (let i = 0; i < linkProperties.length; i++) {
@@ -207,6 +207,7 @@ var PathRouterElement = class extends HTMLElement {
                 path = path.replace(`:${linkPropertyName}`, parentProperties[linkPropertyName]);
               }
             }
+            parentRoute = parentRoute.parentElement?.closest('route-page,[is="route-dialog"]');
           }
         }
         if (path.startsWith("#")) {
@@ -459,7 +460,10 @@ var PathRouterElement = class extends HTMLElement {
     this.#activationPromise = this.#activateRouteManagement();
     this.#injectStyles();
     await this.#activationPromise;
-    this.#openPreActivationRoutes();
+    await this.#openPreActivationRoutes();
+    if (this.currentPageRoute == null && this.defaultRoute != null) {
+      this.#openRoutePage(this.defaultRoute, "");
+    }
   }
   disconnectedCallback() {
     this.#deactivateRouteManagement();
@@ -522,7 +526,7 @@ var PathRouterElement = class extends HTMLElement {
   attributeChangedCallback(attributeName, oldValue, newValue) {
     if (attributeName == "path") {
       if (this.#isActivated == true) {
-        this.#update(newValue, oldValue);
+        this.#update(newValue, oldValue ?? "");
       } else {
         this.#toUpdate.push({ newValue, oldValue: oldValue ?? "" });
       }

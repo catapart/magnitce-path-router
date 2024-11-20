@@ -108,8 +108,8 @@ export class PathRouterElement extends HTMLElement
                 // if they have an exact name match.
                 if(path.indexOf(':') != -1)
                 {
-                    const parentRoute = this.closest('route-page,[is="route-dialog"]');
-                    if(parentRoute != null)
+                    let parentRoute: Element|null|undefined = targetLink.closest('route-page,[is="route-dialog"]');
+                    while(parentRoute != null)
                     {
                         const parentProperties = (parentRoute as RoutePageElement).getProperties();
                         const linkProperties = path.split('/').filter(item => item.startsWith(':'));
@@ -121,6 +121,7 @@ export class PathRouterElement extends HTMLElement
                                 path = path.replace(`:${linkPropertyName}`, parentProperties[linkPropertyName]);
                             }
                         }
+                        parentRoute = parentRoute.parentElement?.closest('route-page,[is="route-dialog"]');
                     }
                 }
 
@@ -505,7 +506,12 @@ export class PathRouterElement extends HTMLElement
         this.#injectStyles();
 
         await this.#activationPromise;
-        this.#openPreActivationRoutes();
+        await this.#openPreActivationRoutes();
+
+        if(this.currentPageRoute == null && this.defaultRoute != null)
+        {
+            this.#openRoutePage(this.defaultRoute, "");
+        }
     }
     disconnectedCallback()
     {
@@ -595,7 +601,7 @@ export class PathRouterElement extends HTMLElement
         {
             if(this.#isActivated == true)
             {
-                this.#update(newValue, oldValue);
+                this.#update(newValue, oldValue ?? "");
             }
             else
             {
