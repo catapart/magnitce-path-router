@@ -176,10 +176,16 @@ export class PathRouterElement extends HTMLElement
 
         // find routes by path
         const matchingRoutes = this.#findMatchingRoutes(path);
-        const matchingPageRoutes = matchingRoutes.filter(item => item.route instanceof RoutePageElement);
+        let matchingPageRoutes = matchingRoutes.filter(item => item.route instanceof RoutePageElement);
         const matchingDialogRoutes = matchingRoutes.filter(item => item.route instanceof RouteDialogElement);
         // const [ pageRoute, dialogRoute ] = this.#getRouteElements(path);
         let openPagePromise: Promise<boolean> = new Promise(resolve => resolve(false));
+
+        // if more than one route matched at the same nesting depth
+        // and one of them is strictly a property route (path=":propertyName"),
+        // the property-only route should be ignored so that a default route can
+        // be matched without also matching the property
+        matchingPageRoutes = this.#filterPropertyRoutes(matchingPageRoutes);
 
         let hasClosedPages = false;
         const pagesToRemainOpen = matchingPageRoutes.map(item => item.route);
@@ -291,6 +297,38 @@ export class PathRouterElement extends HTMLElement
             }
         }
         return routes;
+    }
+    #filterPropertyRoutes(matchingPageRoutes: { route: Route, properties: PropertyValues }[])
+    {
+        const toRemove: { route: Route, properties: PropertyValues }[] = [];
+        for(let i = 0; i < matchingPageRoutes.length; i++)
+        {
+            const currentMatch =  matchingPageRoutes[i];
+            const currentMatchPath = currentMatch.route.getAttribute('path');
+            const closestCurrentMatchRouteParent = currentMatch.route.parentElement?.closest('route-page,[is="route-dialog"],path-router');
+            
+            const comparisonMatch = matchingPageRoutes.find(item =>
+            {
+                return toRemove.indexOf(item) == -1
+                && item != currentMatch
+                && item.route.parentElement?.closest('route-page,[is="route-dialog"],path-router') == closestCurrentMatchRouteParent;
+            });
+            if(comparisonMatch == null) { continue; }
+
+            if(currentMatchPath?.startsWith(':'))
+            {
+                toRemove.push(currentMatch);
+                continue;
+            }
+            const comparisonMatchPath = comparisonMatch.route.getAttribute('path');
+            if(comparisonMatchPath?.startsWith(':'))
+            {
+                toRemove.push(comparisonMatch);
+            }
+        }
+
+        const result = matchingPageRoutes.filter(item => toRemove.indexOf(item) == -1);
+        return result;
     }
     async #awaitAllRouteProcesses()
     {

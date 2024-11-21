@@ -713,7 +713,7 @@
               <menu id="page-menu">
                 <a data-theme="heading-nav" data-route="home">Routing</a>
                 <a data-theme="heading-nav" data-route="user/">User</a>
-                <a data-theme="heading-nav" data-route="help">Help</a>
+                <a data-theme="heading-nav" data-route="help/faq">Help</a>
                 <a data-theme="heading-nav" data-route="help/faq">FAQ</a>
                 <a data-theme="heading-nav" data-route="help/contact">Contact</a>
               </menu>
@@ -735,42 +735,51 @@
                   <button type="button" data-theme="heading-nav" data-route="user/1/contact/alice">Open Alice Contact</button>
                   <button type="button" data-theme="heading-nav" data-route="user/1/contact/bob">Open Bob Contact</button>
                 </route-page>
-                <route-page path="user/:id" class="user-page">
+                <route-page path="user" class="user-page">
                   <h3>User</h3>
                   <p>Routes can be nested by adding a path-router element as a child of a route-page element.</p>
-                  <nav>
-                    <a data-theme="tabs" data-route="user/:id/profile">Profile</a>
-                    <a data-theme="tabs" data-route="user/:id/contact/main">Contacts</a>
-                  </nav>
-                  <div id="user-router" data-theme="tabs">
-                    <route-page path="profile">
-                      <h4>User Profile</h4>
-                      <p>By giving the route a variable, like ":subpage", the remanining route can be passed down to the nested path-router element.</p>
-                    </route-page>
-                    <route-page path="contact" class="contact-page">
-                      <div id="user-contact-router">
-                        <route-page path="main">
-                          <h4>User Contacts</h4>
-                          <p>Nested routes can also have path-router elements.</p>
-                          <p>By using variables and route-link elements, a nested path can be navigated to without any javascript needed for the implementer.</p>
-                          <nav>
-                            <style>
-                              .link { padding: 0 .2em; cursor: pointer; }
+                  <route-page>
+                    <nav>
+                      <a data-theme="tabs" data-route="user/1">User 1</a>
+                      <a data-theme="tabs" data-route="user/2">User 2</a>
+                      <a data-theme="tabs" data-route="user/3">User 3</a>
+                    </nav>
+                  </route-page>
+                  <route-page path=":id">
+                    <nav>
+                      <a data-theme="tabs" data-route="user/:id/profile">Profile</a>
+                      <a data-theme="tabs" data-route="user/:id/contact/">Contacts</a>
+                    </nav>
+                    <div id="user-router" data-theme="tabs">
+                      <route-page path="profile">
+                        <h4>User Profile</h4>
+                        <p>By giving the route a variable, like ":subpage", the remanining route can be passed down to the nested path-router element.</p>
+                      </route-page>
+                      <route-page path="contact" class="contact-page">
+                        <div id="user-contact-router">
+                          <route-page>
+                            <h4>User Contacts</h4>
+                            <p>Nested routes can also have path-router elements.</p>
+                            <p>By using variables and route-link elements, a nested path can be navigated to without any javascript needed for the implementer.</p>
+                            <nav>
+                              <style>
+                                .link { padding: 0 .2em; cursor: pointer; }
                               .link:hover { text-decoration: underline ;}
-                            </style>
-                            <a class="link" data-route="alice">Alice</a>
-                            <a class="link" data-route="bob">Bob</a>
-                          </nav>
-                        </route-page>
-                        <route-page path=":contactId" class="contact-data-page">
-                          <h4><span class="contact-data">[Contact]</span></h4>
-                          <p><span class="contact-data">[Contact]</span>'s Contact Info</p>
-                          <a class="link" data-route="#address">See Address</a>
-                          <a class="link" data-route="user/:id/contact">Back</a>
-                        </route-page>
-                      </div>
-                    </route-page>
-                  </div>
+                              </style>
+                              <a class="link" data-route="user/:id/contact/alice">Alice</a>
+                              <a class="link" data-route="user/:id/contact/bob">Bob</a>
+                            </nav>
+                          </route-page>
+                          <route-page path=":contactId" class="contact-data-page">
+                            <h4><span class="contact-data">[Contact]</span></h4>
+                            <p><span class="contact-data">[Contact]</span>'s Contact Info</p>
+                            <a class="link" data-route="#address">See Address</a>
+                            <a class="link" data-route="user/:id/contact/">Back</a>
+                          </route-page>
+                        </div>
+                      </route-page>
+                    </div>
+                  </route-page>
                 </route-page>
                 <route-page path="help" class="help-page">
                   <h2>Help</h2>
@@ -867,11 +876,6 @@
                     pageRouter.addRouteLinkClickHandlers(aboutDialogMenu);
                     
                     // todo: 
-                    // add subrouting
-                    // - contact router
-                    //  - contact dialog name issue
-                    // - dialog router
-                    // - help router
                     // add history navigation
                     // revise demo copy
                     // update readme copy

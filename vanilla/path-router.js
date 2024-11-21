@@ -242,9 +242,10 @@ var PathRouterElement = class extends HTMLElement {
     }
     await this.#awaitAllRouteProcesses();
     const matchingRoutes = this.#findMatchingRoutes(path);
-    const matchingPageRoutes = matchingRoutes.filter((item) => item.route instanceof RoutePageElement);
+    let matchingPageRoutes = matchingRoutes.filter((item) => item.route instanceof RoutePageElement);
     const matchingDialogRoutes = matchingRoutes.filter((item) => item.route instanceof RouteDialogElement);
     let openPagePromise = new Promise((resolve) => resolve(false));
+    matchingPageRoutes = this.#filterPropertyRoutes(matchingPageRoutes);
     let hasClosedPages = false;
     const pagesToRemainOpen = matchingPageRoutes.map((item) => item.route);
     if (pageHasChanged == true || currentlyOpen == null) {
@@ -321,6 +322,30 @@ var PathRouterElement = class extends HTMLElement {
       }
     }
     return routes;
+  }
+  #filterPropertyRoutes(matchingPageRoutes) {
+    const toRemove = [];
+    for (let i = 0; i < matchingPageRoutes.length; i++) {
+      const currentMatch = matchingPageRoutes[i];
+      const currentMatchPath = currentMatch.route.getAttribute("path");
+      const closestCurrentMatchRouteParent = currentMatch.route.parentElement?.closest('route-page,[is="route-dialog"],path-router');
+      const comparisonMatch = matchingPageRoutes.find((item) => {
+        return toRemove.indexOf(item) == -1 && item != currentMatch && item.route.parentElement?.closest('route-page,[is="route-dialog"],path-router') == closestCurrentMatchRouteParent;
+      });
+      if (comparisonMatch == null) {
+        continue;
+      }
+      if (currentMatchPath?.startsWith(":")) {
+        toRemove.push(currentMatch);
+        continue;
+      }
+      const comparisonMatchPath = comparisonMatch.route.getAttribute("path");
+      if (comparisonMatchPath?.startsWith(":")) {
+        toRemove.push(comparisonMatch);
+      }
+    }
+    const result = matchingPageRoutes.filter((item) => toRemove.indexOf(item) == -1);
+    return result;
   }
   async #awaitAllRouteProcesses() {
     return Promise.allSettled(this.routes.map((route) => {
