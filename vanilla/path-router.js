@@ -1,5 +1,5 @@
 // path-router.css?raw
-var path_router_default = '/* \r\n   Animations will not be awaitable in code if they have a display of none.\r\n   Instead, the routes are stacked in a grid.\r\n */\r\npath-router\r\n{ \r\n    display: var(--router-display, grid);\r\n    grid-template-columns: 1fr;\r\n    grid-template-rows: 1fr;\r\n}\r\n\r\nroute-page:not([open],[data-entering],[data-exiting]) path-router\r\n{ display: none; /* browser bug when rendering visibility? */ }\r\n\r\nroute-page\r\n{\r\n    display: var(--route-display, block);\r\n    visibility: hidden;\r\n    grid-row: 1;\r\n    grid-column: 1;\r\n}\r\n/* \r\n   Visibility is visible during the entering and exiting phases\r\n   to allow for animations to be awaited.\r\n */\r\nroute-page[open]\r\n,route-page[data-entering]\r\n,route-page[data-exiting]\r\n{\r\n    visibility: visible;\r\n}\r\n[is="route-link"]\r\n,[is="route-button"]\r\n{\r\n    user-select: none;\r\n}';
+var path_router_default = "/* \r\n   Animations will not be awaitable in code if they have a display of none.\r\n   Instead, the routes are stacked in a grid.\r\n */\r\npath-router\r\n{ \r\n    display: var(--router-display, grid);\r\n    grid-template-columns: 1fr;\r\n    grid-template-rows: 1fr;\r\n}\r\n\r\nroute-page\r\n{\r\n    display: var(--route-display, block);\r\n    visibility: hidden;\r\n    grid-row: 1;\r\n    grid-column: 1;\r\n}\r\n/* \r\n   Visibility is visible during the entering and exiting phases\r\n   to allow for animations to be awaited.\r\n */\r\nroute-page[open]\r\n,route-page[data-entering]\r\n,route-page[data-exiting]\r\n{\r\n    visibility: visible;\r\n}\r\n\r\n/* sub routes should respect the visibility of the parent routes */\r\nroute-page:not([open],[data-entering],[data-exiting]) route-page[open]\r\n{\r\n    visibility: inherit;\r\n}";
 
 // route.ts
 var RouteType = (elementType = HTMLElement) => {
@@ -221,11 +221,31 @@ var PathRouterElement = class extends HTMLElement {
       }
     });
   }
+  /**
+   * Compare two `URL` objects to determine whether they represet different locations and, if so, whether or not the new location is marked as a replacement change.
+   * @param currentLocation a url object representing the current location
+   * @param updatedLocation a url object representing the location to compare against
+   * @returns `{ hasChanged, isReplacementChange }`: Whether there was a change, and whether history management should add an entry, or replace the last entry.
+   */
+  compareLocations(currentLocation, updatedLocation) {
+    let hasChanged = false;
+    let isReplacementChange = false;
+    if (updatedLocation.pathname != currentLocation.pathname) {
+      hasChanged = true;
+    } else if (updatedLocation.pathname == currentLocation.pathname && updatedLocation.hash != currentLocation.hash) {
+      hasChanged = true;
+      if (currentLocation.hash != "" && updatedLocation.hash != "") {
+        isReplacementChange = true;
+      }
+    }
+    return { hasChanged, isReplacementChange };
+  }
   async #update(path, previousPath) {
     if (this.#isActivated == false) {
       throw new Error("Unable to update path-router before activation.");
     }
-    const [pagePath, dialogPath] = this.#getTypedPaths(path);
+    const sanitizedPath = path.startsWith("/") ? path.substring(1) : path;
+    const [pagePath, dialogPath] = this.#getTypedPaths(sanitizedPath);
     const [currentPagePath, currentDialogPath] = this.#getTypedPaths(previousPath);
     let openedPage = false;
     let openedDialog = false;
@@ -241,7 +261,7 @@ var PathRouterElement = class extends HTMLElement {
       return [openedPage, openedDialog];
     }
     await this.#awaitAllRouteProcesses();
-    const matchingRoutes = this.#findMatchingRoutes(path);
+    const matchingRoutes = this.#findMatchingRoutes(sanitizedPath);
     let matchingPageRoutes = matchingRoutes.filter((item) => item.route instanceof RoutePageElement);
     const matchingDialogRoutes = matchingRoutes.filter((item) => item.route instanceof RouteDialogElement);
     let openPagePromise = new Promise((resolve) => resolve(false));
@@ -299,7 +319,7 @@ var PathRouterElement = class extends HTMLElement {
       this.#resolveNavigation();
       this.#resolveNavigation = void 0;
     }
-    this.dispatchEvent(new CustomEvent("pathchange" /* PathChange */, { detail: { path }, bubbles: true, cancelable: true }));
+    this.dispatchEvent(new CustomEvent("pathchange" /* PathChange */, { detail: { sanitizedPath }, bubbles: true, cancelable: true }));
     return [openedPage, openedDialog];
   }
   #getTypedPaths(path) {
@@ -423,7 +443,7 @@ var PathRouterElement = class extends HTMLElement {
   }
   routeTypeMatches(route, queryPathArray, routePathArray, parentRouteSelector, previousMatches) {
     if (queryPathArray.length == 1 && queryPathArray[0].trim() == "") {
-      return [false, {}];
+      return [routePathArray.length == 1 && routePathArray[0].trim() == "", {}];
     }
     const parentRoutes = [];
     let parentRoute = route.parentElement?.closest(parentRouteSelector);

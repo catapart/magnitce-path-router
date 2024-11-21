@@ -9,9 +9,6 @@ path-router
     grid-template-rows: 1fr;
 }
 
-route-page:not([open],[data-entering],[data-exiting]) path-router
-{ display: none; /* browser bug when rendering visibility? */ }
-
 route-page
 {
     display: var(--route-display, block);
@@ -29,8 +26,9 @@ route-page[open]
 {
     visibility: visible;
 }
-[is="route-link"]
-,[is="route-button"]
+
+/* sub routes should respect the visibility of the parent routes */
+route-page:not([open],[data-entering],[data-exiting]) route-page[open]
 {
-    user-select: none;
+    visibility: inherit;
 }

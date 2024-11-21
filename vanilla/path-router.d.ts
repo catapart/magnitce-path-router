@@ -759,6 +759,16 @@ declare class PathRouterElement extends HTMLElement {
      * @param linkQuery A query that will be used to de-select all route links. This can be customized for use-cases like nested path routers which may benefit from scoped selectors. By default, the query is `a[data-route],button[data-route]`.
      */
     addRouteLinkClickHandlers(parent?: HTMLElement, linkQuery?: string): void;
+    /**
+     * Compare two `URL` objects to determine whether they represet different locations and, if so, whether or not the new location is marked as a replacement change.
+     * @param currentLocation a url object representing the current location
+     * @param updatedLocation a url object representing the location to compare against
+     * @returns `{ hasChanged, isReplacementChange }`: Whether there was a change, and whether history management should add an entry, or replace the last entry.
+     */
+    compareLocations(currentLocation: URL, updatedLocation: URL): {
+        hasChanged: boolean;
+        isReplacementChange: boolean;
+    };
     routeMatchesPath(route: Route, queryPath: string, previousMatches: Route[], isDialog?: boolean): MatchValues;
     routeTypeMatches(route: Route, queryPathArray: string[], routePathArray: string[], parentRouteSelector: string, previousMatches: Route[]): MatchValues;
     getRouteProperties(route?: Route): {};

@@ -711,7 +711,7 @@
           <browser-mockup url="https://www.path-router.com" tabs="1" collapsed-tabs="2" class="windows">
             <div class="layout" data-theme="heading-nav">
               <menu id="page-menu">
-                <a data-theme="heading-nav" data-route="home">Routing</a>
+                <a data-theme="heading-nav" data-route="">Routing</a>
                 <a data-theme="heading-nav" data-route="user/">User</a>
                 <a data-theme="heading-nav" data-route="help/faq">Help</a>
                 <a data-theme="heading-nav" data-route="help/faq">FAQ</a>
@@ -722,7 +722,7 @@
                 path=""
                 data-theme="heading-nav"
               >
-                <route-page path="home" class="home-page">
+                <route-page class="home-page">
                   <h3>Routing</h3>
                   <p>Routes can define simple routes, nested routes, and dialog routes, which provide a secondary routing path for displaying dialogs over existing route content.</p>
                   <button type="button" data-theme="heading-nav" data-route="#about">Open Dialog Route</button>
@@ -813,7 +813,7 @@
                     <route-page path="website">
                       <h3>About Website</h3>
                       <p>About Website Content</p>
-                      <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="#disclaimer">See Disclaimer</button>
+                      <button type="button" data-route="#disclaimer">See Disclaimer</button>
                     </route-page>
                   </div>
                   <form method="dialog"><button method="dialog">Close</button></form>
@@ -821,7 +821,7 @@
                 <dialog is="route-dialog" path="disclaimer">
                   <h2>Disclaimer</h2>
                   <p>Disclaimer content</p>
-                  <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="#about">Back to About</button>
+                  <button type="button" data-route="#about">Back to About</button>
                   <form method="dialog"><button method="dialog">Close</button></form>
                 </dialog>
                 <dialog is="route-dialog" path="address">
@@ -838,77 +838,49 @@
           import { PathRouterElement } from '../vanilla/path-router.js';
 
                 const browserMockup = document.body.querySelector('browser-mockup');
+                const pageRouter = document.querySelector('#page-router');
+
+                let historyIsUpdating = false;
 
                 document.addEventListener('DOMContentLoaded', () =>
                 {
-                    const pageRouter = document.querySelector('#page-router');
                     const pageMenu = document.querySelector('#page-menu');
-                    const homePage = pageRouter.querySelector('.home-page');
+                    // const homePage = pageRouter.querySelector('.home-page');
 
-                    const userPage = pageRouter.querySelector('.user-page');
-                    const userPageMenu = userPage.querySelector('nav');
+                    // const userPage = pageRouter.querySelector('.user-page');
+                    // const userPageMenu = userPage.querySelector('nav');
                     const userRouter = document.querySelector('#user-router');
                     
                     const userContactPage = userRouter.querySelector('.contact-page');
-                    const userContactPageMenu = userContactPage.querySelector('nav');
+                    // const userContactPageMenu = userContactPage.querySelector('nav');
                     const userContactRouter = document.querySelector('#user-contact-router');
                     
                     const userContactDataPage = userContactRouter.querySelector('.contact-data-page');
 
-                    const helpPage = pageRouter.querySelector('.help-page');
-                    const helpPageMenu = helpPage.querySelector('nav');
-                    const helpRouter = document.querySelector('#help-router');
+                    // const helpPage = pageRouter.querySelector('.help-page');
+                    // const helpPageMenu = helpPage.querySelector('nav');
+                    // const helpRouter = document.querySelector('#help-router');
                     
-                    const aboutDialog = pageRouter.querySelector('.about-dialog');
-                    const aboutDialogMenu = aboutDialog.querySelector('nav');
-                    const aboutRouter = document.querySelector('#about-router');
+                    // const aboutDialog = pageRouter.querySelector('.about-dialog');
+                    // const aboutDialogMenu = aboutDialog.querySelector('nav');
+                    // const aboutRouter = document.querySelector('#about-router');
 
                     pageRouter.addRouteLinkClickHandlers(pageMenu);
-                    pageRouter.addRouteLinkClickHandlers(homePage);
+                    pageRouter.addRouteLinkClickHandlers(pageRouter);
 
-                    pageRouter.addRouteLinkClickHandlers(userPageMenu);
+                    // pageRouter.addRouteLinkClickHandlers(userPageMenu);
                     
-                    pageRouter.addRouteLinkClickHandlers(userContactPageMenu);
-                    pageRouter.addRouteLinkClickHandlers(userContactRouter);
+                    // pageRouter.addRouteLinkClickHandlers(userContactPageMenu);
+                    // pageRouter.addRouteLinkClickHandlers(userContactRouter);
 
-                    pageRouter.addRouteLinkClickHandlers(helpPageMenu);
+                    // pageRouter.addRouteLinkClickHandlers(helpPageMenu);
 
-                    pageRouter.addRouteLinkClickHandlers(aboutDialogMenu);
+                    // pageRouter.addRouteLinkClickHandlers(aboutDialogMenu);
                     
                     // todo: 
-                    // add history navigation
+                    // fix default routing
                     // revise demo copy
                     // update readme copy
-
-
-
-                    
-                    // before the user page is opened, collect the
-                    // properties used to open it with. If there's
-                    // a user id, navigate the target router to
-                    // that user
-                    // userPage.addEventListener('beforeopen', async () =>
-                    // {
-                    //     // get the properties that route path is 
-                    //     // expecting which are provided in the router's path attribute
-                    //     const properties = userPage.getProperties();
-                    //     if(properties.id != null)
-                    //     {
-                    //         await userRouter.navigate(properties.subroute);
-
-                    //         // get a set of key/value pairs from the router's path string;
-                    //         // these have no encoded relationship to properties, but they
-                    //         // usually share a semantic relationship.
-                    //         // in this example, a value provided in the path after "contact"
-                    //         // to the user router can be used as the ":contactId" property
-                    //         // for the contacts router.
-                    //         const pathValuePairs = userRouter.getPathValuePairs();
-                    //         if(pathValuePairs.contact != null)
-                    //         {
-                    //             userContactRouter.navigate('contact/' + pathValuePairs.contact);
-                    //         }
-                    //     }
-                    // });
 
                     // the contact page uses a single route that sets
                     // data based on the contact id path property;
@@ -934,71 +906,37 @@
                     userContactPage.addEventListener('refresh', contactPage_onUpdate);
 
 
-                    // fix dialog subroute
-                    // let historyIsUpdating = false;
+                    pageRouter.addEventListener('pathchange', pageRouter_onPathCompose);
+                    function pageRouter_onPathCompose(event)
+                    {
+                      
+                      // if we're moving back or forward,
+                      // we don't want to record that in history
+                      // and the browser will update the url
+                      if(historyIsUpdating == true) { return; } 
+                      
+                      const currentLocation = new URL(browserMockup.getAttribute('url')); // equivalent to `window.location`
 
-                    // pageRouter.addEventListener('pathcompose', pageRouter_onPathCompose);
-                    // function pageRouter_onPathCompose(event)
-                    // {
-                    //     // prevent changing the url using events from subrouters
-                    //     if(event.target != pageRouter) { return; }
+                      let updatedPath = pageRouter.getAttribute('path');
+                      updatedPath = (updatedPath != null && updatedPath.trim() != "") ? `/${updatedPath}` : updatedPath;
+                      const origin = 'https://www.path-router.com' // reference window's origin with `window.location.origin`;
+                      const updatedLocation = new URL(origin + updatedPath);
 
-                    //     // if we're moving back or forward,
-                    //     // we don't want to record that in history
-                    //     // and the browser will update the url
-                    //     if(historyIsUpdating == true) { return; } 
-                        
-                    //     const currentLocation = new URL(browserMockup.getAttribute('url')); // equivalent to `window.location`
-
-                    //     let updatedPath = pageRouter.getAttribute('composed-path');
-                    //     const origin = 'https://www.path-router.com' // reference window's origin with `window.location.origin`;
-                    //     const updatedLocation = new URL(origin + updatedPath);
-
-                    //     const { hasChanged, isReplacementChange } = pageRouter.compareLocations(currentLocation, updatedLocation);
-                    //     if(hasChanged)
-                    //     {
-                    //         if(isReplacementChange)
-                    //         {
-                    //             browserMockup.history.replace(updatedLocation.href);
-                    //             // equivalent to `window.history.replaceState(null, '', updatedLocation.href);`
-                    //         }
-                    //         else
-                    //         {
-                    //             browserMockup.history.add(updatedLocation.href);
-                    //             // equivalent to `window.history.pushState(null, '', updatedLocation.href);`
-                    //         }
-                    //     }
-                    // }
-
-                    // const routeLinks = [...document.querySelectorAll('[is="route-link"],[is="route-button"]')];
-                    // for(let i = 0; i < routeLinks.length; i++)
-                    // {
-                    //     routeLinks[i].onPreparePath = prepareRouteLink;
-                    // }
-                    // function prepareRouteLink(path)
-                    // {
-                    //     const url = browserMockup.getAttribute('url') ?? ""; // equivalent to `window.location.href`
-                    //     const urlParameters = PathRouterElement.getUrlParameters(url);
-
-                    //     if(path.indexOf(':id') > -1)
-                    //     {
-                    //         const idValue = urlParameters.user;
-                    //         const id = parseInt(idValue);
-                    //         const userId = isNaN(id) ? -1 : id;
-                    //         if(userId > -1)
-                    //         {
-                    //             path = path.replace(":id", userId);
-                    //         }
-                    //     }
-                    //     if(path.indexOf(':contactId') > -1)
-                    //     {
-                    //         const idValue = urlParameters.contact;
-                    //         const contactId = parseInt(idValue);
-                    //         path = path.replace(":contactId", urlParameters.contact);
-                    //     }
-
-                    //     return path;
-                    // }                
+                      const { hasChanged, isReplacementChange } = pageRouter.compareLocations(currentLocation, updatedLocation);
+                      if(hasChanged)
+                      {
+                          if(isReplacementChange)
+                          {
+                              browserMockup.history.replace(updatedLocation.href);
+                              // equivalent to `window.history.replaceState(null, '', updatedLocation.href);`
+                          }
+                          else
+                          {
+                              browserMockup.history.add(updatedLocation.href);
+                              // equivalent to `window.history.pushState(null, '', updatedLocation.href);`
+                          }
+                      }
+                    }               
                 });
                 
 
