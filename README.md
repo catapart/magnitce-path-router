@@ -3,7 +3,7 @@ A custom `HTMLElement` that routes to pages based on its `path` attribute.
 
 Includes subrouting, transitions, events, and dialog routes.
 
-Package size: ~12kb minified, ~25kb verbose.
+Package size: ~12kb minified, ~26kb verbose.
 
 ## Quick Reference
 ```html

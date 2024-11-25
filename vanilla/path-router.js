@@ -188,38 +188,42 @@ var PathRouterElement = class extends HTMLElement {
    */
   addRouteLinkClickHandlers(parent, linkQuery = "a[data-route],button[data-route]") {
     parent = parent ?? document.body;
-    parent.addEventListener("click", (event) => {
-      const targetLink = event.target.closest("a[data-route],button[data-route]");
-      if (targetLink != null && parent.contains(targetLink)) {
-        const links = [...parent.querySelectorAll(linkQuery)];
-        for (let i = 0; i < links.length; i++) {
-          links[i].removeAttribute("aria-current");
-        }
-        let path = targetLink.dataset.route;
-        if (path.indexOf(":") != -1) {
-          let parentRoute = targetLink.closest('route-page,[is="route-dialog"]');
-          while (parentRoute != null) {
-            const parentProperties = parentRoute.getProperties();
-            const linkProperties = path.split("/").filter((item) => item.startsWith(":"));
-            for (let i = 0; i < linkProperties.length; i++) {
-              const linkPropertyName = linkProperties[i].substring(1);
-              if (parentProperties[linkPropertyName] != null) {
-                path = path.replace(`:${linkPropertyName}`, parentProperties[linkPropertyName]);
-              }
-            }
-            parentRoute = parentRoute.parentElement?.closest('route-page,[is="route-dialog"]');
-          }
-        }
-        if (path.startsWith("#")) {
-          const currentPath = this.path ?? "";
-          const currentPathArray = currentPath.split("#");
-          currentPathArray[1] = path.substring(1);
-          path = currentPathArray.join("#");
-        }
-        this.setAttribute("path", path);
-        targetLink.setAttribute("aria-current", "page");
+    parent.addEventListener("click", (event) => this.routeLink_onClick(parent, event, linkQuery));
+  }
+  routeLink_onClick(parent, event, linkQuery = "a[data-route],button[data-route]") {
+    let targetLink = event.target.closest("a[data-route],button[data-route]");
+    if (targetLink == null && event.target == parent && event.target.shadowRoot != null) {
+      targetLink = event.target.shadowRoot.activeElement;
+    }
+    if (targetLink != null && parent.contains(targetLink)) {
+      const links = [...parent.querySelectorAll(linkQuery)];
+      for (let i = 0; i < links.length; i++) {
+        links[i].removeAttribute("aria-current");
       }
-    });
+      let path = targetLink.dataset.route;
+      if (path.indexOf(":") != -1) {
+        let parentRoute = targetLink.closest('route-page,[is="route-dialog"]');
+        while (parentRoute != null) {
+          const parentProperties = parentRoute.getProperties();
+          const linkProperties = path.split("/").filter((item) => item.startsWith(":"));
+          for (let i = 0; i < linkProperties.length; i++) {
+            const linkPropertyName = linkProperties[i].substring(1);
+            if (parentProperties[linkPropertyName] != null) {
+              path = path.replace(`:${linkPropertyName}`, parentProperties[linkPropertyName]);
+            }
+          }
+          parentRoute = parentRoute.parentElement?.closest('route-page,[is="route-dialog"]');
+        }
+      }
+      if (path.startsWith("#")) {
+        const currentPath = this.path ?? "";
+        const currentPathArray = currentPath.split("#");
+        currentPathArray[1] = path.substring(1);
+        path = currentPathArray.join("#");
+      }
+      this.setAttribute("path", path);
+      targetLink.setAttribute("aria-current", "page");
+    }
   }
   /**
    * Compare two `URL` objects to determine whether they represet different locations and, if so, whether or not the new location is marked as a replacement change.
