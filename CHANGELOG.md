@@ -1,5 +1,11 @@
 # @magnit-ce/path-router
 
+## 0.1.5
+
+### Patch Changes
+
+- 5224aa7: rewrote entire element; polished demo page;
+
 ## 0.1.4
 
 ### Patch Changes
