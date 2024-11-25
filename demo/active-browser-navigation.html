@@ -633,151 +633,148 @@
         <footer>Terms | Site Map</footer>
     </main>
     <script type="module">
-        import { PathRouterElement } from '../vanilla/path-router.js';
+        import '../vanilla/path-router.min.js';
+    
+        const pageRouter = document.querySelector('path-router');
+        pageRouter.addRouteLinkClickHandlers();
 
-            const main = document.body.querySelector('main');
-            const pathRouter = main.querySelector('path-router');
-
-            let historyIsUpdating = false;
-
-            document.addEventListener('DOMContentLoaded', () =>
+        // monitor window history to update routes
+        let historyIsUpdating = false;
+        window.addEventListener('popstate', async (event) =>
+        {
+            historyIsUpdating = true;
+            let route = window.location.pathname + window.location.hash;
+            if(route.startsWith('/demo/active-browser-navigation/'))
             {
-                const pageMenu = main.querySelector('.layout > header menu');
-                const userRouter = document.querySelector('#user-router');
-                
-                const userContactPage = userRouter.querySelector('.contact-page');
-                const userContactRouter = document.querySelector('#user-contact-router');
-                
-                const userContactDataPage = userContactRouter.querySelector('.contact-data-page');
+                route = route.substring(32)
+            }
+            await pageRouter.navigate(route);
+            historyIsUpdating = false;
+        });
 
-                pathRouter.addRouteLinkClickHandlers(pageMenu);
-                pathRouter.addRouteLinkClickHandlers(pathRouter);
-
-                // if multiple links select the same page, the pathchange
-                // event can be used to update each link's selection state
-                const updateLinks = () =>
-                {
-                    const links = [...main.querySelectorAll('a[data-route],button[data-route]')];
-                    links.forEach(item => item.classList.remove("selected"));
-
-                    const toSelect = [];
-                    if(pathRouter.path == "" || pathRouter.path == "/" || pathRouter.path.split('#')[0] == "")
-                    {
-                    toSelect.push(...main.querySelectorAll('a[data-route=""],button[data-route=""],a[data-route="/"],button[data-route="/"]'));
-                    }
-                    if(pathRouter.path.indexOf('user') > -1)
-                    {
-                    toSelect.push(...main.querySelectorAll('.layout > header a[data-route="user"],.layout > header a[data-route="user/"]'));
-                    if(pathRouter.path.indexOf('profile') > -1 && pathRouter.path.indexOf('contact') == -1)
-                    {
-                        toSelect.push(...main.querySelectorAll('.user-page a[data-route*="profile"],.user-page button[data-route*="profile"]'));
-                    }
-                    else if(pathRouter.path.indexOf('contact') > -1)
-                    {
-                        toSelect.push(...main.querySelectorAll('.user-page menu a[data-route*="contact"],.user-page button[data-route*="contact"]'));
-                    }
-                    }
-                    if(pathRouter.path.indexOf('help') > -1)
-                    {
-                    toSelect.push(...main.querySelectorAll('.layout > header a[data-route="help"],.layout > header a[data-route="help/"]'));
-                    if(pathRouter.path.indexOf('faq') > -1)
-                    {
-                        toSelect.push(...main.querySelectorAll('a[data-route*="faq"],button[data-route*="faq"]'));
-                    }
-                    else if(pathRouter.path.indexOf('contact') > -1)
-                    {
-                        toSelect.push(...main.querySelectorAll('a[data-route*="contact"],button[data-route*="contact"]'));
-                    }
-                    }
-                    if(pathRouter.path.indexOf('about') > -1)
-                    {
-                    if(pathRouter.path.indexOf('company') > -1)
-                    {
-                        toSelect.push(...main.querySelectorAll('a[data-route*="company"],button[data-route*="company"]'));
-                    }
-                    else if(pathRouter.path.indexOf('website') > -1)
-                    {
-                        toSelect.push(...main.querySelectorAll('a[data-route*="website"],button[data-route*="website"]'));
-                    }
-                    }
-
-                    for(let i = 0; i < toSelect.length; i++)
-                    {
-                    toSelect[i].classList.add('selected');
-                    }
-                }
-                pathRouter.addEventListener('pathchange', updateLinks);
-                updateLinks(); // highlight links on page open
-
-                // the contact page uses a single route that sets
-                // data based on the contact id path property;
-                // instead of just handling when the page opens, 
-                // it also has a handler for the "refresh" event
-                // to account for setting a new contact id, when
-                // already on the contact page
-                const contactPage_onUpdate = async () =>
-                {
-                    const contactProperties = userContactDataPage.getProperties();
-                    const dataElements = userContactRouter.querySelectorAll('.contact-data');
-                    if(contactProperties.contactId != null 
-                    && contactProperties.contactId.trim() != "")
-                    {
-                        dataElements.forEach(element => 
-                        {
-                            const titleCased = contactProperties.contactId.substring(0, 1).toUpperCase() + contactProperties.contactId.substring(1);
-                            element.textContent = titleCased;
-                        });
-                    }
-                };
-                userContactPage.addEventListener('beforeopen', contactPage_onUpdate);
-                userContactPage.addEventListener('refresh', contactPage_onUpdate);
-
-
-                pathRouter.addEventListener('pathchange', pageRouter_onPathCompose);
-                function pageRouter_onPathCompose(event)
-                {
-                    
-                    // if we're moving back or forward,
-                    // we don't want to record that in history
-                    // and the browser will update the url
-                    if(historyIsUpdating == true) { return; } 
-                    
-                    const currentLocation = new URL(main.getAttribute('url')); // equivalent to `window.location`
-
-                    let updatedPath = pathRouter.getAttribute('path');
-                    updatedPath = (updatedPath != null && updatedPath.trim() != "") ? `/${updatedPath}` : updatedPath;
-                    const origin = 'https://www.path-router.com' // reference window's origin with `window.location.origin`;
-                    const updatedLocation = new URL(origin + updatedPath);
-
-                    const { hasChanged, isReplacementChange } = pathRouter.compareLocations(currentLocation, updatedLocation);
-                    if(hasChanged)
-                    {
-                        if(isReplacementChange)
-                        {
-                            main.history.replace(updatedLocation.href);
-                            // equivalent to `window.history.replaceState(null, '', updatedLocation.href);`
-                        }
-                        else
-                        {
-                            main.history.add(updatedLocation.href);
-                            // equivalent to `window.history.pushState(null, '', updatedLocation.href);`
-                        }
-                    }
-                }               
-            });
+        // monitor path changes on path-router
+        // element, to set new url paths
+        pageRouter.addEventListener('pathchange', pageRouter_onPathChange);
+        function pageRouter_onPathChange(event)
+        {
+            // if we're moving back or forward,
+            // we don't want to record that in history
+            // and the browser will update the url
+            if(historyIsUpdating == true) { return; } 
             
+            const currentLocation = window.location;
+            let updatedPath = pageRouter.getAttribute('path');
+            const origin = window.location.origin;
+            const updatedLocation = new URL(`${origin}/demo/active-browser-navigation/${updatedPath}`);
+            console.log(window.location);
 
-            // equivalent to `window.addEventListener('popstate', [...])`;
-            main.addEventListener('popstate', async (event) =>
+            const { hasChanged, isReplacementChange } = pageRouter.compareLocations(currentLocation, updatedLocation);
+            if(hasChanged)
             {
-                historyIsUpdating = true;
-                const location = new URL(main.getAttribute('url')) // reference the window's location with `window.location`;
-                const path = location.pathname; // equivalent to `window.location.pathname`;
-                const hash = location.hash; // equivalent to `window.location.hash`;
-                const route = path + hash;
-                await pathRouter.navigate(route);
-                historyIsUpdating = false;
-            });
+                if(isReplacementChange)
+                {
+                    window.history.replaceState(null, '', updatedLocation.href);
+                }
+                else
+                {
+                    window.history.pushState(null, '', updatedLocation.href);
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () =>
+        {
+            const pageMenu = document.querySelector('.layout > header menu');
+            const userRouter = document.querySelector('#user-router');
+            
+            const userContactPage = userRouter.querySelector('.contact-page');
+            const userContactRouter = document.querySelector('#user-contact-router');
+            
+            const userContactDataPage = userContactRouter.querySelector('.contact-data-page');
+
+            pageRouter.addRouteLinkClickHandlers(pageMenu);
+            pageRouter.addRouteLinkClickHandlers(pageRouter);
+
+            // if multiple links select the same page, the pathchange
+            // event can be used to update each link's selection state
+            const updateLinks = () =>
+            {
+                const links = [...document.querySelectorAll('a[data-route],button[data-route]')];
+                links.forEach(item => item.classList.remove("selected"));
+
+                const toSelect = [];
+                if(pageRouter.path == "" || pageRouter.path == "/" || pageRouter.path.split('#')[0] == "")
+                {
+                toSelect.push(...document.querySelectorAll('a[data-route=""],button[data-route=""],a[data-route="/"],button[data-route="/"]'));
+                }
+                if(pageRouter.path.indexOf('user') > -1)
+                {
+                toSelect.push(...document.querySelectorAll('.layout > header a[data-route="user"],.layout > header a[data-route="user/"]'));
+                if(pageRouter.path.indexOf('profile') > -1 && pageRouter.path.indexOf('contact') == -1)
+                {
+                    toSelect.push(...document.querySelectorAll('.user-page a[data-route*="profile"],.user-page button[data-route*="profile"]'));
+                }
+                else if(pageRouter.path.indexOf('contact') > -1)
+                {
+                    toSelect.push(...document.querySelectorAll('.user-page menu a[data-route*="contact"],.user-page button[data-route*="contact"]'));
+                }
+                }
+                if(pageRouter.path.indexOf('help') > -1)
+                {
+                toSelect.push(...document.querySelectorAll('.layout > header a[data-route="help"],.layout > header a[data-route="help/"]'));
+                if(pageRouter.path.indexOf('faq') > -1)
+                {
+                    toSelect.push(...document.querySelectorAll('a[data-route*="faq"],button[data-route*="faq"]'));
+                }
+                else if(pageRouter.path.indexOf('contact') > -1)
+                {
+                    toSelect.push(...document.querySelectorAll('a[data-route*="contact"],button[data-route*="contact"]'));
+                }
+                }
+                if(pageRouter.path.indexOf('about') > -1)
+                {
+                if(pageRouter.path.indexOf('company') > -1)
+                {
+                    toSelect.push(...document.querySelectorAll('a[data-route*="company"],button[data-route*="company"]'));
+                }
+                else if(pageRouter.path.indexOf('website') > -1)
+                {
+                    toSelect.push(...document.querySelectorAll('a[data-route*="website"],button[data-route*="website"]'));
+                }
+                }
+
+                for(let i = 0; i < toSelect.length; i++)
+                {
+                toSelect[i].classList.add('selected');
+                }
+            }
+            pageRouter.addEventListener('pathchange', updateLinks);
+            updateLinks(); // highlight links on page open
+
+            // the contact page uses a single route that sets
+            // data based on the contact id path property;
+            // instead of just handling when the page opens, 
+            // it also has a handler for the "refresh" event
+            // to account for setting a new contact id, when
+            // already on the contact page
+            const contactPage_onUpdate = async () =>
+            {
+                const contactProperties = userContactDataPage.getProperties();
+                const dataElements = userContactRouter.querySelectorAll('.contact-data');
+                if(contactProperties.contactId != null 
+                && contactProperties.contactId.trim() != "")
+                {
+                    dataElements.forEach(element => 
+                    {
+                        const titleCased = contactProperties.contactId.substring(0, 1).toUpperCase() + contactProperties.contactId.substring(1);
+                        element.textContent = titleCased;
+                    });
+                }
+            };
+            userContactPage.addEventListener('beforeopen', contactPage_onUpdate);
+            userContactPage.addEventListener('refresh', contactPage_onUpdate);
+
+        });
     </script>
 </body>
 </html>

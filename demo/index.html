@@ -51,7 +51,7 @@
         <section class="features">
           <h3>Features</h3>
           <div>
-            <header>Transitions</header>
+            <h4>Transitions</h4>
             <dl>
               <dt>Blocking</dt>
               <dd>The
@@ -64,7 +64,7 @@
             </dl>
           </div>
           <div>
-            <header>Dialog Routes</header>
+            <h4>Dialog Routes</h4>
             <p>To account for the common design pattern of dialog routes, while still maintaining best practices for route history manamgent, the
               <code>&lt;path-router&gt;</code>
               element uses the hash character (<code>#</code>) to match with any
@@ -72,7 +72,7 @@
               child elements.</p>
           </div>
           <div>
-            <header>Links and Buttons</header>
+            <h4>Links and Buttons</h4>
             <p>As an additional convenience, this library also provides the <code>addRouteLinkClickHandlers()</code> function, which adds handling for any anchor (<code>&lt;a&gt;</code>) element or <code>&lt;button&gt;</code> element to route to a custom path.</p>
           </div>
         </section>
@@ -857,12 +857,6 @@
                     }
                     browserMockupRouter.addEventListener('pathchange', updateLinks);
                     updateLinks(); // highlight links on page open
-
-                    
-                    // todo: 
-                    // update readme copy
-                    // add route-view description
-                    // make navigation work on active demo
 
                     // the contact page uses a single route that sets
                     // data based on the contact id path property;
