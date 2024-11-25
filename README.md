@@ -3,69 +3,47 @@ A custom `HTMLElement` that routes to pages based on its `path` attribute.
 
 Includes subrouting, transitions, events, dialog routes, route links, and route buttons.
 
-Package size: ~11kb minified, ~24kb verbose.
+Package size: ~12kb minified, ~25kb verbose.
 
 ## Quick Reference
 ```html
 <menu>
-    <a is="route-link" for="my-router" data-theme="heading-nav" path="/">Home</a>
-    <a is="route-link" target="#my-router" data-theme="heading-nav" path="about">About</a>
-    <a is="route-link" target=".router" data-theme="heading-nav" path="contact">Contact</a>
+    <a data-route="first">Route First</a>
+    <a data-route="second">Route Second</a>
+    <a data-route="third">Route Third</a>
+    <a data-route="fourth">Route Fourth</a>
+    <a data-route="fourth/fifth/sixth">Route Fifth</a>
+    <a data-route="#dialog/">Route Dialog</a>
+    <a data-route="#dialog/second">Route Dialog - Second</a>
+    <a data-route="test">No Match Test</a>
 </menu>
-<path-router path="home" id="my-router" class="router" data-theme="heading-nav">
-    <route-page path="home">
-        <header>Home</header>
-        <div>
-            <p>Welcome to the website!</p>
-            <button is="route-button" data-theme="heading-nav" path="#config">
-                Open Config
-            </button>
-            <button is="route-button" data-theme="heading-nav" path="#config/app">
-                Open App Config
-            </button>
-        </div>
+<path-router path="">
+    <route-page path="first">Route First</route-page>
+    <route-page path="second">Route Second</route-page>
+    <route-page path="third">Route Third</route-page>
+    <route-page path="fourth">
+        Route Fourth
+        <route-page path="fifth/:property">Route Fifth</route-page>
     </route-page>
-    <route-page path="about">    
-        <header>About</header>
-        <div>
-            <p>About this website:</p>
-        </div>
-    </route-page>
-    <route-page path="contact">    
-        <header>Contact</header>
-        <div>
-            <p>Contact Us:</p>
-            <a>contact@mydomain.com</a>
-        </div>
-    </route-page>
-    <dialog is="route-dialog" path="config/:subroute">    
-        <header>Configuration</header>
-        <menu data-theme="tabs">
-            <a is="route-link" data-theme="tabs" for="config-router" path="/">User</a>
-            <a is="route-link" data-theme="tabs" for="config-router" path="app">App</a>
-        </menu>
-        <path-router id="config-router" data-theme="tabs">
-            <route-page path="/">
-                <header>User</header>
-                <div>
-                    <p>User Setttings</p>
-                </div>
-            </route-page>
-            <route-page path="app">
-                <header>App</header>
-                <div>
-                    <p>App Setttings</p>
-                </div>
-            </route-page>
-        </path-router>
-        <footer>
-            <form method="dialog">
-                <button method="dialog">Close</button>
-            </form>
-        </footer>
+    <path-router class="subrouter-manages-its-own-routes">
+        <route-page path="first" class="never matches"></route-page>
+    </path-router>
+    <dialog is="route-dialog" path="dialog">
+        Dialog
+        <route-page>Dialog Default</route-page>
+        <route-page path="second">Dialog Second</route-page>
+        <form method="dialog"><button>Close</button></form>
     </dialog>
 </path-router>
 <script type="module" src="/path/to/path-router[.min].js"></script>
+<script type="module">
+    const router = document.querySelector('path-router');
+    document.addEventListener('DOMContentLoaded', () =>
+    {
+        const linksParent = document.querySelector('menu');
+        router.addRouteLinkClickHandlers(linksParent);
+    });
+</script>
 ```
 
 ## Demos
@@ -169,36 +147,6 @@ import { PathRouter } from "@magnit-ce/path-router";
 </path-router>
 ```
 
-### Add a Theme
-```html
-<menu data-theme="heading-nav"> <!-- New -->
-    <a is="route-link" data-theme="heading-nav" path="/">Home</a> <!-- New -->
-    <a is="route-link" data-theme="heading-nav" path="about">About</a> <!-- New -->
-    <a is="route-link" data-theme="heading-nav" path="contact">Contact</a> <!-- New -->
-</menu>
-<path-router path="home" data-theme="heading-nav"> <!-- New -->
-    <route-page path="home">
-        <header>Home</header>
-        <div>
-            <p>Welcome to the website!</p>
-        </div>
-    </route-page>
-    <route-page path="about">    
-        <header>About</header>
-        <div>
-            <p>About this website:</p>
-        </div>
-    </route-page>
-    <route-page path="contact">    
-        <header>Contact</header>
-        <div>
-            <p>Contact Us:</p>
-            <a>contact@mydomain.com</a>
-        </div>
-    </route-page>
-</path-router>
-```
-
 ### Await Data
 ```js
 document.querySelector('route-page[path="home"]').addBlockingEventListener('beforeopen', async () =>
@@ -220,10 +168,10 @@ document.querySelector('route-page[path="home"]').addEventListener('afteropen', 
 
 ### Add a Dialog Route
 ```html
-<menu data-theme="heading-nav">
-    <a is="route-link" data-theme="heading-nav" path="/">Home</a>
-    <a is="route-link" data-theme="heading-nav" path="about">About</a>
-    <a is="route-link" data-theme="heading-nav" path="contact">Contact</a>
+<menu>
+    <a is="route-link" path="home">Home</a>
+    <a is="route-link" path="about">About</a>
+    <a is="route-link" path="contact">Contact</a>
 </menu>
 <path-router path="home" data-theme="heading-nav">
     <route-page path="home">
@@ -231,7 +179,7 @@ document.querySelector('route-page[path="home"]').addEventListener('afteropen', 
         <div>
             <p>Welcome to the website!</p>
             <!-- New -->
-            <button is="route-button" data-theme="heading-nav" path="#config">
+            <button is="route-button" route="#config">
                 Open Config
             </button>
             <!-- End New -->
@@ -251,7 +199,7 @@ document.querySelector('route-page[path="home"]').addEventListener('afteropen', 
         </div>
     </route-page>
     <!-- New -->
-    <route-dialog path="config">    
+    <dialog is="route-dialog" path="config">    
         <header>Configuration</header>
         <div>
             <p>User Setttings</p>
@@ -261,28 +209,28 @@ document.querySelector('route-page[path="home"]').addEventListener('afteropen', 
                 <button method="dialog">Close</button>
             </form>
         </footer>
-    </route-dialog>
+    </dialog>
     <!-- End New -->
 </path-router>
 ```
 
 ### Add a Subrouter
 ```html
-<menu data-theme="heading-nav">
-    <a is="route-link" data-theme="heading-nav" path="/">Home</a>
-    <a is="route-link" data-theme="heading-nav" path="about">About</a>
-    <a is="route-link" data-theme="heading-nav" path="contact">Contact</a>
+<menu>
+    <a is="route-link" path="home">Home</a>
+    <a is="route-link" path="about">About</a>
+    <a is="route-link" path="contact">Contact</a>
 </menu>
 <path-router path="home" data-theme="heading-nav">
     <route-page path="home">
         <header>Home</header>
         <div>
             <p>Welcome to the website!</p>
-            <button is="route-button" data-theme="heading-nav" path="#config">
+            <button is="route-button" route="#config">
                 Open Config
             </button>
             <!-- New -->
-            <button is="route-button" data-theme="heading-nav" path="#config/app">
+            <button is="route-button" route="#config/app">
                 Open App Config
             </button>
             <!-- End New -->
@@ -301,7 +249,7 @@ document.querySelector('route-page[path="home"]').addEventListener('afteropen', 
             <a>contact@mydomain.com</a>
         </div>
     </route-page>
-    <route-dialog path="config">    
+    <dialog is="route-dialog" path="config">    
         <header>Configuration</header>
         <!-- New -->
         <menu data-theme="tabs">
@@ -328,7 +276,7 @@ document.querySelector('route-page[path="home"]').addEventListener('afteropen', 
                 <button method="dialog">Close</button>
             </form>
         </footer>
-    </route-dialog>
+    </dialog>
 </path-router>
 ```
 

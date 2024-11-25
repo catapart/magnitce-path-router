@@ -4,252 +4,780 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Path Router Demo</title>
-    <!-- <link rel="stylesheet" href="./demo-page.css"> -->
-    <link rel="stylesheet" href="../vanilla/tabs.theme.css">
-    <link rel="stylesheet" href="../vanilla/sidebar.theme.css">
-    <link rel="stylesheet" href="../vanilla/heading-nav.theme.css">
 
     <style>
-    html
-    {
-        color-scheme: light dark;
-        height: 100%;
-    }
+        *
+        {
+            box-sizing: border-box;
+        }
+        html
+        {
+            color-scheme: light dark;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        body
+        {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            overflow: hidden;
+            background-color: #f2f2f2;
 
-    html
-    ,body
-    {
-        margin: 0;
-        padding: 0;
-    }
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 
-    body
-    {
-        display: flex;
-        min-height: 100dvh;
-        font-family: sans-serif;
-    }
+            --primary-color: rgb(160, 200, 13);
+            --accent-color: #00a1bd;
+            padding: 0;
+            margin: 0;
+        }
 
-    :is(header,h1,h2,h3,h4,h5,h6)
-    {
-        color: rgb(121, 123, 216);
-    }
-    route-page[path="/help/:subpage"]
-    {
-        display: grid !important;
-        grid-template-columns: auto 1fr;
-        grid-template-rows: auto 1fr;
-    }
-    route-page[path="/help/:subpage"] > h2
-    {
-        grid-column: span 2;
-    }
+        menu
+        {
+            padding: 0;
+        }
+
+        main.centered-single-column
+        {
+            --column-min-width: 100px;
+            flex: 1;
+            grid-template-rows: auto auto 1fr auto;
+            overflow: auto;
+        }
+
+        main > header
+        {
+            font-size: 1em;
+            color: inherit;
+        }
+
+        main.centered-single-column > header
+        {
+            grid-column: span 3;
+            color: white;
+        }
+        main > header menu
+        {
+            background-color: #131313;
+            margin: 0;
+            font-family: sans-serif;
+        }
+        @media (max-width: 500px)
+        {
+            main > header menu
+            {
+                display: grid;
+            }
+        }
+        main > header menu a
+        {
+            display: inline-block;
+            padding: 1em 1.5em;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: .8em;
+        }
+        main > header menu a:hover
+        ,main > header menu a.selected
+        {
+            background-color: rgb(0 0 0 / .2);
+            color: var(--primary-color);
+        }
+        main.centered-single-column  > footer
+        {
+            grid-column: span 3;
+            color: #999;
+            background-color: #222;
+            font-size: .8em;
+            padding: 1em;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            border-top: solid 1px var(--primary-color);
+        }
+
+        .centered-single-column .hero
+        {
+            --column-min-width: 100px;
+            border-block: solid 1px var(--accent-color);
+            grid-column: span 3;
+            min-height: 200px;
+            display: grid;
+            /* grid-template-columns: 1fr;
+            grid-template-rows: 1fr; */
+            color: white;
+
+            background-image: linear-gradient(65deg, rgba(251, 251, 251, 0.04) 0%, rgba(251, 251, 251, 0.04) 78%,rgba(51, 51, 51, 0.04) 78%, rgba(51, 51, 51, 0.04) 100%),
+            linear-gradient(335deg, rgba(15, 15, 15, 0.04) 0%, rgba(15, 15, 15, 0.04) 41%,rgba(13, 13, 13, 0.04) 41%, rgba(13, 13, 13, 0.04) 100%),
+            linear-gradient(274deg, rgba(157, 157, 157, 0.04) 0%, rgba(157, 157, 157, 0.04) 43%,rgba(253, 253, 253, 0.04) 43%, rgba(253, 253, 253, 0.04) 100%),
+            linear-gradient(224deg, rgba(227, 227, 227, 0.04) 0%, rgba(227, 227, 227, 0.04) 23%,rgba(19, 19, 19, 0.04) 23%, rgba(19, 19, 19, 0.04) 100%),
+            linear-gradient(305deg, rgba(250, 250, 250, 0.04) 0%, rgba(250, 250, 250, 0.04) 45%,rgba(16, 16, 16, 0.04) 45%, rgba(16, 16, 16, 0.04) 100%),
+            linear-gradient(90deg, rgb(92, 154, 53),rgb(160, 200, 13));
+        }
+
+        .circles
+        {
+            grid-row: 1;
+            grid-column: 1;
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr;
+            overflow: hidden;
+        }
+        .circles .circle
+        {
+            grid-row: 1;
+            grid-column: 1;
+            width: var(--size);
+            height: var(--size);
+            border-radius: 50%;
+            background-color: var(--background-color);
+            border: solid 2px var(--border-color, transparent);
+            box-shadow: 1px 1px 150px 2px rgb(255 255 255 / .3);
+        }
+        .circles .circle.a
+        {
+            --size: 50px;
+            --border-color: #234cda;
+            translate: 75px 95px;
+            opacity: .9
+        }
+        .circles .circle.b
+        {
+            --size: 100px;
+            --border-color: #7638c5;
+            translate: 20px 10px;
+            opacity: .8;
+        }
+        .circles .circle.c
+        {
+            --size: 75px;
+            --border-color: #d35f0a;
+            translate: 80px 155px;
+            opacity: .7;
+        }
+        .circles .circle.d
+        {
+            --size: 150px;
+            --border-color: #9b1a48;
+            translate: 120px 40px;
+            opacity: .2;
+        }
+        .circles .circle.e
+        {
+            --size: 175px;
+            --border-color: #cba6f7;
+            translate: 180px -80px;
+            opacity: .6;
+        }
+        .circles .circle.f
+        {
+            --size: 100px;
+            --border-color: #048e63;
+            translate: 130px 11px;
+            opacity: .8;
+        }
+        .hero .content
+        {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr;
+            overflow: hidden;
+        }
+        .hero .message
+        {
+            translate: 200px;
+            grid-row: 1;
+            grid-column: 1;
+            display: grid;
+            align-content: center;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+        }
+        .hero .message .title
+        {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .hero .message .description
+        {
+            max-width: 35ch;
+        }
+
+        path-router
+        {
+            grid-column: 2;
+            margin-inline: 1em;
+            border-inline: solid 1px var(--primary-color);
+        }
+
+        main route-page
+        {
+                color: #222;
+            padding: 1em;
+        }
+        @media (prefers-color-scheme: dark) 
+        {
+            main route-page
+            {
+                color: #ccc;
+            }
+        }
+
+        route-page > header
+        ,[is="route-dialog"] > header
+        {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+        }
+
+        route-page button
+        ,[is="route-dialog"] button
+        {
+            display: inline-block;
+            background-color: var(--accent-color);
+            border: solid 1px transparent;
+            border-radius: 3px;
+            color: white;
+            font-weight: bold;
+            font-size: .9em;
+            padding: .25em 1.25em;
+            transition: all 100ms linear;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+        }
+        route-page button:hover
+        ,[is="route-dialog"] button:hover
+        {
+            translate: 0 -1px;
+        }
+
+        route-page
+        ,[is="route-dialog"][open]
+        {
+            display: grid;
+            align-content: flex-start;
+            gap: 1em;
+        }
+        route-page section
+        ,[is="route-dialog"] section
+        {
+            border-radius: 2px;
+            padding: 1em;
+            display: flex;
+            flex-direction: column;
+            gap: .25em;
+            border: solid 1px rgb(0 0 0 / .4);
+            box-shadow: 1px 1px 4px -1px rgb(0 0 0);
+            margin-block: 1em;
+        }
+        route-page:not([path]) section > header
+        ,route-page[path="help"] route-page header
+        ,route-page[path="user"] route-page header
+        ,[path="about"] route-page header
+        {
+            color: var(--accent-color);
+            font-weight: bold;
+            font-size: .9em;
+            text-shadow: none;
+        }
+        route-page:not([path]) section a
+        {
+            color: canvastext;
+            cursor: pointer;
+        }
+        route-page:not([path]) section a:hover
+        ,route-page:not([path]) section a.selected
+        {
+            color: var(--accent-color);
+            text-decoration: underline;
+        }
+        route-page:not([path]) section.dialogs
+        {
+            display: grid;
+            grid-template-columns: auto auto;
+        }
+        route-page:not([path]) section.dialogs > header
+        {
+            grid-column: span 2;
+        }
+
+
+        route-page[path="user"] a
+        {
+            color: canvastext;
+            cursor: pointer;
+        }
+        route-page[path="user"] section a:hover
+        ,route-page[path="user"] section a.selected
+        {
+            color: var(--accent-color);
+            text-decoration: underline;
+        }
+        route-page[path=":id"] > menu
+        ,[path="about"] > menu
+        {
+            display: flex;
+            gap: 1px;
+            border-bottom: solid 1px var(--accent-color);
+        }
+        route-page[path=":id"] > menu a
+        ,[path="about"] > menu a
+        {
+            padding: .25em .75em;
+            color: white;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            background-color: var(--accent-color);
+        }
+        route-page[path=":id"] > menu a:not(:hover,.selected)::after
+        ,[path="about"] > menu a:not(:hover,.selected)::after
+        {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-color: rgb(0 0 0 / .25);
+        }
+
+        route-page[path="help"]
+        {
+            display: grid !important;
+            grid-template-columns: auto 1fr;
+            grid-template-rows: auto auto 1fr;
+        }
+        route-page[path="help"] > header
+        ,route-page[path="help"] > section
+        {
+            grid-column: span 2;
+        }
+        route-page[path="help"] > menu
+        {
+            display: flex;
+            flex-direction: column;
+            text-align: right;
+            gap: 0;
+            border-right: solid 1px var(--accent-color);
+        }
+        route-page[path="help"] > menu a
+        {
+            padding: .25em .75em;
+            color: canvastext;
+            cursor: pointer;
+            user-select: none;
+            font-size: 1rem;
+            font-weight: normal;
+            align-self: stretch;
+        }
+        route-page[path="help"] > menu a:hover
+        ,route-page[path="help"] > menu a.selected
+        {
+            color: white;
+            background-color: var(--accent-color);
+        }
+        route-page[path="help"] route-page header
+        {
+            color: var(--accent-color);
+            font-weight: bold;
+            font-size: .9em;
+        }
+
+        form[method="dialog"]
+        {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        @media (max-width: 630px)
+        {
+            .hero .message
+            {
+                translate: 0;
+                margin-left: 5px;
+                font-size: .8rem !important;
+                max-width: 25ch;
+            }
+
+            section
+            {
+                padding-inline: 5px !important;
+            }
+        }
+        
+        .centered-single-column
+        {
+            --column-min-width: 330px; /* calibrated value to fit within 350px window; 350px - 10px - 10px; */
+            --column-width: 1030px;
+            --gutter-minimum: 10px;
+
+            display: grid;
+            grid-template-columns: minmax(var(--gutter-minimum), auto) minmax(var(--column-min-width), var(--column-width)) minmax(var(--gutter-minimum), auto);
+        }
+        .centered-single-column > :not(dialog)
+        { 
+            grid-column: 2;
+        }
+
+        .centered-single-column .full-width
+        {
+            grid-column: 1 / 4;
+        }
+        @media (prefers-color-scheme: light) 
+        {
+            body
+            {
+                --example-background: #eaeaea;
+            }
+            section
+            {
+                --border-color: #999;
+            }
+        }
+        @media (prefers-color-scheme: dark) 
+        {
+            body
+            {
+                background-color: #222;
+                color: #ccc;
+
+                --example-background: #0a0a0a;
+            }
+            section
+            {
+                --border-color: #444;
+            }
+            h1,h2,h3,h4,h5,h6
+            {
+                color: white;
+            }
+        }
     </style>
 </head>
 <body>
-    <main>
-        <menu id="page-menu">
-            <a is="route-link" for="page-router" data-theme="heading-nav" path="/">Routing</a>
-            <a is="route-link" for="page-router" data-theme="heading-nav" path="/user">User</a>
-            <a is="route-link" for="page-router" data-theme="heading-nav" path="/help">Help</a>
-            <a is="route-link" for="page-router" data-theme="heading-nav" path="/help/faq">FAQ</a>
-            <a is="route-link" for="page-router" data-theme="heading-nav" path="/help/contact">Contact</a>
-        </menu>
-        <path-router id="page-router" path="" data-theme="heading-nav" >
-            <route-page path="/">
-                <h3>Routing</h3>
-                <p>Routes can define simple routes, nested routes, and dialog routes, which provide a secondary routing path for displaying dialogs over existing route content.</p>
-                <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="#about">Open Dialog Route</button>
-                <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="#about/website">Open Dialog Subroute</button>
-                <p>Routes can include variables by using a colon character before the variable name (ex: 'routeA/:id' defines the route variable of "id" for the "routeA" route).</p>
-                <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="/user/1">Open User 1</button>
-                <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="/user/2">Open User 2</button>
-                <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="/user/3">Open User 3</button>
-                <p>Nested routes can be linked to from top-level path-router elements by using variables.</p>
-                <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="/user/1/contact/alice">Open Alice Contact</button>
-                <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="/user/1/contact/bob">Open Bob Contact</button>
-                <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="/user/1/contact/bob/#address">Open Bob Contact's address</button>
-                <!-- Can't do this: -->
-                <!-- <a is="route-link" for="app-router" path="/help#about">Open About Dialog</a> -->
-                <!-- No automated way to know if the hash should be for the top level router, or a subrouter -->
-                <!-- Can move the dialog to top level and change link target router, or script from a page open event -->
+    <main class="centered-single-column">
+        <header>
+            <menu>
+                <a data-route="">Routing</a>
+                <a data-route="user/">User</a>
+                <a data-route="help/">Help</a>
+                <a data-route="help/faq">FAQ</a>
+                <a data-route="help/contact">Contact</a>
+            </menu>
+        </header>
+        <div class="hero centered-single-column">
+            <div class="content">
+                <div class="circles">
+                <div class="circle a"></div>
+                <div class="circle b"></div>
+                <div class="circle c"></div>
+                <div class="circle d"></div>
+                <div class="circle e"></div>
+                <div class="circle f"></div>
+                </div>
+                <div class="message">
+                    <div class="title">Routing Made Easy</div>
+                    <div class="description">
+                        <p>A straightforward frontend router with support for awaiting transitions and subrouting by default.</p>
+                        <p style="font-weight: bold; letter-spacing:1px;">No framework. Single 12kb js file.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <path-router path="">
+            <route-page class="home-page">
+                <header>Routing</header>
+                <section>
+                <header>Simple Routes</header>
+                <a data-route="user/">User</a>
+                <a data-route="help/">Help</a>
+                </section>
+                <section>
+                <header>Nested Routes</header>
+                <a data-route="user/1">User 1</a>
+                <a data-route="user/2">User 2</a>
+                <a data-route="user/3">User 3</a>
+                <a data-route="user/1/contact/alice">Alice Contact</a>
+                <a data-route="user/1/contact/bob">Bob Contact</a>
+                <a data-route="help/faq">Help - FAQ</a>
+                <a data-route="help/contact">Help - Contact</a>
+                </section>
+                <section class="dialogs">
+                <header>Dialog Routes</header>
+                <button type="button"  data-route="#about">Open Dialog Route</button>
+                <button type="button"  data-route="#about/website">Open Dialog Subroute</button>
+                </section>
             </route-page>
-            <route-page path="/user/:id">
-                <h3>User</h3>
-                <p>Routes can be nested by adding a path-router element as a child of a route-page element.</p>
-                <nav>
-                    <a is="route-link" for="user-router" data-theme="tabs" path=":id/profile">Profile</a>
-                    <a is="route-link" for="user-router" data-theme="tabs" path=":id/contact">Contacts</a>
-                </nav>
-                <path-router id="user-router" data-theme="tabs">
-                    <route-page path=":id/profile">
-                        <h4>User Profile</h4>
-                        <p>By giving the route a variable, like ":subpage", the remanining route can be passed down to the nested path-router element.</p>
+            <route-page path="user" class="user-page">
+                <header>Account</header>
+                <section>
+                <p>Account Content</p>
+                </section>
+                <div class="route-view">
+                <route-page>
+                    <header>Users</header>
+                    <section>
+                    <a data-route="user/1">User 1</a>
+                    <a data-route="user/2">User 2</a>
+                    <a data-route="user/3">User 3</a>
+                    </section>
+                </route-page>
+                <route-page path=":id">
+                    <header class="user-header">User</header>
+                    <section>
+                    <p>User Content</p>
+                    </section>
+                    <menu>
+                    <a  data-route="user/:id/profile">Profile</a>
+                    <a  data-route="user/:id/contact/">Contacts</a>
+                    </menu>
+                    <div id="user-router" class="route-view">
+                    <route-page path="profile">
+                        <header>User Profile</header>
+                        <section>
+                        <p>User Profile Content</p>
+                        </section>
                     </route-page>
-                    <route-page path=":id/contact/:contactId">
-                        <path-router id="user-contact-router">
-                            <route-page path=":contactId/">
-                                <h4>User Contacts</h4>
-                                <p>Nested routes can also have path-router elements.</p>
-                                <p>By using variables and route-link elements, a nested path can be navigated to without any javascript needed for the implementer.</p>
-                                <nav>
-                                    <style>
-                                        .link-button { padding: 0 .2em; cursor: pointer; }
-                                        .link-button:hover { text-decoration: underline ;}
-                                    </style>
-                                    <a is="route-link" for="user-contact-router" class="link-button" path="/alice">Alice</a>
-                                    <a is="route-link" for="user-contact-router" class="link-button" path="/bob">Bob</a>
-                                </nav>
-                            </route-page>
-                            <route-page path="alice">
-                                <h4>Alice</h4>
-                                <p>Alice's Contact Info</p>
-                                <a is="route-link" for="user-contact-router" class="link-button" path=":contactId#address">See Address</a>
-                                <a is="route-link" for="user-contact-router" class="link-button" path="/">Back</a>
-                            </route-page>
-                            <route-page path="bob">
-                                <h4>Bob</h4>
-                                <p>Bob's Contact Info</p>
-                                <a is="route-link" for="user-contact-router" class="link-button" path=":contactId#address">See Address</a>
-                                <a is="route-link" for="user-contact-router" class="link-button" path="/">Back</a>
-                            </route-page>
-                            <dialog is="route-dialog" path="address">
-                                <h2>Contact Address</h2>
-                                <p>Contact Address Content</p>
-                                <form method="dialog"><button method="dialog">Close</button></form>
-                            </dialog>
-                        </path-router>
+                    <route-page path="contact" class="contact-page">
+                        <div id="user-contact-router" class="route-view">
+                        <route-page>
+                            <header>User Contacts</header>
+                            <section>
+                            <p>Contacts list page</p>
+                            <a data-route="user/:id/contact/alice">Alice</a>
+                            <a data-route="user/:id/contact/bob">Bob</a>
+                            </section>
+                        </route-page>
+                        <route-page path=":contactId" class="contact-data-page">
+                            <header><span class="contact-data">[Contact]</span></header>
+                            <section>
+                            <p><span class="contact-data">[Contact]</span>'s Contact Info</p>
+                            <a data-route="#address">See Address</a>
+                            <a data-route="user/:id/contact/">Back</a>
+                            </section>
+                        </route-page>
+                        </div>
                     </route-page>
-                </path-router>
+                    </div>
+                </route-page>
+                </div>
             </route-page>
-            <route-page path="/help/:subpage">
-                <h2>Help</h2>
-                <nav>
-                    <a is="route-link" for="help-router" data-theme="sidebar" path="/faq">FAQ</a>
-                    <a is="route-link" for="help-router" data-theme="sidebar" path="/contact">Contact</a>
-                </nav>
-                <path-router id="help-router"data-theme="sidebar">
-                    <route-page path="/faq">
-                        <h3>Frequently Asked Questions</h3>
-                        <p>Answer Content</p>
-                    </route-page>
-                    <route-page path="/contact">
-                        <h3>Contact Us</h3>
-                        <p>Contact Content</p>
-                    </route-page>
-                </path-router>
+            <route-page path="help" class="help-page">
+                <header>Help</header>
+                <section>
+                <p>Help Content</p>
+                </section>
+                <menu>
+                <a data-route="help/faq">FAQ</a>
+                <a data-route="help/contact">Contact</a>
+                </menu>
+                <div class="route-view">
+                <route-page path="faq">
+                    <header>Frequently Asked Questions</header>
+                    <p>Answer Content</p>
+                </route-page>
+                <route-page path="contact">
+                    <header>Contact Us</header>
+                    <p>Contact Content</p>
+                </route-page>
+                </div>
             </route-page>
-            <dialog is="route-dialog" path="about/:subpage">
-                <h2>About</h2>
+            <dialog is="route-dialog" class="about-dialog" path="about">
+                <header>About</header>
+                <section>
                 <p>About Content</p>
-                <nav>
-                    <a is="route-link" for="about-router" data-theme="tabs" path="/company">Company</a>
-                    <a is="route-link" for="about-router" data-theme="tabs" path="/website">Website</a>
-                </nav>
-                <path-router id="about-router">
-                    <route-page path="company">
-                        <h3>About Company</h3>
-                        <p>About Company Content</p>
-                    </route-page>
-                    <route-page path="website">
-                        <h3>About Website</h3>
-                        <p>About Website Content</p>
-                        <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="#disclaimer">See Disclaimer</button>
-                    </route-page>
-                </path-router>
+                </section>
+                <menu>
+                <a  data-route="#about/company">Company</a>
+                <a  data-route="#about/website">Website</a>
+                </menu>
+                <div class="route-view">
+                <route-page path="company">
+                    <header>About Company</header>
+                    <section>
+                    <p>About Company Content</p>
+                    </section>
+                </route-page>
+                <route-page path="website">
+                    <header>About Website</header>
+                    <section>
+                    <p>About Website Content</p>
+                    </section>
+                    <button type="button" data-route="#disclaimer">See Disclaimer</button>
+                </route-page>
+                </div>
                 <form method="dialog"><button method="dialog">Close</button></form>
             </dialog>
             <dialog is="route-dialog" path="disclaimer">
-                <h2>Disclaimer</h2>
+                <header>Disclaimer</header>
+                <section>
                 <p>Disclaimer content</p>
-                <button type="button" is="route-button" for="page-router" data-theme="heading-nav" path="#about">Back to About</button>
+                </section>
+                <button type="button" data-route="#about">Back to About</button>
+                <form method="dialog"><button method="dialog">Close</button></form>
+            </dialog>
+            <dialog is="route-dialog" path="address">
+                <header>Contact Address</header>
+                <section>
+                <p>Contact Address Content</p>
+                </section>
                 <form method="dialog"><button method="dialog">Close</button></form>
             </dialog>
         </path-router>
+        <footer>Terms | Site Map</footer>
     </main>
-    <script type="module" src="./browser-mockup.js"></script>
-    <!-- Browser Mockup library from here: https://github.com/catapart/magnitce-browser-mockup !-->
-    
     <script type="module">
         import { PathRouterElement } from '../vanilla/path-router.js';
-        const pageRouter = document.querySelector('#page-router');
-        const userRouter = document.querySelector('#user-router');
-        const userContactRouter = document.querySelector('#user-contact-router');
-        const helpRouter = document.querySelector('#help-router');
 
-        // nested dialog path explanation: all dialog routes would need to be accessible
-        // to the top level router. instead, just hook into the beforeopen event and open
-        // the dialog from the variable name route properties example
-        
-        let historyIsUpdating = false;
-        window.addEventListener('popstate', async (event) =>
-        {
-            historyIsUpdating = true;
-            const route = window.location.pathname + window.location.hash;
-            await pageRouter.navigate(route);
-            historyIsUpdating = false;
-        });
+            const main = document.body.querySelector('main');
+            const pathRouter = main.querySelector('path-router');
 
-        pageRouter.addEventListener('pathcompose', pageRouter_onPathCompose);
-        function pageRouter_onPathCompose(event)
-        {
-            // prevent changing the url using events from subrouters
-            if(event.target != pageRouter) { return; }
+            let historyIsUpdating = false;
 
-            // if we're moving back or forward,
-            // we don't want to record that in history
-            // and the browser will update the url
-            if(historyIsUpdating == true) { return; } 
+            document.addEventListener('DOMContentLoaded', () =>
+            {
+                const pageMenu = main.querySelector('.layout > header menu');
+                const userRouter = document.querySelector('#user-router');
+                
+                const userContactPage = userRouter.querySelector('.contact-page');
+                const userContactRouter = document.querySelector('#user-contact-router');
+                
+                const userContactDataPage = userContactRouter.querySelector('.contact-data-page');
+
+                pathRouter.addRouteLinkClickHandlers(pageMenu);
+                pathRouter.addRouteLinkClickHandlers(pathRouter);
+
+                // if multiple links select the same page, the pathchange
+                // event can be used to update each link's selection state
+                const updateLinks = () =>
+                {
+                    const links = [...main.querySelectorAll('a[data-route],button[data-route]')];
+                    links.forEach(item => item.classList.remove("selected"));
+
+                    const toSelect = [];
+                    if(pathRouter.path == "" || pathRouter.path == "/" || pathRouter.path.split('#')[0] == "")
+                    {
+                    toSelect.push(...main.querySelectorAll('a[data-route=""],button[data-route=""],a[data-route="/"],button[data-route="/"]'));
+                    }
+                    if(pathRouter.path.indexOf('user') > -1)
+                    {
+                    toSelect.push(...main.querySelectorAll('.layout > header a[data-route="user"],.layout > header a[data-route="user/"]'));
+                    if(pathRouter.path.indexOf('profile') > -1 && pathRouter.path.indexOf('contact') == -1)
+                    {
+                        toSelect.push(...main.querySelectorAll('.user-page a[data-route*="profile"],.user-page button[data-route*="profile"]'));
+                    }
+                    else if(pathRouter.path.indexOf('contact') > -1)
+                    {
+                        toSelect.push(...main.querySelectorAll('.user-page menu a[data-route*="contact"],.user-page button[data-route*="contact"]'));
+                    }
+                    }
+                    if(pathRouter.path.indexOf('help') > -1)
+                    {
+                    toSelect.push(...main.querySelectorAll('.layout > header a[data-route="help"],.layout > header a[data-route="help/"]'));
+                    if(pathRouter.path.indexOf('faq') > -1)
+                    {
+                        toSelect.push(...main.querySelectorAll('a[data-route*="faq"],button[data-route*="faq"]'));
+                    }
+                    else if(pathRouter.path.indexOf('contact') > -1)
+                    {
+                        toSelect.push(...main.querySelectorAll('a[data-route*="contact"],button[data-route*="contact"]'));
+                    }
+                    }
+                    if(pathRouter.path.indexOf('about') > -1)
+                    {
+                    if(pathRouter.path.indexOf('company') > -1)
+                    {
+                        toSelect.push(...main.querySelectorAll('a[data-route*="company"],button[data-route*="company"]'));
+                    }
+                    else if(pathRouter.path.indexOf('website') > -1)
+                    {
+                        toSelect.push(...main.querySelectorAll('a[data-route*="website"],button[data-route*="website"]'));
+                    }
+                    }
+
+                    for(let i = 0; i < toSelect.length; i++)
+                    {
+                    toSelect[i].classList.add('selected');
+                    }
+                }
+                pathRouter.addEventListener('pathchange', updateLinks);
+                updateLinks(); // highlight links on page open
+
+                // the contact page uses a single route that sets
+                // data based on the contact id path property;
+                // instead of just handling when the page opens, 
+                // it also has a handler for the "refresh" event
+                // to account for setting a new contact id, when
+                // already on the contact page
+                const contactPage_onUpdate = async () =>
+                {
+                    const contactProperties = userContactDataPage.getProperties();
+                    const dataElements = userContactRouter.querySelectorAll('.contact-data');
+                    if(contactProperties.contactId != null 
+                    && contactProperties.contactId.trim() != "")
+                    {
+                        dataElements.forEach(element => 
+                        {
+                            const titleCased = contactProperties.contactId.substring(0, 1).toUpperCase() + contactProperties.contactId.substring(1);
+                            element.textContent = titleCased;
+                        });
+                    }
+                };
+                userContactPage.addEventListener('beforeopen', contactPage_onUpdate);
+                userContactPage.addEventListener('refresh', contactPage_onUpdate);
+
+
+                pathRouter.addEventListener('pathchange', pageRouter_onPathCompose);
+                function pageRouter_onPathCompose(event)
+                {
+                    
+                    // if we're moving back or forward,
+                    // we don't want to record that in history
+                    // and the browser will update the url
+                    if(historyIsUpdating == true) { return; } 
+                    
+                    const currentLocation = new URL(main.getAttribute('url')); // equivalent to `window.location`
+
+                    let updatedPath = pathRouter.getAttribute('path');
+                    updatedPath = (updatedPath != null && updatedPath.trim() != "") ? `/${updatedPath}` : updatedPath;
+                    const origin = 'https://www.path-router.com' // reference window's origin with `window.location.origin`;
+                    const updatedLocation = new URL(origin + updatedPath);
+
+                    const { hasChanged, isReplacementChange } = pathRouter.compareLocations(currentLocation, updatedLocation);
+                    if(hasChanged)
+                    {
+                        if(isReplacementChange)
+                        {
+                            main.history.replace(updatedLocation.href);
+                            // equivalent to `window.history.replaceState(null, '', updatedLocation.href);`
+                        }
+                        else
+                        {
+                            main.history.add(updatedLocation.href);
+                            // equivalent to `window.history.pushState(null, '', updatedLocation.href);`
+                        }
+                    }
+                }               
+            });
             
-            const currentLocation = window.location;
-            let updatedPath = pageRouter.getAttribute('composed-path');
-            const origin = window.location.origin;
-            const updatedLocation = new URL(origin + updatedPath);
 
-            const { hasChanged, isReplacementChange } = pageRouter.compareLocations(currentLocation, updatedLocation);
-            if(hasChanged)
+            // equivalent to `window.addEventListener('popstate', [...])`;
+            main.addEventListener('popstate', async (event) =>
             {
-                if(isReplacementChange)
-                {
-                    window.history.replaceState(null, '', updatedLocation.href);
-                }
-                else
-                {
-                    window.history.pushState(null, '', updatedLocation.href);
-                }
-            }
-        }
-
-        const routeLinks = [...document.querySelectorAll('[is="route-link"],[is="route-button"]')];
-        for(let i = 0; i < routeLinks.length; i++)
-        {
-            routeLinks[i].onPreparePath = prepareRouteLink;
-        }
-        function prepareRouteLink(path)
-        {
-            const url = window.location.href;
-            const urlParameters = PathRouterElement.getUrlParameters(url);
-
-            if(path.indexOf(':id') > -1)
-            {
-                const idValue = urlParameters.user;
-                const id = parseInt(idValue);
-                const userId = isNaN(id) ? -1 : id;
-                if(userId > -1)
-                {
-                    path = path.replace(":id", userId);
-                }
-            }
-            if(path.indexOf(':contactId') > -1)
-            {
-                const idValue = urlParameters.contact;
-                const contactId = parseInt(idValue);
-                path = path.replace(":contactId", urlParameters.contact);
-            }
-
-            return path;
-        }
-
+                historyIsUpdating = true;
+                const location = new URL(main.getAttribute('url')) // reference the window's location with `window.location`;
+                const path = location.pathname; // equivalent to `window.location.pathname`;
+                const hash = location.hash; // equivalent to `window.location.hash`;
+                const route = path + hash;
+                await pathRouter.navigate(route);
+                historyIsUpdating = false;
+            });
     </script>
 </body>
 </html>

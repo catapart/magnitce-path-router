@@ -1,175 +1,193 @@
+/* defaults */
+*
+{
+    box-sizing: border-box;
+}
 html
 {
     color-scheme: light dark;
-    height: 100%;
-}
-
-html
-,body
-{
     margin: 0;
     padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
-
 body
 {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
     display: flex;
-    min-height: 100dvh;
-    font-family: sans-serif;
+    overflow: hidden;
+    background-color: #f2f2f2;
+
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+@media (prefers-color-scheme: light) 
+{
+    body
+    {
+        --example-background: #eaeaea;
+    }
+    section
+    {
+        --border-color: #999;
+    }
+}
+@media (prefers-color-scheme: dark) 
+{
+    body
+    {
+        background-color: #222;
+        color: #ccc;
+
+        --example-background: #0a0a0a;
+    }
+    section
+    {
+        --border-color: #444;
+    }
+    h1,h2,h3,h4,h5,h6
+    {
+        color: white;
+    }
 }
 
-:is(header,h1,h2,h3,h4,h5,h6)
+h2,h3,h4,h5,h6
 {
-    color: rgb(121, 123, 216);
+    margin-block: .75em;
 }
-
-main
-{
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    gap: 1em;
-    align-items: center;
-}
-main > header
-{
-    padding: 1em 0;
-    font-size: 2em;
-}
-
-main :is(p, dl)
+p
 {
     max-width: 80ch;
 }
 
-main article
+code
 {
-    padding: 2em;
-    border-radius: 10px;
-    border: solid 1px #999;
-    background-color: #f3f3f3;
-    color: buttontext;
-}
-@media (prefers-color-scheme: dark) 
-{
-    main article
-    {
-        background-color: #222;
-        border-color: #333;
-    }
-}
-
-main code
-{
-    background-color: field;
-    border: solid 1px buttonface;
-    color: #bb5d26;
-    padding: 2px 5px;
+    background-color:lightcyan;
+    color:darkcyan;
     display: inline-block;
+    padding: 1px 3px;
     border-radius: 2px;
+    border: solid 1px;
 }
 
-header
+main > article
 {
-    font-size: 1.3em;
+    box-shadow: 1px 1px 5px 1px rgb(0 0 0 / .4);
+    border-radius: 2px;
+    padding: .5em;
+    display: grid;
+    grid-template-columns: minmax(0, auto) minmax(0, 900px) minmax(0, auto);
+}
+main > article:has(> section)
+{
+    row-gap: 1em;
+}
+article > *
+{
+    grid-column: 2;
 }
 
-article menu
+article > section
 {
-    padding: 0;
-    display: flex;
-    gap: 1em;
+    border: solid 1px var(--border-color);
+    border-radius: 2px;
+    padding-block: .5em;
+    padding-inline: 1em;
+}
+
+article > :is(h2,h3,h4,h5,h6)
+{
+    margin-block: .25em;
+}
+
+article p
+{
+    margin-inline: auto;
+    text-wrap-style:pretty;
 }
 
 article .example
 {
-    margin-block: 1em;
+    margin-top: 2em;
+    background-color: var(--example-background);
+    padding: 1em;
+    border-radius: 5px;
 }
 
-[is="route-link"]:hover
-{
-    cursor: pointer;
-    text-decoration: underline;
-}
-
-[is="route-link"][aria-current="page"]
-{
-    text-decoration: underline;
-    color: highlight;
-}
-
-[is="route-button"][aria-current="page"]
-{
-    color: highlight;
-    outline:solid 3px highlight;
-}
-
-path-router
+/* layout */
+main
 {
     flex: 1;
+    row-gap: 1em;
+    padding-bottom: 1em;
+    overflow: auto;
+}
+main > header
+{
+    height: 200px;
+    background-image: repeating-linear-gradient(225deg, rgba(0,0,0, 0.03) 0px, rgba(0,0,0, 0.03) 1px,transparent 1px, transparent 12px),
+    repeating-linear-gradient(112.5deg, rgba(0,0,0, 0.03) 0px, rgba(0,0,0, 0.03) 1px,transparent 1px, transparent 12px),
+    repeating-linear-gradient(22.5deg, rgba(0,0,0, 0.03) 0px, rgba(0,0,0, 0.03) 1px,transparent 1px, transparent 12px),
+    repeating-linear-gradient(67.5deg, rgba(0,0,0, 0.03) 0px, rgba(0,0,0, 0.03) 1px,transparent 1px, transparent 12px),
+    repeating-linear-gradient(225deg, rgba(0,0,0, 0.03) 0px, rgba(0,0,0, 0.03) 1px,transparent 1px, transparent 12px),
+    repeating-linear-gradient(157.5deg, rgba(0,0,0, 0.03) 0px, rgba(0,0,0, 0.03) 1px,transparent 1px, transparent 12px),
+    repeating-linear-gradient(112.5deg, rgba(0,0,0, 0.03) 0px, rgba(0,0,0, 0.03) 1px,transparent 1px, transparent 12px),
+    repeating-linear-gradient(270deg, rgba(0,0,0, 0.03) 0px, rgba(0,0,0, 0.03) 1px,transparent 1px, transparent 12px),
+    repeating-linear-gradient(270deg, rgba(0,0,0, 0.03) 0px, rgba(0,0,0, 0.03) 1px,transparent 1px, transparent 12px),
+    repeating-linear-gradient(315deg, rgba(0,0,0, 0.03) 0px, rgba(0,0,0, 0.03) 1px,transparent 1px, transparent 12px),
+    repeating-linear-gradient(67.5deg, rgba(0,0,0, 0.03) 0px, rgba(0,0,0, 0.03) 1px,transparent 1px, transparent 12px),
+    repeating-linear-gradient(315deg, rgba(0,0,0, 0.03) 0px, rgba(0,0,0, 0.03) 1px,transparent 1px, transparent 12px),
+    repeating-linear-gradient(270deg, rgba(0,0,0, 0.03) 0px, rgba(0,0,0, 0.03) 1px,transparent 1px, transparent 12px),
+    linear-gradient(225deg, rgb(54,61,73),rgb(59,57,61));
 
-    background-color: field;
-    color: fieldtext;
-    padding: 2em;
-    border-radius: 3px;
-}
-
-path-router path-router
-{
-    background-color: canvas;
-    color: canvastext;
-    border: solid 1px buttonborder;
-}
-
-header:has(#invoke-get-properties)
-{
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-browser-mockup
-{
-    width: 640px;
-}
-browser-mockup path-router path-router
-{
-    border: none;
-}
-browser-mockup route-page[path="/help/:subpage"]
-{
-    display: grid !important;
-    grid-template-columns: auto 1fr;
-    grid-template-rows: auto 1fr;
-}
-browser-mockup route-page[path="/help/:subpage"] > h2
-{
-    grid-column: span 2;
+    display: grid;
 }
 
-header:has(small)
+main > header .content
 {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: grid;
+    align-items: flex-end;
+    text-transform:uppercase;
+    color: white;
+    font-size: 1.3rem;
 }
 
-header > small
+/* utilities */
+.centered-single-column
 {
-    font-size: .6em;
+    --column-min-width: 330px; /* calibrated value to fit within 350px window; 350px - 10px - 10px; */
+    --column-width: 1030px;
+    --gutter-minimum: 10px;
+
+    display: grid;
+    grid-template-columns: minmax(var(--gutter-minimum), auto) minmax(var(--column-min-width), var(--column-width)) minmax(var(--gutter-minimum), auto);
+}
+.centered-single-column > :not(dialog)
+{ 
+    grid-column: 2;
+}
+
+.centered-single-column .full-width
+{
+    grid-column: 1 / 4;
 }
 
 .log
 {
-    background: field;
-    color: fieldtext;
-    border: solid 1px #616161;
-    border-radius: 2px;
-    padding: 1em;
-    height: 200px;
+    height: 350px;
+    border: solid 1px var(--border-color);
+    border-radius: 5px;
     overflow: auto;
-    margin: 1em;
+    background-color: field;
+    color: fieldtext;
+    margin-block: 1em;
+    padding: 1em;
 }
+
+
 
 
 #transitions path-route[data-entering]
@@ -204,17 +222,4 @@ header > small
 {
     0% { translate: 50px 0; }
     100% { translate: 0 0; }
-}
-
-browser-mockup path-router
-,.themes path-router
-{
-    margin: 0;
-    padding: 0;
-}
-
-.themes menu
-{
-    margin: 0;
-    padding: 0;
 }

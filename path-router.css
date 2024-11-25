@@ -3,6 +3,7 @@
    Instead, the routes are stacked in a grid.
  */
 path-router
+,.route-view
 { 
     display: var(--router-display, grid);
     grid-template-columns: 1fr;

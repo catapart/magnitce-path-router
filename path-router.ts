@@ -575,7 +575,7 @@ export class PathRouterElement extends HTMLElement
         await this.#activationPromise;
         await this.#openPreActivationRoutes();
 
-        if(this.currentPageRoute == null && this.defaultRoute != null)
+        if(this.getAttribute('path') != null && this.currentPageRoute == null && this.defaultRoute != null)
         {
             this.#openRoutePage(this.defaultRoute, "");
         }

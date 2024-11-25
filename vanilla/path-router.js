@@ -1,5 +1,5 @@
 // path-router.css?raw
-var path_router_default = "/* \r\n   Animations will not be awaitable in code if they have a display of none.\r\n   Instead, the routes are stacked in a grid.\r\n */\r\npath-router\r\n{ \r\n    display: var(--router-display, grid);\r\n    grid-template-columns: 1fr;\r\n    grid-template-rows: 1fr;\r\n}\r\n\r\nroute-page\r\n{\r\n    display: var(--route-display, block);\r\n    visibility: hidden;\r\n    grid-row: 1;\r\n    grid-column: 1;\r\n}\r\n/* \r\n   Visibility is visible during the entering and exiting phases\r\n   to allow for animations to be awaited.\r\n */\r\nroute-page[open]\r\n,route-page[data-entering]\r\n,route-page[data-exiting]\r\n{\r\n    visibility: visible;\r\n}\r\n\r\n/* sub routes should respect the visibility of the parent routes */\r\nroute-page:not([open],[data-entering],[data-exiting]) route-page[open]\r\n{\r\n    visibility: inherit;\r\n}";
+var path_router_default = "/* \r\n   Animations will not be awaitable in code if they have a display of none.\r\n   Instead, the routes are stacked in a grid.\r\n */\r\npath-router\r\n,.route-view\r\n{ \r\n    display: var(--router-display, grid);\r\n    grid-template-columns: 1fr;\r\n    grid-template-rows: 1fr;\r\n}\r\n\r\nroute-page\r\n{\r\n    display: var(--route-display, block);\r\n    visibility: hidden;\r\n    grid-row: 1;\r\n    grid-column: 1;\r\n}\r\n/* \r\n   Visibility is visible during the entering and exiting phases\r\n   to allow for animations to be awaited.\r\n */\r\nroute-page[open]\r\n,route-page[data-entering]\r\n,route-page[data-exiting]\r\n{\r\n    visibility: visible;\r\n}\r\n\r\n/* sub routes should respect the visibility of the parent routes */\r\nroute-page:not([open],[data-entering],[data-exiting]) route-page[open]\r\n{\r\n    visibility: inherit;\r\n}";
 
 // route.ts
 var RouteType = (elementType = HTMLElement) => {
@@ -506,7 +506,7 @@ var PathRouterElement = class extends HTMLElement {
     this.#injectStyles();
     await this.#activationPromise;
     await this.#openPreActivationRoutes();
-    if (this.currentPageRoute == null && this.defaultRoute != null) {
+    if (this.getAttribute("path") != null && this.currentPageRoute == null && this.defaultRoute != null) {
       this.#openRoutePage(this.defaultRoute, "");
     }
   }
