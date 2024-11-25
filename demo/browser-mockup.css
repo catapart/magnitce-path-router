@@ -1,0 +1,380 @@
+
+browser-mockup::part(body)
+{
+    --primary-color: rgb(160, 200, 13);
+    --accent-color: #00a1bd;
+    /* background-color: blue; */
+    padding: 0;
+    margin: 0;
+    
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+browser-mockup header
+{
+    font-size: 1em;
+    color: inherit;
+}
+
+browser-mockup menu
+{
+    padding: 0;
+}
+
+browser-mockup .layout
+{
+    --column-min-width: 100px;
+}
+
+browser-mockup .layout > header
+{
+    grid-column: span 3;
+    color: white;
+}
+browser-mockup .layout > header menu
+{
+    background-color: #131313;
+    margin: 0;
+    font-family: sans-serif;
+}
+@media (max-width: 500px)
+{
+    browser-mockup .layout > header menu
+    {
+        display: grid;
+    }
+}
+browser-mockup .layout > header menu a
+{
+    padding: 1em 1.5em;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: .8em;
+}
+browser-mockup .layout > header menu a:hover
+,browser-mockup .layout > header menu a.selected
+{
+    background-color: rgb(0 0 0 / .2);
+    color: var(--primary-color);
+}
+browser-mockup .layout > footer
+{
+    grid-column: span 3;
+    color: #999;
+    background-color: #222;
+    font-size: .8em;
+    padding: 1em;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    border-top: solid 1px var(--primary-color);
+}
+
+browser-mockup .hero
+{
+    --column-min-width: 100px;
+    border-block: solid 1px var(--accent-color);
+    grid-column: span 3;
+    min-height: 200px;
+    display: grid;
+    /* grid-template-columns: 1fr;
+    grid-template-rows: 1fr; */
+    color: white;
+
+    background-image: linear-gradient(65deg, rgba(251, 251, 251, 0.04) 0%, rgba(251, 251, 251, 0.04) 78%,rgba(51, 51, 51, 0.04) 78%, rgba(51, 51, 51, 0.04) 100%),
+    linear-gradient(335deg, rgba(15, 15, 15, 0.04) 0%, rgba(15, 15, 15, 0.04) 41%,rgba(13, 13, 13, 0.04) 41%, rgba(13, 13, 13, 0.04) 100%),
+    linear-gradient(274deg, rgba(157, 157, 157, 0.04) 0%, rgba(157, 157, 157, 0.04) 43%,rgba(253, 253, 253, 0.04) 43%, rgba(253, 253, 253, 0.04) 100%),
+    linear-gradient(224deg, rgba(227, 227, 227, 0.04) 0%, rgba(227, 227, 227, 0.04) 23%,rgba(19, 19, 19, 0.04) 23%, rgba(19, 19, 19, 0.04) 100%),
+    linear-gradient(305deg, rgba(250, 250, 250, 0.04) 0%, rgba(250, 250, 250, 0.04) 45%,rgba(16, 16, 16, 0.04) 45%, rgba(16, 16, 16, 0.04) 100%),
+    linear-gradient(90deg, rgb(92, 154, 53),rgb(160, 200, 13));
+}
+
+browser-mockup .circles
+{
+    grid-row: 1;
+    grid-column: 1;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    overflow: hidden;
+}
+browser-mockup .circles .circle
+{
+    grid-row: 1;
+    grid-column: 1;
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+    background-color: var(--background-color);
+    border: solid 2px var(--border-color, transparent);
+    box-shadow: 1px 1px 150px 2px rgb(255 255 255 / .3);
+}
+browser-mockup .circles .circle.a
+{
+    --size: 50px;
+    --border-color: #234cda;
+    translate: 75px 95px;
+    opacity: .9
+}
+browser-mockup .circles .circle.b
+{
+    --size: 100px;
+    --border-color: #7638c5;
+    translate: 20px 10px;
+    opacity: .8;
+}
+browser-mockup .circles .circle.c
+{
+    --size: 75px;
+    --border-color: #d35f0a;
+    translate: 80px 155px;
+    opacity: .7;
+}
+browser-mockup .circles .circle.d
+{
+    --size: 150px;
+    --border-color: #9b1a48;
+    translate: 120px 40px;
+    opacity: .2;
+}
+browser-mockup .circles .circle.e
+{
+    --size: 175px;
+    --border-color: #cba6f7;
+    translate: 180px -80px;
+    opacity: .6;
+}
+browser-mockup .circles .circle.f
+{
+    --size: 100px;
+    --border-color: #048e63;
+    translate: 130px 11px;
+    opacity: .8;
+}
+browser-mockup .hero .content
+{
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    overflow: hidden;
+}
+browser-mockup .hero .message
+{
+    translate: 200px;
+    grid-row: 1;
+    grid-column: 1;
+    display: grid;
+    align-content: center;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+}
+browser-mockup .hero .message .title
+{
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+browser-mockup .hero .message .description
+{
+    max-width: 35ch;
+}
+
+browser-mockup path-router
+{
+    grid-column: 2;
+    margin-inline: 1em;
+    border-inline: solid 1px var(--primary-color);
+}
+
+browser-mockup .layout route-page
+{
+        color: #222;
+    padding: 1em;
+}
+@media (prefers-color-scheme: dark) 
+{
+    browser-mockup .layout route-page
+    {
+        color: #ccc;
+    }
+}
+
+browser-mockup route-page > header
+,browser-mockup [is="route-dialog"] > header
+{
+    font-size: 1.3em;
+    font-weight: bold;
+    color: var(--primary-color);
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+}
+
+browser-mockup route-page button
+,browser-mockup [is="route-dialog"] button
+{
+    display: inline-block;
+    background-color: var(--accent-color);
+    border: solid 1px transparent;
+    border-radius: 3px;
+    color: white;
+    font-weight: bold;
+    font-size: .9em;
+    padding: .25em 1.25em;
+    transition: all 100ms linear;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+}
+browser-mockup route-page button:hover
+,browser-mockup [is="route-dialog"] button:hover
+{
+    translate: 0 -1px;
+}
+
+browser-mockup route-page
+,browser-mockup [is="route-dialog"][open]
+{
+    display: grid;
+    align-content: flex-start;
+    gap: 1em;
+}
+browser-mockup route-page section
+,browser-mockup [is="route-dialog"] section
+{
+    border-radius: 2px;
+    padding: 1em;
+    display: flex;
+    flex-direction: column;
+    gap: .25em;
+    border: solid 1px rgb(0 0 0 / .4);
+    box-shadow: 1px 1px 4px -1px rgb(0 0 0);
+}
+browser-mockup route-page:not([path]) section > header
+,browser-mockup route-page[path="help"] route-page header
+,browser-mockup route-page[path="user"] route-page header
+,browser-mockup [path="about"] route-page header
+{
+    color: var(--accent-color);
+    font-weight: bold;
+    font-size: .9em;
+    text-shadow: none;
+}
+browser-mockup route-page:not([path]) section a
+{
+    color: canvastext;
+    cursor: pointer;
+}
+browser-mockup route-page:not([path]) section a:hover
+,browser-mockup route-page:not([path]) section a.selected
+{
+    color: var(--accent-color);
+    text-decoration: underline;
+}
+browser-mockup route-page:not([path]) section.dialogs
+{
+    display: grid;
+    grid-template-columns: auto auto;
+}
+browser-mockup route-page:not([path]) section.dialogs > header
+{
+    grid-column: span 2;
+}
+
+
+browser-mockup route-page[path="user"] a
+{
+    color: canvastext;
+    cursor: pointer;
+}
+browser-mockup route-page[path="user"] section a:hover
+,browser-mockup route-page[path="user"] section a.selected
+{
+    color: var(--accent-color);
+    text-decoration: underline;
+}
+browser-mockup route-page[path=":id"] > menu
+,browser-mockup [path="about"] > menu
+{
+    display: flex;
+    gap: 1px;
+    border-bottom: solid 1px var(--accent-color);
+}
+browser-mockup route-page[path=":id"] > menu a
+,browser-mockup [path="about"] > menu a
+{
+    padding: .25em .75em;
+    color: white;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    background-color: var(--accent-color);
+}
+browser-mockup route-page[path=":id"] > menu a:not(:hover,.selected)::after
+,browser-mockup [path="about"] > menu a:not(:hover,.selected)::after
+{
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: rgb(0 0 0 / .25);
+}
+
+browser-mockup route-page[path="help"]
+{
+    display: grid !important;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto 1fr;
+}
+browser-mockup route-page[path="help"] > header
+,browser-mockup route-page[path="help"] > section
+{
+    grid-column: span 2;
+}
+browser-mockup route-page[path="help"] > menu
+{
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+    gap: 0;
+    border-right: solid 1px var(--accent-color);
+}
+browser-mockup route-page[path="help"] > menu a
+{
+    padding: .25em .75em;
+    color: canvastext;
+    cursor: pointer;
+    user-select: none;
+    font-size: 1rem;
+    font-weight: normal;
+    align-self: stretch;
+}
+browser-mockup route-page[path="help"] > menu a:hover
+,browser-mockup route-page[path="help"] > menu a.selected
+{
+    color: white;
+    background-color: var(--accent-color);
+}
+browser-mockup route-page[path="help"] route-page header
+{
+    color: var(--accent-color);
+    font-weight: bold;
+    font-size: .9em;
+}
+
+form[method="dialog"]
+{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+@media (max-width: 630px)
+{
+    browser-mockup .hero .message
+    {
+        translate: 0;
+        margin-left: 5px;
+        font-size: .8rem !important;
+        max-width: 25ch;
+    }
+
+    browser-mockup section
+    {
+        padding-inline: 5px !important;
+    }
+}

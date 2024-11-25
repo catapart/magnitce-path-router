@@ -1,0 +1,35 @@
+/* 
+   Animations will not be awaitable in code if they have a display of none.
+   Instead, the routes are stacked in a grid.
+ */
+path-router
+,.route-view
+{ 
+    display: var(--router-display, grid);
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+}
+
+route-page
+{
+    display: var(--route-display, block);
+    visibility: hidden;
+    grid-row: 1;
+    grid-column: 1;
+}
+/* 
+   Visibility is visible during the entering and exiting phases
+   to allow for animations to be awaited.
+ */
+route-page[open]
+,route-page[data-entering]
+,route-page[data-exiting]
+{
+    visibility: visible;
+}
+
+/* sub routes should respect the visibility of the parent routes */
+route-page:not([open],[data-entering],[data-exiting]) route-page[open]
+{
+    visibility: inherit;
+}
