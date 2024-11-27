@@ -1,5 +1,11 @@
 # @magnit-ce/path-router
 
+## 0.2.0
+
+### Minor Changes
+
+- 3976411: exposed route link click handler for external listening
+
 ## 0.1.5
 
 ### Patch Changes

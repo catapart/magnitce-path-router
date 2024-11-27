@@ -1,6 +1,6 @@
 {
   "name": "@magnit-ce/path-router",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "description": "A custom html element that routes to pages based on its path attribute",
   "type": "module",
   "main": "dist/path-router.js",
