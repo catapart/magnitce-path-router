@@ -1,5 +1,11 @@
 # @magnit-ce/path-router
 
+## 0.2.2
+
+### Patch Changes
+
+- 55882d8: refactored event target collection in route link click handler
+
 ## 0.2.1
 
 ### Patch Changes
