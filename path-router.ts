@@ -89,58 +89,68 @@ export class PathRouterElement extends HTMLElement
     addRouteLinkClickHandlers(parent?: HTMLElement, linkQuery: string = "a[data-route],button[data-route]")
     {
         parent = parent ?? document.body;
-        parent.addEventListener('click', (event) =>
+        parent.addEventListener('click', (event) => this.routeLink_onClick(parent, event, linkQuery));
+    }
+    routeLink_onClick(parent: HTMLElement, event: Event, linkQuery: string = "a[data-route],button[data-route]")
+    {
+        let targetLink = (event.target as HTMLElement).closest('a[data-route],button[data-route]');
+        if(targetLink == null && event.target == parent && (event.target as HTMLElement).shadowRoot != null)
         {
-            const targetLink = (event.target as HTMLElement).closest('a[data-route],button[data-route]');
-            if(targetLink != null && parent.contains(targetLink))
+            // if the parent is a custom element, the click event's target
+            // will always be the parent element, rather than the triggering
+            // link. To work around this, we try to collect the active element
+            // in the target's shadowRoot. 
+            targetLink = (event.target as HTMLElement).shadowRoot!.activeElement;
+        }
+
+        if(targetLink != null && parent.contains(targetLink))
+        {
+            // clear existing selection
+            const links = [...parent.querySelectorAll(linkQuery)];
+            for(let i = 0; i < links.length; i++)
             {
-                // clear existing selection
-                const links = [...parent.querySelectorAll(linkQuery)];
-                for(let i = 0; i < links.length; i++)
-                {
-                    links[i].removeAttribute('aria-current');
-                }
-
-                let path = (targetLink as HTMLElement).dataset.route!; // if no path attribute, would have been null from query.
-
-                // if the route has a variable, and this is in a
-                // parent route element, values are substituted
-                // if they have an exact name match.
-                if(path.indexOf(':') != -1)
-                {
-                    let parentRoute: Element|null|undefined = targetLink.closest('route-page,[is="route-dialog"]');
-                    while(parentRoute != null)
-                    {
-                        const parentProperties = (parentRoute as RoutePageElement).getProperties();
-                        const linkProperties = path.split('/').filter(item => item.startsWith(':'));
-                        for(let i = 0; i < linkProperties.length; i++)
-                        {
-                            const linkPropertyName = linkProperties[i].substring(1);
-                            if(parentProperties[linkPropertyName] != null)
-                            {
-                                path = path.replace(`:${linkPropertyName}`, parentProperties[linkPropertyName]);
-                            }
-                        }
-                        parentRoute = parentRoute.parentElement?.closest('route-page,[is="route-dialog"]');
-                    }
-                }
-
-
-                // if this link is only made to open a dialog
-                // the path shouldn't change the page route,
-                // instead, it should only change the dialog route
-                if(path.startsWith('#'))
-                {
-                    const currentPath = this.path ?? "";
-                    const currentPathArray = currentPath.split('#');
-                    currentPathArray[1] = path.substring(1);
-                    path = currentPathArray.join('#');
-                }
-
-                this.setAttribute('path', path);
-                targetLink.setAttribute('aria-current', "page");
+                links[i].removeAttribute('aria-current');
             }
-        });
+
+            let path = (targetLink as HTMLElement).dataset.route!; // if no path attribute, would have been null from query.
+
+            // if the route has a variable, and this is in a
+            // parent route element, values are substituted
+            // if they have an exact name match.
+            if(path.indexOf(':') != -1)
+            {
+                let parentRoute: Element|null|undefined = targetLink.closest('route-page,[is="route-dialog"]');
+                while(parentRoute != null)
+                {
+                    const parentProperties = (parentRoute as RoutePageElement).getProperties();
+                    const linkProperties = path.split('/').filter(item => item.startsWith(':'));
+                    for(let i = 0; i < linkProperties.length; i++)
+                    {
+                        const linkPropertyName = linkProperties[i].substring(1);
+                        if(parentProperties[linkPropertyName] != null)
+                        {
+                            path = path.replace(`:${linkPropertyName}`, parentProperties[linkPropertyName]);
+                        }
+                    }
+                    parentRoute = parentRoute.parentElement?.closest('route-page,[is="route-dialog"]');
+                }
+            }
+
+
+            // if this link is only made to open a dialog
+            // the path shouldn't change the page route,
+            // instead, it should only change the dialog route
+            if(path.startsWith('#'))
+            {
+                const currentPath = this.path ?? "";
+                const currentPathArray = currentPath.split('#');
+                currentPathArray[1] = path.substring(1);
+                path = currentPathArray.join('#');
+            }
+
+            this.setAttribute('path', path);
+            targetLink.setAttribute('aria-current', "page");
+        }
     }
 
 
