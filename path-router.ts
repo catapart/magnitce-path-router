@@ -93,17 +93,8 @@ export class PathRouterElement extends HTMLElement
     }
     routeLink_onClick(parent: HTMLElement, event: Event, linkQuery: string = "a[data-route],button[data-route]")
     {
-        let targetLink = (event.target as HTMLElement).closest('a[data-route],button[data-route]');
-        if(targetLink == null && event.target == parent && (event.target as HTMLElement).shadowRoot != null)
-        {
-            // if the parent is a custom element, the click event's target
-            // will always be the parent element, rather than the triggering
-            // link. To work around this, we try to collect the active element
-            // in the target's shadowRoot. 
-            targetLink = (event.target as HTMLElement).shadowRoot!.activeElement;
-        }
-
-        if(targetLink != null && parent.contains(targetLink))
+        let targetLink = event.composedPath().find(item => (item as HTMLElement).dataset.route != null) as HTMLElement;
+        if(targetLink != null)
         {
             // clear existing selection
             const links = [...parent.querySelectorAll(linkQuery)];

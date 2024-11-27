@@ -191,11 +191,8 @@ var PathRouterElement = class extends HTMLElement {
     parent.addEventListener("click", (event) => this.routeLink_onClick(parent, event, linkQuery));
   }
   routeLink_onClick(parent, event, linkQuery = "a[data-route],button[data-route]") {
-    let targetLink = event.target.closest("a[data-route],button[data-route]");
-    if (targetLink == null && event.target == parent && event.target.shadowRoot != null) {
-      targetLink = event.target.shadowRoot.activeElement;
-    }
-    if (targetLink != null && parent.contains(targetLink)) {
+    let targetLink = event.composedPath().find((item) => item.dataset.route != null);
+    if (targetLink != null) {
       const links = [...parent.querySelectorAll(linkQuery)];
       for (let i = 0; i < links.length; i++) {
         links[i].removeAttribute("aria-current");
