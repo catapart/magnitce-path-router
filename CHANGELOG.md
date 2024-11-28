@@ -1,5 +1,11 @@
 # @magnit-ce/path-router
 
+## 0.2.5
+
+### Patch Changes
+
+- d018683: updated vanilla versions
+
 ## 0.2.4
 
 ### Patch Changes
