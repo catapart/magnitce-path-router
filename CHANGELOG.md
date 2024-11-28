@@ -1,5 +1,11 @@
 # @magnit-ce/path-router
 
+## 0.2.4
+
+### Patch Changes
+
+- 92c8106: added break for undefined in link click handler
+
 ## 0.2.3
 
 ### Patch Changes
