@@ -1,5 +1,11 @@
 # @magnit-ce/path-router
 
+## 0.2.7
+
+### Patch Changes
+
+- 61629cb: included RouteProperties type
+
 ## 0.2.6
 
 ### Patch Changes
