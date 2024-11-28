@@ -191,7 +191,7 @@ var PathRouterElement = class extends HTMLElement {
     parent.addEventListener("click", (event) => this.routeLink_onClick(parent, event, linkQuery));
   }
   routeLink_onClick(parent, event, linkQuery = "a[data-route],button[data-route]") {
-    let targetLink = event.composedPath().find((item) => item.dataset.route != null);
+    let targetLink = event.composedPath().find((item) => item.dataset?.route != null);
     if (targetLink != null) {
       const links = [...parent.querySelectorAll(linkQuery)];
       for (let i = 0; i < links.length; i++) {
