@@ -682,3 +682,5 @@ if(customElements.get(COMPONENT_TAG_NAME) == null)
 {
     customElements.define(COMPONENT_TAG_NAME, PathRouterElement);
 }
+
+export { RoutePageElement, RouteDialogElement, Route, RouteType, PathRouteEvent }
