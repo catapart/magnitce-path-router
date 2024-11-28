@@ -1,5 +1,11 @@
 # @magnit-ce/path-router
 
+## 0.2.6
+
+### Patch Changes
+
+- 6440426: added subobject exports
+
 ## 0.2.5
 
 ### Patch Changes
