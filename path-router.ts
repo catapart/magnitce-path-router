@@ -93,7 +93,7 @@ export class PathRouterElement extends HTMLElement
     }
     routeLink_onClick(parent: HTMLElement, event: Event, linkQuery: string = "a[data-route],button[data-route]")
     {
-        let targetLink = event.composedPath().find(item => (item as HTMLElement).dataset.route != null) as HTMLElement;
+        let targetLink = event.composedPath().find(item => (item as HTMLElement).dataset?.route != null) as HTMLElement;
         if(targetLink != null)
         {
             // clear existing selection
