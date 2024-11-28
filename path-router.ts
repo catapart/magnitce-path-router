@@ -1,5 +1,5 @@
 import style from './path-router.css?raw';
-import { PathRouteEvent, Route, RouteType } from './route';
+import { PathRouteEvent, Route, RouteType, RouteProperties } from './route';
 import { RouteDialogElement, COMPONENT_TAG_NAME as ROUTEDIALOG_TAG_NAME } from "./route-dialog.route";
 import { RoutePageElement, COMPONENT_TAG_NAME as ROUTEPAGE_TAG_NAME } from "./route-page.route";
 
@@ -142,6 +142,18 @@ export class PathRouterElement extends HTMLElement
             this.setAttribute('path', path);
             targetLink.setAttribute('aria-current', "page");
         }
+    }
+
+    getRouteProperties(route?: Route): RouteProperties
+    {
+        if(route != null) { return route.getProperties(); }
+        const properties = {};
+        for(let i = 0; i < this.routes.length; i++)
+        {
+            const route = this.routes[i];
+            Object.assign(properties, route.getProperties());
+        }
+        return properties;
     }
 
 
@@ -516,18 +528,6 @@ export class PathRouterElement extends HTMLElement
 
         return [ match, properties ];
     }
-
-    getRouteProperties(route?: Route)
-    {
-        if(route != null) { return route.getProperties(); }
-        const properties = {};
-        for(let i = 0; i < this.routes.length; i++)
-        {
-            const route = this.routes[i];
-            Object.assign(properties, route.getProperties());
-        }
-        return properties;
-    }
     
     pathArraySelectsRouteArray(pathArray: string[], routeArray: string[])
     {
@@ -683,4 +683,4 @@ if(customElements.get(COMPONENT_TAG_NAME) == null)
     customElements.define(COMPONENT_TAG_NAME, PathRouterElement);
 }
 
-export { RoutePageElement, RouteDialogElement, Route, RouteType, PathRouteEvent }
+export { RoutePageElement, RouteDialogElement, Route, RouteType, PathRouteEvent, type RouteProperties }

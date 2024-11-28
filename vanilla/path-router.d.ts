@@ -3,9 +3,7 @@ declare const RouteDialogElement_base: {
         currentProcess: Promise<void>;
         canBeOpened: () => Promise<boolean>;
         canBeClosed: () => Promise<boolean>;
-        getProperties(): {
-            [key: string]: string | null | undefined;
-        };
+        getProperties(): RouteProperties;
         enter(path: string): Promise<boolean>;
         "__#1@#enter"(path: string): Promise<void>;
         "__#1@#open"(): Promise<void>;
@@ -356,9 +354,7 @@ declare const RoutePageElement_base: {
         currentProcess: Promise<void>;
         canBeOpened: () => Promise<boolean>;
         canBeClosed: () => Promise<boolean>;
-        getProperties(): {
-            [key: string]: string | null | undefined;
-        };
+        getProperties(): RouteProperties;
         enter(path: string): Promise<boolean>;
         "__#1@#enter"(path: string): Promise<void>;
         "__#1@#open"(): Promise<void>;
@@ -711,6 +707,9 @@ declare enum PathRouteEvent {
     AfterClose = "afterclose",
     Refresh = "refresh"
 }
+type RouteProperties = {
+    [key: string]: string | null | undefined;
+};
 /**
  * @param elementType The type of `HTMLElement` that will act as the base type for this Route.
  * @description
@@ -725,9 +724,7 @@ declare const RouteType: (elementType?: typeof HTMLElement) => {
         currentProcess: Promise<void>;
         canBeOpened: () => Promise<boolean>;
         canBeClosed: () => Promise<boolean>;
-        getProperties(): {
-            [key: string]: string | null | undefined;
-        };
+        getProperties(): RouteProperties;
         enter(path: string): Promise<boolean>;
         "__#1@#enter"(path: string): Promise<void>;
         "__#1@#open"(): Promise<void>;
@@ -1119,6 +1116,7 @@ declare class PathRouterElement extends HTMLElement {
      */
     addRouteLinkClickHandlers(parent?: HTMLElement, linkQuery?: string): void;
     routeLink_onClick(parent: HTMLElement, event: Event, linkQuery?: string): void;
+    getRouteProperties(route?: Route): RouteProperties;
     /**
      * Compare two `URL` objects to determine whether they represet different locations and, if so, whether or not the new location is marked as a replacement change.
      * @param currentLocation a url object representing the current location
@@ -1131,7 +1129,6 @@ declare class PathRouterElement extends HTMLElement {
     };
     routeMatchesPath(route: Route, queryPath: string, previousMatches: Route[], isDialog?: boolean): MatchValues;
     routeTypeMatches(route: Route, queryPathArray: string[], routePathArray: string[], parentRouteSelector: string, previousMatches: Route[]): MatchValues;
-    getRouteProperties(route?: Route): {};
     pathArraySelectsRouteArray(pathArray: string[], routeArray: string[]): {
         match: boolean;
         properties: PropertyValues;
@@ -1142,4 +1139,4 @@ declare class PathRouterElement extends HTMLElement {
     attributeChangedCallback(attributeName: string, oldValue: string, newValue: string): void;
 }
 
-export { COMPONENT_TAG_NAME, PathRouteEvent, type PathRouterAttributes, PathRouterElement, PathRouterEvent, ROUTEPROPERTY_DATA_ATTRIBUTE_KEYWORD, type Route, RouteDialogElement, RoutePageElement, RouteType };
+export { COMPONENT_TAG_NAME, PathRouteEvent, type PathRouterAttributes, PathRouterElement, PathRouterEvent, ROUTEPROPERTY_DATA_ATTRIBUTE_KEYWORD, type Route, RouteDialogElement, RoutePageElement, type RouteProperties, RouteType };

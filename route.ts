@@ -11,7 +11,7 @@ export enum PathRouteEvent
     Refresh = 'refresh',
 }
 
-export type RouteProperties = { [key: string]: string };
+export type RouteProperties = { [key: string]: string | null | undefined; };
 
 /**
  * @param elementType The type of `HTMLElement` that will act as the base type for this Route.
@@ -30,7 +30,7 @@ export const RouteType = (elementType: typeof HTMLElement = HTMLElement) =>
         canBeOpened: () => Promise<boolean> = async () => true;
         canBeClosed: () => Promise<boolean> = async () => true;
 
-        getProperties()
+        getProperties(): RouteProperties
         {
             const dataValues = Object.entries(this.dataset);
 
@@ -45,7 +45,7 @@ export const RouteType = (elementType: typeof HTMLElement = HTMLElement) =>
 
                 result[key] = value;
                 return result;
-            }, {} as { [key: string]: string|undefined|null });
+            }, {} as RouteProperties);
 
             return properties;
         }

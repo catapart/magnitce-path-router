@@ -230,6 +230,17 @@ var PathRouterElement = class extends HTMLElement {
       targetLink.setAttribute("aria-current", "page");
     }
   }
+  getRouteProperties(route) {
+    if (route != null) {
+      return route.getProperties();
+    }
+    const properties = {};
+    for (let i = 0; i < this.routes.length; i++) {
+      const route2 = this.routes[i];
+      Object.assign(properties, route2.getProperties());
+    }
+    return properties;
+  }
   /**
    * Compare two `URL` objects to determine whether they represet different locations and, if so, whether or not the new location is marked as a replacement change.
    * @param currentLocation a url object representing the current location
@@ -474,17 +485,6 @@ var PathRouterElement = class extends HTMLElement {
     });
     let { match, properties } = this.pathArraySelectsRouteArray(subrouteArray, routePathArray);
     return [match, properties];
-  }
-  getRouteProperties(route) {
-    if (route != null) {
-      return route.getProperties();
-    }
-    const properties = {};
-    for (let i = 0; i < this.routes.length; i++) {
-      const route2 = this.routes[i];
-      Object.assign(properties, route2.getProperties());
-    }
-    return properties;
   }
   pathArraySelectsRouteArray(pathArray, routeArray) {
     let properties = {};
