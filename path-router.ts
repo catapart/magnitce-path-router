@@ -86,12 +86,12 @@ export class PathRouterElement extends HTMLElement
      * @param parent An element that will contain every link that should be listened for. If no parent is provided, the document `<body>` will be used.
      * @param linkQuery A query that will be used to de-select all route links. This can be customized for use-cases like nested path routers which may benefit from scoped selectors. By default, the query is `a[data-route],button[data-route]`.
      */
-    addRouteLinkClickHandlers(parent?: HTMLElement, linkQuery: string = "a[data-route],button[data-route]")
+    addRouteLinkClickHandlers(parent?: HTMLElement|ShadowRoot, linkQuery: string = "a[data-route],button[data-route]")
     {
         parent = parent ?? document.body;
         parent.addEventListener('click', (event) => this.routeLink_onClick(parent, event, linkQuery));
     }
-    routeLink_onClick(parent: HTMLElement, event: Event, linkQuery: string = "a[data-route],button[data-route]")
+    routeLink_onClick(parent: HTMLElement|ShadowRoot, event: Event, linkQuery: string = "a[data-route],button[data-route]")
     {
         let targetLink = event.composedPath().find(item => (item as HTMLElement).dataset?.route != null) as HTMLElement;
         if(targetLink != null)
