@@ -1,5 +1,11 @@
 # @magnit-ce/path-router
 
+## 0.2.8
+
+### Patch Changes
+
+- 28f4930: added shadow root as option for link parents
+
 ## 0.2.7
 
 ### Patch Changes
