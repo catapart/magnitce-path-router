@@ -1,5 +1,11 @@
 # @magnit-ce/path-router
 
+## 0.3.1
+
+### Patch Changes
+
+- e486397: refactored to remove cancel feature and allow multiple router link parents
+
 ## 0.3.0
 
 ### Minor Changes
