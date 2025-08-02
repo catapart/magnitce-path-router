@@ -1,5 +1,11 @@
 # @magnit-ce/path-router
 
+## 0.3.0
+
+### Minor Changes
+
+- e52eb47: added cancel feature to cancel onClick handler using cancel attribute
+
 ## 0.2.8
 
 ### Patch Changes
