@@ -1,5 +1,11 @@
 # @magnit-ce/path-router
 
+## 0.3.2
+
+### Patch Changes
+
+- 0524ee5: restored cancel feature, using defaultPrevented event property
+
 ## 0.3.1
 
 ### Patch Changes
