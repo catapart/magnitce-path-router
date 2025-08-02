@@ -93,6 +93,12 @@ export class PathRouterElement extends HTMLElement
     }
     routeLink_onClick(parent: HTMLElement|ShadowRoot, event: Event, linkQuery: string = "a[data-route],button[data-route]")
     {
+        if(this.getAttribute('cancel') != null)
+        {
+            this.toggleAttribute('cancel', false);
+            return;
+        }
+        
         let targetLink = event.composedPath().find(item => (item as HTMLElement).dataset?.route != null) as HTMLElement;
         if(targetLink != null)
         {
