@@ -1,5 +1,29 @@
 # @magnit-ce/path-router
 
+## 0.3.2
+
+### Patch Changes
+
+- 0524ee5: restored cancel feature, using defaultPrevented event property
+
+## 0.3.1
+
+### Patch Changes
+
+- e486397: refactored to remove cancel feature and allow multiple router link parents
+
+## 0.3.0
+
+### Minor Changes
+
+- e52eb47: added cancel feature to cancel onClick handler using cancel attribute
+
+## 0.2.8
+
+### Patch Changes
+
+- 28f4930: added shadow root as option for link parents
+
 ## 0.2.7
 
 ### Patch Changes

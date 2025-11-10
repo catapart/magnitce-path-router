@@ -1,6 +1,6 @@
 {
   "name": "@magnit-ce/path-router",
-  "version": "0.2.7",
+  "version": "0.3.2",
   "description": "A custom html element that routes to pages based on its path attribute",
   "type": "module",
   "main": "dist/path-router.js",
@@ -11,10 +11,10 @@
   ],
   "scripts": {
     "build": "tsup path-router.ts --format cjs,esm --dts --publicDir --clean",
-    "build-vanilla": "tsup path-router.ts --format esm --dts --publicDir --clean --outDir ./vanilla",
-    "minify": "tsup path-router.ts --format esm --config ./tsup.config.min.ts --outDir ./vanilla --minify --publicDir",
+    "copyToDemo": "node -e \"const fs = require('fs'); fs.cpSync('dist', 'demo/dist', {recursive: true});\"",
+    "minify": "tsup path-router.ts --format esm --config ./tsup.config.min.ts --outDir ./demo/dist --minify --publicDir",
     "lint": "tsup path-router.ts --format esm",
-    "package": "npm run build && npm run build-vanilla && npm run minify",
+    "package": "npm run build && npm run minify && npm run copyToDemo",
     "release": "npm run package && changeset publish"
   },
   "keywords": [
