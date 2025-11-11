@@ -5,7 +5,7 @@ import dts from 'vite-plugin-dts';
 export default defineConfig({
     build: {
         lib: {
-            entry: ['src/code-example.ts'],
+            entry: ['src/path-router.ts'],
         },
         minify: false,
         rollupOptions: {
@@ -16,25 +16,25 @@ export default defineConfig({
             output: [
                 {
                     dir: 'dist',
-                    entryFileNames: 'code-example.js',
+                    entryFileNames: 'path-router.js',
                     format: 'es',
                 },
                 {
                     dir: 'dist',
-                    entryFileNames: 'code-example.min.js',
+                    entryFileNames: 'path-router.min.js',
                     format: 'es',
                     plugins: [terser()]
                 },
                 {
                     dir: 'dist',
-                    name: 'code-example.umd.js',
-                    entryFileNames: 'code-example.umd.js',
+                    name: 'path-router.umd.js',
+                    entryFileNames: 'path-router.umd.js',
                     format: 'umd',
                 },
                 {
                     dir: 'dist',
-                    entryFileNames: 'code-example.umd.min.js',
-                    name: 'code-example.umd.min.js',
+                    entryFileNames: 'cpath-router.umd.min.js',
+                    name: 'path-router.umd.min.js',
                     format: 'umd',
                     plugins: [terser()]
                 }

@@ -1,15 +1,19 @@
 import style from './path-router.css?raw';
-import { PathRouteEvent, Route, RouteType, RouteProperties } from './route';
+import { RouteEvent, RouteType, type RouteProperties } from './route';
 import { RouteDialogElement, COMPONENT_TAG_NAME as ROUTEDIALOG_TAG_NAME } from "./route-dialog.route";
 import { RoutePageElement, COMPONENT_TAG_NAME as ROUTEPAGE_TAG_NAME } from "./route-page.route";
 
-export enum PathRouterEvent
+export const PathRouterEvent =
 {
     /** Fires when a route is opened or closed.  */
-    Change = 'change',
+    Change: 'change',
     /** Fires when the router's `path` attribute is updated. */
-    PathChange = 'pathchange',
-}
+    PathChange: 'pathchange',
+} as const;
+
+export type PathRouterEventType = typeof PathRouterEvent[keyof typeof PathRouterEvent];
+
+export type Route = RoutePageElement|RouteDialogElement;
 
 export type PathRouterAttributes =
 {
@@ -23,7 +27,10 @@ type MatchValues = [ boolean, PropertyValues ];
 const COMPONENT_STYLESHEET = new CSSStyleSheet();
 COMPONENT_STYLESHEET.replaceSync(style);
 
-const DOMCONTENTLOADED_PROMISE = new Promise((resolve) => document.addEventListener('DOMContentLoaded', resolve));
+const DOMCONTENTLOADED_PROMISE = new Promise((resolve) => {
+    if(document.readyState === 'complete') { resolve(null); return;}
+    document.addEventListener('DOMContentLoaded', resolve)
+});
 
 // export const ROUTEPROPERTY_DEFAULT = 'default';
 export const ROUTEPROPERTY_DATA_ATTRIBUTE_KEYWORD = 'property';
@@ -221,7 +228,7 @@ export class PathRouterElement extends HTMLElement
                 this.#resolveNavigation();
                 this.#resolveNavigation = undefined;
             }
-            currentlyOpen.dispatchEvent(new CustomEvent(PathRouteEvent.Refresh, { detail: { path }, bubbles: true, cancelable: true }));
+            currentlyOpen.dispatchEvent(new CustomEvent(RouteEvent.Refresh, { detail: { path }, bubbles: true, cancelable: true }));
             return [ openedPage, openedDialog ];
         }
         
@@ -464,7 +471,7 @@ export class PathRouterElement extends HTMLElement
         }
     }
 
-    routeMatchesPath(route: Route, queryPath: string, previousMatches: Route[], isDialog = false): MatchValues
+    routeMatchesPath(route: Route, queryPath: string, previousMatches: Route[], _isDialog = false): MatchValues
     {
         
         // split query path into page and dialog paths
@@ -518,7 +525,7 @@ export class PathRouterElement extends HTMLElement
             parentRoutes.push(parentRoute);
             parentRoute = parentRoute.parentElement?.closest(parentRouteSelector);
         }
-        let composedParentPath = parentRoutes.reverse().reduce((accumulation, item, index) =>
+        let composedParentPath = parentRoutes.reverse().reduce((accumulation, item, _index) =>
         {
             return `${(accumulation == "") ? "" : accumulation + '/'}${item.getAttribute('path') ?? ""}`;
         }, "");
@@ -579,10 +586,12 @@ export class PathRouterElement extends HTMLElement
 
     async connectedCallback()
     {
+        console.log('connect');
         this.#activationPromise = this.#activateRouteManagement();
         this.#injectStyles();
 
         await this.#activationPromise;
+        console.log('pre-active');
         await this.#openPreActivationRoutes();
 
         if(this.getAttribute('path') != null && this.currentPageRoute == null && this.defaultRoute != null)
@@ -676,6 +685,7 @@ export class PathRouterElement extends HTMLElement
     {
         if(attributeName == "path")
         {
+            console.log(newValue);
             if(this.#isActivated == true)
             {
                 this.#update(newValue, oldValue ?? "");
@@ -692,4 +702,4 @@ if(customElements.get(COMPONENT_TAG_NAME) == null)
     customElements.define(COMPONENT_TAG_NAME, PathRouterElement);
 }
 
-export { RoutePageElement, RouteDialogElement, Route, RouteType, PathRouteEvent, type RouteProperties }
+export { RoutePageElement, RouteDialogElement, RouteType, RouteEvent as PathRouteEvent, type RouteProperties }
