@@ -1,15 +1,15 @@
 import { ROUTEPROPERTY_DATA_ATTRIBUTE_KEYWORD } from "./path-router";
-import { RouteDialogElement } from "./route-dialog.route";
-import { RoutePageElement } from "./route-page.route";
 
-export enum PathRouteEvent
+export const RouteEvent =
 {
-    BeforeOpen = "beforeopen",
-    AfterOpen = "afteropen",
-    BeforeClose = "beforeclose",
-    AfterClose = "afterclose",
-    Refresh = 'refresh',
-}
+    BeforeOpen: 'beforeopen',
+    AfterOpen: 'afteropen',
+    BeforeClose: 'beforeclose',
+    AfterClose: 'afterclose',
+    Refresh: 'refresh',
+} as const;
+
+export type RouteEventType = typeof RouteEvent[keyof typeof RouteEvent];
 
 export type RouteProperties = { [key: string]: string | null | undefined; };
 
@@ -63,7 +63,7 @@ export const RouteType = (elementType: typeof HTMLElement = HTMLElement) =>
         }
         async #enter(path: string)
         {
-            this.dispatchEvent(new CustomEvent(PathRouteEvent.BeforeOpen, { detail: { path, properties: this.getProperties() }}));
+            this.dispatchEvent(new CustomEvent(RouteEvent.BeforeOpen, { detail: { path, properties: this.getProperties() }}));
             await Promise.allSettled(this.#blockingBeforeOpen.map(value => value()));
 
             this.dataset.entering = '';
@@ -73,7 +73,7 @@ export const RouteType = (elementType: typeof HTMLElement = HTMLElement) =>
             delete this.dataset.entering;
             this.#open();
     
-            this.dispatchEvent(new Event(PathRouteEvent.AfterOpen));
+            this.dispatchEvent(new Event(RouteEvent.AfterOpen));
             await Promise.allSettled(this.#blockingAfterOpen.map(value => value()));
         }
         async #open()
@@ -99,7 +99,7 @@ export const RouteType = (elementType: typeof HTMLElement = HTMLElement) =>
         }
         async #exit()
         {
-            this.dispatchEvent(new Event(PathRouteEvent.BeforeClose));
+            this.dispatchEvent(new Event(RouteEvent.BeforeClose));
             await Promise.allSettled(this.#blockingBeforeClose.map(value => value()));
 
             this.dataset.exiting = '';
@@ -110,7 +110,7 @@ export const RouteType = (elementType: typeof HTMLElement = HTMLElement) =>
             this.#close();
             delete this.dataset.exiting;
 
-            this.dispatchEvent(new Event(PathRouteEvent.AfterClose));
+            this.dispatchEvent(new Event(RouteEvent.AfterClose));
             await Promise.allSettled(this.#blockingAfterClose.map(value => value()));
         }
         #close()
@@ -127,41 +127,41 @@ export const RouteType = (elementType: typeof HTMLElement = HTMLElement) =>
         {
             const isOpen = this.getAttribute('open') != null;
             this.addEventListener(type, listener, options);
-            if((type == PathRouteEvent.BeforeOpen.toString() 
-            || type == PathRouteEvent.AfterOpen.toString())
+            if((type == RouteEvent.BeforeOpen.toString() 
+            || type == RouteEvent.AfterOpen.toString())
             && isOpen == true)
             {
                 this.dispatchEvent(new Event(type));
             }
-            else if(type == PathRouteEvent.BeforeClose.toString()
-            || type == PathRouteEvent.AfterClose.toString()
+            else if(type == RouteEvent.BeforeClose.toString()
+            || type == RouteEvent.AfterClose.toString()
             && isOpen == false)
             {
                 this.dispatchEvent(new Event(type));
             }
         }
-        addBlockingEventListener(eventName: PathRouteEvent, handler: () => void|Promise<void>)
+        addBlockingEventListener(eventName: RouteEventType, handler: () => void|Promise<void>)
         {
             switch(eventName)
             {
-            case PathRouteEvent.BeforeOpen: this.#blockingBeforeOpen.push(handler); break;
-            case PathRouteEvent.AfterOpen: this.#blockingAfterOpen.push(handler); break;
-            case PathRouteEvent.BeforeClose: this.#blockingBeforeClose.push(handler); break;
-            case PathRouteEvent.AfterClose: this.#blockingAfterClose.push(handler); break;
+            case RouteEvent.BeforeOpen: this.#blockingBeforeOpen.push(handler); break;
+            case RouteEvent.AfterOpen: this.#blockingAfterOpen.push(handler); break;
+            case RouteEvent.BeforeClose: this.#blockingBeforeClose.push(handler); break;
+            case RouteEvent.AfterClose: this.#blockingAfterClose.push(handler); break;
             }
         }
-        applyBlockingEventListener(eventName: PathRouteEvent, handler: () => void|Promise<void>)
+        applyBlockingEventListener(eventName: RouteEventType, handler: () => void|Promise<void>)
         {
             const isOpen = this.getAttribute('open') != null;
             this.addBlockingEventListener(eventName, handler);
-            if((eventName == PathRouteEvent.BeforeOpen.toString() 
-            || eventName == PathRouteEvent.AfterOpen.toString())
+            if((eventName == RouteEvent.BeforeOpen.toString() 
+            || eventName == RouteEvent.AfterOpen.toString())
             && isOpen == true)
             {
                 this.dispatchEvent(new Event(eventName));
             }
-            else if(eventName == PathRouteEvent.BeforeClose.toString()
-            || eventName == PathRouteEvent.AfterClose.toString()
+            else if(eventName == RouteEvent.BeforeClose.toString()
+            || eventName == RouteEvent.AfterClose.toString()
             && isOpen == false)
             {
                 this.dispatchEvent(new Event(eventName));
@@ -169,5 +169,3 @@ export const RouteType = (elementType: typeof HTMLElement = HTMLElement) =>
         }
     }
 }
-
-export type Route = RoutePageElement|RouteDialogElement;

@@ -1,15 +1,19 @@
 import style from './path-router.css?raw';
-import { PathRouteEvent, Route, RouteType, RouteProperties } from './route';
+import { RouteEvent, RouteType, type RouteProperties } from './route';
 import { RouteDialogElement, COMPONENT_TAG_NAME as ROUTEDIALOG_TAG_NAME } from "./route-dialog.route";
 import { RoutePageElement, COMPONENT_TAG_NAME as ROUTEPAGE_TAG_NAME } from "./route-page.route";
 
-export enum PathRouterEvent
+export const PathRouterEvent =
 {
     /** Fires when a route is opened or closed.  */
-    Change = 'change',
+    Change: 'change',
     /** Fires when the router's `path` attribute is updated. */
-    PathChange = 'pathchange',
-}
+    PathChange: 'pathchange',
+} as const;
+
+export type PathRouterEventType = typeof PathRouterEvent[keyof typeof PathRouterEvent];
+
+export type Route = RoutePageElement|RouteDialogElement;
 
 export type PathRouterAttributes =
 {
@@ -23,7 +27,10 @@ type MatchValues = [ boolean, PropertyValues ];
 const COMPONENT_STYLESHEET = new CSSStyleSheet();
 COMPONENT_STYLESHEET.replaceSync(style);
 
-const DOMCONTENTLOADED_PROMISE = new Promise((resolve) => document.addEventListener('DOMContentLoaded', resolve));
+const DOMCONTENTLOADED_PROMISE = new Promise((resolve) => {
+    if(document.readyState === 'complete') { resolve(null); return;}
+    document.addEventListener('DOMContentLoaded', resolve)
+});
 
 // export const ROUTEPROPERTY_DEFAULT = 'default';
 export const ROUTEPROPERTY_DATA_ATTRIBUTE_KEYWORD = 'property';
@@ -46,13 +53,13 @@ export class PathRouterElement extends HTMLElement
         return Array.from(this.querySelectorAll(`:scope > ${ROUTEPAGE_TAG_NAME},${COMPONENT_TAG_NAME} :not(${COMPONENT_TAG_NAME}) ${ROUTEPAGE_TAG_NAME},:scope > [is="${ROUTEDIALOG_TAG_NAME}"]`) as NodeListOf<Route>, (route: Route) => route) as Route[];
     }
 
-    /** The `<page-route>` element currently being navigated to. */
+    /** The `<route-page>` element currently being navigated to. */
     targetPageRoute: RoutePageElement|undefined;
-    /** The `<page-route>` element that the router currently has open. */
+    /** The `<route-page>` element that the router currently has open. */
     currentPageRoute: RoutePageElement|undefined;
-    /** The `route-dialog` element currently being navigated to. */
+    /** The `<route-dialog>` element currently being navigated to. */
     targetDialogRoute: RouteDialogElement|undefined;
-    /** The `route-dialog` element that the router currently has open. */
+    /** The `<route-dialog>` element that the router currently has open. */
     currentDialogRoute: RouteDialogElement|undefined;
 
     /** The route that will be selected if no other routes match the current path. */
@@ -221,7 +228,7 @@ export class PathRouterElement extends HTMLElement
                 this.#resolveNavigation();
                 this.#resolveNavigation = undefined;
             }
-            currentlyOpen.dispatchEvent(new CustomEvent(PathRouteEvent.Refresh, { detail: { path }, bubbles: true, cancelable: true }));
+            currentlyOpen.dispatchEvent(new CustomEvent(RouteEvent.Refresh, { detail: { path }, bubbles: true, cancelable: true }));
             return [ openedPage, openedDialog ];
         }
         
@@ -464,7 +471,7 @@ export class PathRouterElement extends HTMLElement
         }
     }
 
-    routeMatchesPath(route: Route, queryPath: string, previousMatches: Route[], isDialog = false): MatchValues
+    routeMatchesPath(route: Route, queryPath: string, previousMatches: Route[], _isDialog = false): MatchValues
     {
         
         // split query path into page and dialog paths
@@ -518,7 +525,7 @@ export class PathRouterElement extends HTMLElement
             parentRoutes.push(parentRoute);
             parentRoute = parentRoute.parentElement?.closest(parentRouteSelector);
         }
-        let composedParentPath = parentRoutes.reverse().reduce((accumulation, item, index) =>
+        let composedParentPath = parentRoutes.reverse().reduce((accumulation, item, _index) =>
         {
             return `${(accumulation == "") ? "" : accumulation + '/'}${item.getAttribute('path') ?? ""}`;
         }, "");
@@ -692,4 +699,4 @@ if(customElements.get(COMPONENT_TAG_NAME) == null)
     customElements.define(COMPONENT_TAG_NAME, PathRouterElement);
 }
 
-export { RoutePageElement, RouteDialogElement, Route, RouteType, PathRouteEvent, type RouteProperties }
+export { RoutePageElement, RouteDialogElement, RouteType, RouteEvent as PathRouteEvent, type RouteProperties }
