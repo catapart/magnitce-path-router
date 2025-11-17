@@ -1,5 +1,11 @@
 # @magnit-ce/path-router
 
+## 0.3.3
+
+### Patch Changes
+
+- 20dce9f: fixed issue with initial route not loading when dom event was not detected
+
 ## 0.3.2
 
 ### Patch Changes
