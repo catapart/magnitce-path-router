@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Introduction to the path-router custom element">
     <title>&lt;path-router&gt; Introduction</title>
+    <link rel="stylesheet" href="./introduction/introduction.theme.css">
     <link rel="stylesheet" href="./introduction/introduction.css">
-    <link rel="stylesheet" href="./introduction/index.css">
+    
     <noscript>
         <style>
             code-example { display: none; }
@@ -36,11 +37,11 @@
                 </div>
                 <div class="text">
                     <div class="breadcrumbs">
-                        <a class="breadcrumb" href="https://gitlab.com/catapart">@catapart</a>
+                        <a class="breadcrumb" href="https://gitlab.com/cynic-devs/magnitce-code-example">@catapart</a>
                     </div>
                     <h1 class="title">&lt;path-router&gt;</h1>
                     <div class="repos">
-                        <a class="repo gitlab" title="Github Repository" href="https://gitlab.com/cynic-devs/magnitce-path-router">
+                        <a class="repo github" title="Repository" href="https://github.com/catapart/magnitce-path-router">
                             <svg xmlns="http://www.w3.org/2000/svg"
                                 aria-label="GitLab" role="img"
                                 class="icon" width="24" height="24" 
@@ -74,20 +75,20 @@
                 <header>
                     <h3>Introduction</h3>
                 </header>
-                <p>This page is an introduction to the <code>&lt;code-example&gt;</code> custom element. It provides a description of the library and acts as a reference for documentation and examples.</p>
+                <p>This page is an introduction to the <code>&lt;path-router&gt;</code> custom element. It provides a description of the library and acts as a reference for documentation and examples.</p>
             </section>
             <section class="element">
                 <header>
                     <h3>Custom Element</h3>
                 </header>
-                <!-- what -->
-                <p>The <code>&lt;code-example&gt;</code> custom element renders code in a syntax-highlight text block and, if possible, the results of that code in a display frame.</p>
-                <!-- why -->
-                 <p>The element is intended for use in documentation, tutorials, demos, or any other place where an example of code would be helpful.</p>
-                <!-- how -->
-                <p>To use the <code>&lt;code-example&gt;</code> custom element, add it to a page with at least one <code>&lt;code&gt;</code> element in its children.</p>
-                <p>Assign the code element a <code>slot</code> attribute to activate it as example code. Assign a class of <code>language-js</code>, <code>language-html</code>, or <code>language-css</code> to apply syntax highlighting for the respective language.</p>
-                <!-- links (app link,) -->
+                <p>The <code>&lt;path-router&gt;</code> element allows developers to show and hide sections of html contained in "routes" which can either be defined using <code>&lt;route-page&gt;</code> or <code>route-dialog</code> child elements.</p>
+                 <p>The element is intended to simplify development for single page apps, or any types of web content that can benefit from navigation within the page.</p>
+                <p>Routing is done by matching the the <code>&lt;path-router&gt;</code> element's <code>path</code> attribute to one of its child route's <code>path</code> attributes.</p>
+          <p>Matching path values can be as simple as exact string matches. Routing can be done without any type of dynamic content.</p>
+          <p>The <code>&lt;path-router&gt;</code> element does, however, account for dynamic content allowing complex matching that uses common string patterns for variables.</p>
+          <p>If the <code>&lt;path-router&gt;</code> element's <code>path</code> attribute finds a child route that matches, that route will be displayed.</p>
+          <p>If no route can be found that matches the <code>&lt;path-router&gt;</code> element's <code>path</code> attribute, no route will be displayed.</p>
+                
             </section>
             <section class="install">
                 <header>
@@ -112,12 +113,12 @@
                         <span class="title option yarn">yarn</span>
                     </span>
                     <code slot>
-                        npm install @magnit-ce/code-example
+                        npm install @magnit-ce/path-router
                     </code>
                 </code-example>
                 <script>
                     const options = ['npm', 'bun', 'pnpm', 'deno', 'yarn'];
-                    const scripts = ['npm install @magnit-ce/code-example', 'bun add @magnit-ce/code-example', 'pnpm install @magnit-ce/code-example', 'deno install npm:@magnit-ce/code-example', 'yarn add @magnit-ce/code-example'];
+                    const scripts = ['npm install @magnit-ce/path-router', 'bun add @magnit-ce/path-router', 'pnpm install @magnit-ce/path-router', 'deno install npm:@magnit-ce/path-router', 'yarn add @magnit-ce/path-router'];
                     document.addEventListener('DOMContentLoaded', () =>
                     {
                         const installExample = document.getElementById('install-example');
@@ -144,11 +145,11 @@
                 </script>
                 <noscript class="centered-single-column">
                     <dl>
-                        <dt>npm</dt> <dd><textarea>npm install @magnit-ce/code-example</textarea></dd>
-                        <dt>bun</dt> <dd><textarea>bun add @magnit-ce/code-example</textarea></dd>
-                        <dt>pnpm</dt> <dd><textarea>pnpm install @magnit-ce/code-example</textarea></dd>
-                        <dt>deno</dt> <dd><textarea>deno install npm:@magnit-ce/code-example</textarea></dd>
-                        <dt>yarn</dt> <dd><textarea>yarn add @magnit-ce/code-example</textarea></dd>
+                        <dt>npm</dt> <dd><textarea>npm install @magnit-ce/path-router</textarea></dd>
+                        <dt>bun</dt> <dd><textarea>bun add @magnit-ce/path-router</textarea></dd>
+                        <dt>pnpm</dt> <dd><textarea>pnpm install @magnit-ce/path-router</textarea></dd>
+                        <dt>deno</dt> <dd><textarea>deno install npm:@magnit-ce/path-router</textarea></dd>
+                        <dt>yarn</dt> <dd><textarea>yarn add @magnit-ce/path-router</textarea></dd>
                     </ul>
                 </noscript>
             </div>
@@ -161,10 +162,10 @@
                     <h3>Custom Element Documentation</h3>
                 </header>
                 <div class="description">
-                    <p>Use the custom element documentation to learn more about how to integrate the <code>&lt;code-example&gt;</code> element into an html project.</p>
+                    <p>Use the custom element documentation to learn more about how to integrate the <code>&lt;path-router&gt;</code> element into an html project.</p>
                     <p>Follow the README link to view the library's repository page and get a look at the source directly.</p>
                     <div class="actions">
-                        <a href="https://gitlab.com/cynic-devs/magnitce-code-example">See the library's README</a>
+                        <a href="https://github.com/catapart/magnitce-path-router">See the library's README</a>
                         <a class="button-link" href="./documentation/">View Library Documentation</a>
                     </div>
                 </div>
@@ -181,38 +182,67 @@
             </section>
             <code-example class="stack" preview="false">
                 <code slot class="language-html">
-                    <code-example>
-                        <code slot class="language-js">
-                            document.body.append("Hello World");
-                        </code>
-                    </code-example>
-                    <!-- Note: any <script> element in a code-example element will be loaded by the parent document. -->
-                    <!-- Script loading cannot be prevented because the browser will load the tag before the custom element will register. -->
-                    <!-- Always inject a required script using the `preview-script` attribute instead of a <script> element. -->
-                    <!-- The <script> element in this example is being injected to prevent loading. -->
+                    <menu>
+                        <a data-route="first">Route First</a>
+                        <a data-route="second">Route Second</a>
+                        <a data-route="third">Route Third</a>
+                        <a data-route="fourth">Route Fourth</a>
+                        <a data-route="fourth/fifth/sixth">Route Fifth</a>
+                        <a data-route="#dialog/">Route Dialog</a>
+                        <a data-route="#dialog/second">Route Dialog - Second</a>
+                        <a data-route="test">No Match Test</a>
+                    </menu>
+                    <path-router path="">
+                        <route-page path="first">Route First</route-page>
+                        <route-page path="second">Route Second</route-page>
+                        <route-page path="third">Route Third</route-page>
+                        <route-page path="fourth">
+                            Route Fourth
+                            <route-page path="fifth/:property">Route Fifth</route-page>
+                        </route-page>
+                        <path-router class="subrouter-manages-its-own-routes">
+                            <route-page path="first" class="never matches"></route-page>
+                        </path-router>
+                        <dialog is="route-dialog" path="dialog">
+                            Dialog
+                            <route-page>Dialog Default</route-page>
+                            <route-page path="second">Dialog Second</route-page>
+                            <form method="dialog"><button>Close</button></form>
+                        </dialog>
+                    </path-router>
                 </code>
             </code-example>
-            <script>
-                document.addEventListener('DOMContentLoaded', ()=>
-                {
-                    const codeExample = document.querySelector('.quick-reference code-example');
-                    const code = codeExample.querySelector('code');
-                    const scriptElement = document.createElement('script');
-                    scriptElement.type = 'module';
-                    scriptElement.src = "https://cdn.jsdelivr.net/npm/@magnit-ce/path-router";
-                    code.insertBefore(scriptElement, code.childNodes[3]);
-                    code.insertBefore(document.createTextNode('\n'), code.childNodes[4]);
-                    codeExample.replaceSource(code.innerHTML);
-                });
-            </script>
             <noscript>
                 <div class="source html">
                     <header><h5>HTML</h5></header>
-                    <textarea spellcheck="false" class="js"><code-example>
-    <code slot class="language-js">
-        document.body.append("Hello World");
-    </code>
-</code-example></textarea>
+                    <textarea spellcheck="false" class="html"><menu>
+                        <a data-route="first">Route First</a>
+                        <a data-route="second">Route Second</a>
+                        <a data-route="third">Route Third</a>
+                        <a data-route="fourth">Route Fourth</a>
+                        <a data-route="fourth/fifth/sixth">Route Fifth</a>
+                        <a data-route="#dialog/">Route Dialog</a>
+                        <a data-route="#dialog/second">Route Dialog - Second</a>
+                        <a data-route="test">No Match Test</a>
+                    </menu>
+                    <path-router path="">
+                        <route-page path="first">Route First</route-page>
+                        <route-page path="second">Route Second</route-page>
+                        <route-page path="third">Route Third</route-page>
+                        <route-page path="fourth">
+                            Route Fourth
+                            <route-page path="fifth/:property">Route Fifth</route-page>
+                        </route-page>
+                        <path-router class="subrouter-manages-its-own-routes">
+                            <route-page path="first" class="never matches"></route-page>
+                        </path-router>
+                        <dialog is="route-dialog" path="dialog">
+                            Dialog
+                            <route-page>Dialog Default</route-page>
+                            <route-page path="second">Dialog Second</route-page>
+                            <form method="dialog"><button>Close</button></form>
+                        </dialog>
+                    </path-router></textarea>
                 </div>
             </noscript>
             <section class="reference-tables">
@@ -224,632 +254,45 @@
                     <svg class="icon arrow-icon"><use href="#icon-definition_arrow"></use></svg>
                     <h4>Events</h4>
                 </summary>
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="accent text-right">Name</th>
-                            <th>Description</th>
-                            <th><code>event.target</code></th>
-                            <th><code>details</code> Content</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td data-label="Name" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>preview</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>Dispatched before a preview's content is injected into the preview <code>&lt;iframe&gt;</code> element.</p>
-                                </div>
-                            </td>
-                            <td data-label="&lt;code&gt;event.target&lt;/code&gt;">
-                                <div class="cell-content">
-                                    <code>&lt;code-example&gt;</code>
-                                </div>
-                            </td>
-                            <td data-label="&lt;details&gt; Content">
-                                <div class="cell-content">
-                                    <pre><code>{
-    code: string,
-    html: string,
-    style: string
-}</code></pre>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="message">
+                    <p>This custom element does not emit any events.</p>
+                </div>
             </details>
             <details class="reference atributes">
                 <summary class="title">
                     <svg class="icon arrow-icon"><use href="#icon-definition_arrow"></use></svg>
                     <h4>Attributes</h4>
                 </summary>
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="accent text-right">Attribute</th>
-                            <th>Description</th>
-                            <th>Values</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td data-label="Attribute" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>preview</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>Used to disable the preview. Recommended over hiding preview with styles, because it prevents the preview from having scripts run or content styled.</p>
-                                </div>
-                            </td>
-                            <td data-label="Values">
-                                <div class="cell-content">
-                                    <ul>
-                                        <li>
-                                            <span class="value"><code>false</code></span>
-                                            <span class="description">If set to false, prevents the preview content from being loaded, and hides the default preview content</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Attribute" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>script-module</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>Injects the script tags in the preview script as modules.</p>
-                                </div>
-                            </td>
-                            <td data-label="Values">
-                                <div class="cell-content">
-                                    <ul>
-                                        <li>
-                                            <span class="value"><code>true</code></span>
-                                            <span class="description">If set to true, the preview script provided by the source <code>code</code> element will be given a <code>type</code> attribute of <code>module</code></span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Attribute" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>preview-script</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>Injects a script tag into the preview <code>&lt;iframe&gt;</code>'s document. Useful for including scripts without showing those as the example. One use case is dependency injection.</p>
-                                </div>
-                            </td>
-                            <td data-label="Values">
-                                <div class="cell-content">
-                                    <ul>
-                                        <li>
-                                            <span class="value">[<code>"path/to/script.js"</code>]</span>
-                                            <span class="description">The path provided here will be used as the <code>src</code> attribute of the <code>script</code> tag injected into the preview.</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Attribute" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>preview-script-module</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>Injects the script tags in the preview script as modules.</p>
-                                </div>
-                            </td>
-                            <td data-label="Values">
-                                <div class="cell-content">
-                                    <ul>
-                                        <li>
-                                            <span class="value"><code>true</code></span>
-                                            <span class="description">If set to true, the preview script provided by the <code>preview-script</code> attribute will be given a <code>type</code> attribute of <code>module</code></span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Attribute" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>style-src</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>Adds a <code>style</code> element to the preview <code>&lt;iframe&gt;</code>'s document. Useful for styling the <code>&lt;iframe&gt;</code> document and content without using the styles as example code.</p>
-                                </div>
-                            </td>
-                            <td data-label="Values">
-                                <div class="cell-content">
-                                    <ul>
-                                        <li>
-                                            <span class="value">[<code>"path/to/stylesheet.css"</code>]</span>
-                                            <span class="description">Loads the stylesheet in the preview <code>&lt;iframe&gt;</code>'s document.</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="message">
+                    <p>This custom element does not reference any attributes.</p>
+                </div>
             </details>
             <details class="reference slots">
                 <summary class="title">
                     <svg class="icon arrow-icon"><use href="#icon-definition_arrow"></use></svg>
                     <h4>Slots</h4>
                 </summary>
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="accent text-right">Slot Name</th>
-                            <th>Description</th>
-                            <th>Default Content</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td data-label="Slot Name" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>code-badge</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>An icon-like indicator for the language of the source code.</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Content">
-                                <div class="cell-content">
-                                    <code>&lt;span id="code-source-badge" class="badge"&gt;&amp;lt&semi;/&amp;gt&semi;&lt;/span&gt;</code>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Slot Name" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>code-title</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>The name of the language the source is coded in.</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Content">
-                                <div class="cell-content">
-                                    <code>&lt;span id="code-source-title" class="title"&gt;Code&lt;/span&gt;</code>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Slot Name" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>preview</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>The preview content for the example.</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Content">
-                                <div class="cell-content">
-                                    <code>&lt;iframe id="preview"&gt;&lt;/iframe&gt;</code>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="message">
+                    <p>This custom element does not expose any slots.</p>
+                </div>
             </details>
             <details class="reference classes">
                 <summary class="title">
                     <svg class="icon arrow-icon"><use href="#icon-definition_arrow"></use></svg>
                     <h4>CSS Classes</h4>
                 </summary>
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="accent text-right">Class Name</th>
-                            <th>Description</th>
-                            <th>Default Styles</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td data-label="Class Name" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>stack</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>Add this class to display each code source and the preview in a single vertical stack, rather than aligned horizontally.</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Styles">
-                                <div class="cell-content">
-                                    <pre><code>
-:host(.stack)
-{
-    grid-template-columns: 1fr;
-}
-:host(.stack) #sources
-,:host(.stack) #preview
-,:host(.stack) #spinner
-{
-    grid-column: 1;
-}
-:host(.stack) #spinner
-{
-    grid-row: 2;
-}
-:host(.stack) #preview
-{
-    grid-row: 2;
-    min-height: 300px;
-}</code></pre>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="message">
+                    <p>This library does not apply or expect any classes.</p>
+                </div>
             </details>
             <details class="reference properties">
                 <summary class="title">
                     <svg class="icon arrow-icon"><use href="#icon-definition_arrow"></use></svg>
                     <h4>CSS Properties</h4>
                 </summary>
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="accent text-right">Property</th>
-                            <th>Description</th>
-                            <th>Default Value</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td data-label="Property" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>--gap-small</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>A small spacer used for padding, margins, and gaps.</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Value">
-                                <div class="cell-content">
-                                    <code>3px</code>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Property" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>--gap-medium</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>A spacer used for paddings, margins, and gaps.</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Value">
-                                <div class="cell-content">
-                                    <code>6px</code>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Property" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>--spinner-track</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>The color of the loading spinner's track.</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Value">
-                                <div class="cell-content">
-                                    <code>oklch(25.11% 0.006 258.36 / .2)</code>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Property" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>--spinner-thumb</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>The color of the loading spinner's progress indicator.</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Value">
-                                <div class="cell-content">
-                                    <code>oklch(25.11% 0.006 258.36)</code>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Property" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>--surface-header</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>The background color of each source panel's header</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Value">
-                                <div class="cell-content">
-                                    <code>oklch(25.11% 0.006 258.36)</code>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Property" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>--surface-source</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>The background color of each source panel.</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Value">
-                                <div class="cell-content">
-                                    <code>oklch(91.87% 0.003 264.54)</code>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Property" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>--surface-html</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>The background color of the default html badge.</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Value">
-                                <div class="cell-content">
-                                    <code>oklch(74.61% 0.171 51.56)</code>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Property" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>--surface-css</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>The background color of the default css badge.</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Value">
-                                <div class="cell-content">
-                                    <code>oklch(54.87% 0.222 260.33)</code>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Property" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>--surface-code</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>The background color of the default unknown code language badge.</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Value">
-                                <div class="cell-content">
-                                    <code>oklch(80.73% 0.002 247.84)</code>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Property" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>--surface-js</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>The background color of the default javascript badge.</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Value">
-                                <div class="cell-content">
-                                    <code>oklch(89% 0.146 91.5)</code>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Property" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>--surface-success</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>The icon color used for the success icon used during copying.</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Value">
-                                <div class="cell-content">
-                                    <code>oklch(70.03% 0.194 144.71)</code>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Property" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>--surface-error</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>The icon color used for the failure icon used during copying.</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Value">
-                                <div class="cell-content">
-                                    <code>oklch(54.41% 0.214 19.06)</code>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Property" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>--text-header</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>The font color of the headers of each source panel.</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Value">
-                                <div class="cell-content">
-                                    <code>oklch(61.01% 0.005 271.34)</code>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Property" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>--text-source</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>The font color of the source panels.</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Value">
-                                <div class="cell-content">
-                                    <code>oklch(25.11% 0.006 258.36)</code>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Property" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>--text-html</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>The font color of the default html badge.</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Value">
-                                <div class="cell-content">
-                                    <code>oklch(32.49% 0.113 51.98)</code>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Property" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>--text-css</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>The font color of the default css badge.</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Value">
-                                <div class="cell-content">
-                                    <code>oklch(89.66% 0.046 260.67)</code>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Property" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>--text-code</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>The font color of the default unknown code language badge.</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Value">
-                                <div class="cell-content">
-                                    <code>oklch(35.02% 0.005 236.66)</code>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Property" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>--text-js</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>The font color of the default javascript badge.</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Value">
-                                <div class="cell-content">
-                                    <code>oklch(42.29% 0.097 91.9)</code>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-label="Property" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>--badge-size</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>The width and height set for the code badge's container element.</p>
-                                </div>
-                            </td>
-                            <td data-label="Default Value">
-                                <div class="cell-content">
-                                    <code>26px</code>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="message">
+                    <p>This custom element does not expose any object properties.</p>
+                </div>
             </details>
             <details class="reference configs">
                 <summary class="title">
@@ -865,67 +308,9 @@
                     <svg class="icon arrow-icon"><use href="#icon-definition_arrow"></use></svg>
                     <h4>Enumerators</h4>
                 </summary>
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="accent text-right">Name</th>
-                            <th>Description</th>
-                            <th>Values</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td data-label="Name" class="accent text-right text-top">
-                                <div class="cell-content">
-                                    <code>CodeExampleSlotKeys</code>
-                                </div>
-                            </td>
-                            <td data-label="Description" class="text text-top">
-                                <div class="cell-content">
-                                    <p>Used to provide keys for assigning slot values, instead of relying on string matches.</p>
-                                </div>
-                            </td>
-                            <td data-label="Values">
-                                <div class="cell-content">
-                                    <ul>
-                                        <li>
-                                            <span class="key"><code>slot</code></span>
-                                            <span class="value"><code>'slot'</code></span>
-                                        </li>
-                                        <li>
-                                            <span class="key"><code>html</code></span>
-                                            <span class="value"><code>'html'</code></span>
-                                        </li>
-                                        <li>
-                                            <span class="key"><code>script</code></span>
-                                            <span class="value"><code>'script'</code></span>
-                                        </li>
-                                        <li>
-                                            <span class="key"><code>javascript</code></span>
-                                            <span class="value"><code>'javascript'</code></span>
-                                        </li>
-                                        <li>
-                                            <span class="key"><code>js</code></span>
-                                            <span class="value"><code>'js'</code></span>
-                                        </li>
-                                        <li>
-                                            <span class="key"><code>code</code></span>
-                                            <span class="value"><code>'code'</code></span>
-                                        </li>
-                                        <li>
-                                            <span class="key"><code>style</code></span>
-                                            <span class="value"><code>'style'</code></span>
-                                        </li>
-                                        <li>
-                                            <span class="key"><code>css</code></span>
-                                            <span class="value"><code>'css'</code></span>
-                                        </li>
-                                    </dl>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>                
+                <div class="message">
+                    <p>This library does not expose any enumerators.</p>
+                </div>            
             </details>
             <details class="reference constants">
                 <summary class="title">
@@ -941,7 +326,7 @@
                     <svg class="icon arrow-icon"><use href="#icon-definition_arrow"></use></svg>
                     <h4>Assignments</h4>
                 </summary>
-                <div class="message">
+                 <div class="message">
                     <p>This library does not use any values directly from source code to assign values, properties, or attributes.</p>
                 </div>
             </details>
@@ -954,174 +339,22 @@
                 </header>
                 <div class="description">
                     <p>These examples are provided as simple references for practical use cases.</p>
-                    <p>Please note that each of these examples uses the <code>&lt;code-example&gt;</code> element as the method of demonstration, which is similar to using a word inside of its own definition.</p>
                     <p>For specific details and feature maps, see the <a href="./documentation/">documentation</a>.</p>
                 </div>
             </div>
-            <div class="example add-routes">
-                <header><h3>Add Routes</h3></header>
-                <div class="description">
-                    <div class="filler"></div>
-                    <div class="text">
-                        <p>Add routes by including <code>&lt;route-page&gt;</code> or <code>&lt;route-dialog&gt;</code> elements as children of the <code>&lt;path-router&gt;</code> element.</p>
-                        <p>Each route should include a <code>path</code> attribute that defines when that route will be routed to.</p>
-                    </div>
-                </div>
-                
-                <code-example class="stack" script-module preview-script="./introduction/libs/path-router.min.js" preview-script-module>
-                    <code slot class="language-html">
-                        <path-router path="home">
-                            <route-page path="home">
-                                <header>Home</header>
-                                <div>
-                                    <p>Welcome to the website!</p>
-                                </div>
-                            </route-page>
-                            <route-page path="about">    
-                                <header>About</header>
-                                <div>
-                                    <p>About this website:</p>
-                                </div>
-                            </route-page>
-                            <route-page path="contact">    
-                                <header>Contact</header>
-                                <div>
-                                    <p>Contact Us:</p>
-                                    <a>contact@mydomain.com</a>
-                                </div>
-                            </route-page>
-                        </path-router>
-                    </code>
-                </code-example>
-                <noscript>
-                    <div class="source html">
-                        <header><h5>HTML</h5></header>
-                        <textarea spellcheck="false" class="html"><path-router path="home">
-    <route-page path="home">
-        <header>Home</header>
-        <div>
-            <p>Welcome to the website!</p>
-        </div>
-    </route-page>
-    <route-page path="about">    
-        <header>About</header>
-        <div>
-            <p>About this website:</p>
-        </div>
-    </route-page>
-    <route-page path="contact">    
-        <header>Contact</header>
-        <div>
-            <p>Contact Us:</p>
-            <a>contact@mydomain.com</a>
-        </div>
-    </route-page>
-</path-router></textarea>
-                    </div>
-                </noscript>
-            </div>
+            <div class="example placeholder">    <header><h3>Example Placholder</h3></header>    <div class="description">        <div class="filler"></div>        <div class="text"><p>This is provided as an example of using the snippet. It will be overriden when you provide examples in your package file.</p><p>HTML content is allowed, but it needs to be escaped for JSON.</p></div>    </div>    <div class="escaped-example"><em>Escaped HTML will be injected</em></div>    <noscript>        <div class="source html">            <header><h5>HTML</h5></header>            <textarea spellcheck="false" class="html">${noscriptCode}</textarea>        </div>    </noscript></div>
         </div>
         <article class="questions-answers">
             <header>
                 <svg class="icon question-icon"><use href="#icon-definition_question"></use></svg>
                 <h2>Questions &amp; Answers</h2>
             </header>
-            <details class="qa-pair">
-                <summary class="question">
-                    <svg class="icon arrow-icon"><use href="#icon-definition_arrow"></use></svg>
-                    <span class="value">Why do the <code>&lt;code&gt;</code> elements require a <code>slot</code> attribute?</span>
-                </summary>
-                <div class="answer">
-                    <div class="simple">
-                        <span class="label">Simplified:</span>
-                        <span class="value">To make example code explicit and enable automatic code highlighting.</span>
-                    </div>
-                    <div class="more">
-                        <header><h5>Details</h5></header>
-                        <p>The underlying library that is used for code highlighting needs to be invoked to parse the plain text code into class-assigned markup. Rather than assume all child <code>&lt;code&gt;</code> elements are valid for syntax highlighting, the library requires code that is example code to be explicitly marked.</p>
-                        <p>By utilizing the slot attribute, the custom element's <code>slotchange</code> event can be monitored which provides automatic syntax highlighting without having to query the child elements.</p>
-                    </div>
-                </div>
-            </details>
-            <details class="qa-pair">
-                <summary class="question">
-                    <svg class="icon arrow-icon"><use href="#icon-definition_arrow"></use></svg>
-                    <span class="value">How can I use a custom language and include syntax highlighting?</span>
-                </summary>
-                <div class="answer">
-                    <div class="simple">
-                        <span class="label">Simplified:</span>
-                        <span class="value">Use the <a href="https://prismjs.com/">prismjs</a> library's plugins and call <code>loadLanguage</code> using the plugin's loader.</span>
-                    </div>
-                    <div class="more">
-                        <header><h5>Details</h5></header>
-                        <p>The <code>&lt;code-example&gt;</code> element depends on the <a href="https://prismjs.com/">prismjs library</a> for the code highlighting features it provides. Using the plugins for that library allows additional code languages to have appropriate syntax highlighting.</p>
-                        <p>Import or otherwise expose the prismjs plugin's "loader" function into the scope where the <code>&lt;code-example&gt;</code> element is referenced.</p>
-                        <p>Use a reference to the <code>&lt;code-example&gt;</code> element to call the <code>loadLanguage()</code> method, passing in the plugin's loader function. The code will be refreshed with the new syntax highlighting applied.</p>
-                        <p>Remember to include any styles required by the plugin in order to see the expected results.</p>
-                        <p>For information about integrating prismjs plugins, see the <a href="https://prismjs.com/">prismjs website</a>.</p>
-                    </div>
-                </div>
-            </details>
-            <!-- <details class="qa-pair">
-                <summary class="question">
-                    <svg class="icon arrow-icon"><use href="#icon-definition_arrow"></use></svg>
-                    <span class="value">Why would I want to assign ids, classes, tags, etc as <code>part</code> values?</span>
-                </summary>
-                <div class="answer">
-                    <div class="simple">
-                        <span class="label">Simplified:</span>
-                        <span class="value">To allow custom styling.</span>
-                    </div>
-                    <div class="more">
-                        <header><h5>Details:</h5></header>
-                        <p>Parts are weird features in the custom element specification. I can appreciate the intention of the public/private split for this kind of thing, but with styling features like <code>display: grid</code>, and the need for developers to be able to design the modules that make up their apps, there never seems to be any reason to disallow style overrides.</p>
-                        <p>To allow external styling of any arbitrary element in the shadow DOM, parts are added. Unfortunately, parts are limited. Not only in the external selectors (no cascading), but also in the internal selectors. An acutal "part" selector doesn't exist. Internally, the only way to select them is by using the attribute selector. Which is limiting because you would have to use wildcard selectors and chaining in order to get a simple dual-part selection.</p>
-                        <p>This library makes it easy to use ids and classes with internal styling and scripting, and then systematically apply those attribute values as <code>part</code> values.</p>
-                    </div>
-                </div>
-            </details>
-            <details class="qa-pair">
-                <summary class="question">
-                    <svg class="icon arrow-icon"><use href="#icon-definition_arrow"></use></svg>
-                    <span class="value">Should I use this for developing custom elements (web components)?</span>
-                </summary>
-                <div class="answer">
-                    <div class="simple">
-                        <span class="label">Simplified:</span>
-                        <span class="value">Only if your custom element is particularly complex, or is an entire web app.</span>
-                    </div>
-                    <div class="more">
-                        <header><h5>Details:</h5></header>
-                        <p>Generally speaking, this library acts more like a kludge or a hack than a trustworthy solution. Assigning parts should be a very targeted and very deliberate process. It is meant to differentiate the internal parts of your design from the external. It is unlikely that every <code>id</code> and <code>class</code> would need to be assigned as a part for every element.</p>
-                        <p>On a more practical side, the library is not very comprehensive. It does not account for the very common case of inserting content. You can query every element and assign parts, and you can do that as many times as you like since parts act like sets and disallow duplicates. But if you add a new element to the DOM, it is pretty inefficient to query for every element just to apply parts to a single new element.</p>
-                        <p>So you end up having to run the assignment once, and then having to manage each new element's parts anyway. It just is not very useful for most custom element development.</p>
-                        <p>But there are exceptions to every rule and sometimes lots of shadow DOM child elements are unavoidable, or "nested" custom elements need to expose the nested <code>part</code>s for external styling. In those cases, it is better to have a single library that can be referenced, rather than to recreate the methods for each custom element.</p>
-                    </div>
-                </div>
-            </details>
-            <details class="qa-pair">
-                <summary class="question">
-                    <svg class="icon arrow-icon"><use href="#icon-definition_arrow"></use></svg>
-                    <span class="value">What is this library for?</span>
-                </summary>
-                <div class="answer">
-                    <div class="simple">
-                        <span class="label">Simplified:</span>
-                        <span class="value">Shimming in styling functionality for apps that are built as web components.</span>
-                    </div>
-                    <div class="more">
-                        <header><h5>Details</h5></header>
-                        <p>If a particularly intricate custom element requires a lot of elements, manual assignment can be too inexact to be useful. In that case, this library makes sure that each <code>id</code> and <code>class</code> are ported to <code>part</code>s identically. It limits the places that require changes later.</p>
-                        <p>Alternatively, if one custom element is nested inside of another custom element, assigning the <code>part</code>s and then copying those <code>part</code>s to the <code>exportparts</code> attribute would be just as inexact. So if you have completely nested custom elements (custom elements that are never used by implementing developers, only the parent custom element), then this library can be useful in that situation, too.</p>
-                    </div>
-                </div>
-            </details> -->
+            <details class="qa-pair placeholder">    <summary class="question">        <svg class="icon arrow-icon"><use href="#icon-definition_arrow"></use></svg>        <span class="value">Placeholder Question</span>    </summary>    <div class="answer">        <div class="simple">            <span class="label">Simplified:</span>            <span class="value"><p>This is provided as an example of using the snippet. It will be overriden when you provide examples in your package file.</p><p>HTML content is allowed, but it needs to be escaped for JSON.</p></span>        </div>        <div class="more">            <header><h5>Details</h5></header>            <div class="escaped-example"><em>Escaped HTML will be injected</em></div>        </div>    </div></details>
         </article>
         <footer class="full-width">
             <div id="footer-content">
                 <div id="version">
-                    <a href="">Releases</a>
+                    <a href="https://github.com/catapart/magnitce-path-router/releases">Releases</a>
                 </div>
                 <div id="license">
                     License:
@@ -1336,5 +569,8 @@
         </svg>
     </div>
     <script type="module" src="./introduction/libs/code-example.min.js"></script>
+    <script type="module" src="./introduction/libs/path-router.min.js"></script>
+    <script type="module" src="./introduction/libs/browser-mockup/browser-mockup.min.js"></script>
+    <link rel="stylesheet" href="./introduction/libs/browser-mockup/browser-mockup.css">
 </body>
 </html>

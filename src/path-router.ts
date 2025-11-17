@@ -53,13 +53,13 @@ export class PathRouterElement extends HTMLElement
         return Array.from(this.querySelectorAll(`:scope > ${ROUTEPAGE_TAG_NAME},${COMPONENT_TAG_NAME} :not(${COMPONENT_TAG_NAME}) ${ROUTEPAGE_TAG_NAME},:scope > [is="${ROUTEDIALOG_TAG_NAME}"]`) as NodeListOf<Route>, (route: Route) => route) as Route[];
     }
 
-    /** The `<page-route>` element currently being navigated to. */
+    /** The `<route-page>` element currently being navigated to. */
     targetPageRoute: RoutePageElement|undefined;
-    /** The `<page-route>` element that the router currently has open. */
+    /** The `<route-page>` element that the router currently has open. */
     currentPageRoute: RoutePageElement|undefined;
-    /** The `route-dialog` element currently being navigated to. */
+    /** The `<route-dialog>` element currently being navigated to. */
     targetDialogRoute: RouteDialogElement|undefined;
-    /** The `route-dialog` element that the router currently has open. */
+    /** The `<route-dialog>` element that the router currently has open. */
     currentDialogRoute: RouteDialogElement|undefined;
 
     /** The route that will be selected if no other routes match the current path. */
@@ -586,12 +586,10 @@ export class PathRouterElement extends HTMLElement
 
     async connectedCallback()
     {
-        console.log('connect');
         this.#activationPromise = this.#activateRouteManagement();
         this.#injectStyles();
 
         await this.#activationPromise;
-        console.log('pre-active');
         await this.#openPreActivationRoutes();
 
         if(this.getAttribute('path') != null && this.currentPageRoute == null && this.defaultRoute != null)
@@ -685,7 +683,6 @@ export class PathRouterElement extends HTMLElement
     {
         if(attributeName == "path")
         {
-            console.log(newValue);
             if(this.#isActivated == true)
             {
                 this.#update(newValue, oldValue ?? "");
