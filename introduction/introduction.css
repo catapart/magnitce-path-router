@@ -62,7 +62,7 @@ table th.accent
 {
     .quick-reference > code-example::part(html-source-panel)
     {
-        height: 330px;
+        height: 350px;
         max-height: none;
     }
     .example.custom-preview code-example::part(preview)
@@ -77,8 +77,8 @@ table th.accent
     {
         min-height: 200px;
     }
-    .example.custom-language code-example::part(preview)
+    /* .example.custom-language code-example::part(preview)
     {
         height: 910px;
-    }
+    } */
 }

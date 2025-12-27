@@ -763,11 +763,11 @@ footer
 }
 
 .examples code-example::part(code-source-panel)
+,.examples code-example.inline-editors::part(html-source-panel)
 {
     height: 340px;
     max-height: none;
 }
-
 article noscript
 ,.example noscript
 {
