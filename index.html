@@ -67,6 +67,10 @@
                                 <path fill="#fca326" d="m244 442q12 10 24 0l61-46V340.8H183V396" />
                                 <path fill="#fc6d26" d="m103 336A97 97 0 0171 222q37 8 65 28l193 146 80-60a97 97 0 0032-114q-37 8-65 28L183 396" />
                             </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" aria-label="GitHub" role="img" class="icon github" width="24" height="24" viewBox="0 0 512 512">
+                                <path d="m0 0H512V512H0" fill="#181717"></path>
+                                <path fill="#fff" d="M335 499c-13 0-16-6-16-12l1-70c0-24-8-40-18-48 57-6 117-28 117-126 0-28-10-51-26-69 3-6 11-32-3-67 0 0-21-7-70 26-42-12-86-12-128 0-49-33-70-26-70-26-14 35-6 61-3 67-16 18-26 41-26 69 0 98 59 120 116 126-7 7-14 18-16 35-15 6-52 17-74-22 0 0-14-24-40-26 0 0-25 0-1 16 0 0 16 7 28 37 0 0 15 50 86 34l1 44c0 6-3 12-16 12-14 0-12 17-12 17H347s2-17-12-17Z"></path>
+                            </svg>
                         </a>
                     </div>
                     <div class="actions">
@@ -99,9 +103,11 @@
                 <header>
                     <h3>Custom Element</h3>
                 </header>
-
-
-
+                <p>The <code>&lt;path-router&gt;</code> element allows developers to show and hide sections of html contained in "routes" which can either be defined using <code>&lt;route-page&gt;</code> or <code>route-dialog</code> child elements.</p>
+                <p>The element is designed to provide simple navigation for HTML content.</p>
+                <p>Routing is done by matching the the <code>&lt;path-router&gt;</code> element's <code>path</code> attribute to one of its child route's <code>path</code> attributes.</p>
+                <p>Matching path values can be as simple as exact string matches. Routing can be done without any type of dynamic content.</p>
+                <p>The <code>&lt;path-router&gt;</code> element does, however, account for dynamic content allowing complex matching that uses common string patterns for variables.</p>
 
             </section>
             <section class="install">
@@ -204,7 +210,10 @@
             </section>
             <code-example class="stack" preview="false">
                 <code slot class="language-html">
-                    <path-router path=""> <route-page path="first">Route First</route-page> <route-page path="second">Route Second</route-page></path-router>
+                    <path-router path="">
+                        <route-page path="first">Route First</route-page>
+                        <route-page path="second">Route Second</route-page>
+                    </path-router>
                 </code>
             </code-example>
             <script>
@@ -218,7 +227,10 @@
                     <header>
                         <h5>HTML</h5>
                     </header>
-                    <textarea spellcheck="false" class="html"> <path-router path="">     <route-page path="first">Route First</route-page>     <route-page path="second">Route Second</route-page></path-router></textarea>
+                    <textarea spellcheck="false" class="html"><path-router path="">
+    <route-page path="first">Route First</route-page>
+    <route-page path="second">Route Second</route-page>
+</path-router></textarea>
                 </div>
             </noscript>
             <section class="reference-tables">
@@ -351,7 +363,7 @@
                         <p>HTML content is allowed, but it needs to be escaped for JSON.</p>
                     </div>
                 </div>
-                <div class="escaped-example"><em>Escaped HTML will be injected</em></div> <noscript> ${noscriptExampleSnippet:...noscriptExamples} </noscript>
+                <div class="escaped-example"><em>Escaped HTML will be injected</em></div> <noscript> </noscript>
             </div>
         </div>
         <article class="questions-answers">
@@ -440,7 +452,7 @@
         </svg>
     </div>
     <script type="module" src="./public/libs/code-example.min.js"></script>
-    <script type="module" src="./introduction/libs/path-router.min.js"></script>
+    <script type="module" src="./public/libs/path-router.min.js"></script>
 </body>
 
 </html>

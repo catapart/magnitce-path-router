@@ -252,6 +252,19 @@ main > header .repos .icon
     border-radius: 50%;
 }
 
+main > header .repos .repo .icon
+{
+    display: none;
+}
+main > header .repos .repo.gitlab .icon.gitlab
+{
+    display: inline;
+}
+main > header .repos .repo.github .icon.github
+{
+    display: inline;
+}
+
 main > header .actions
 {
     display: grid;

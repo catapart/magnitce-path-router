@@ -11,7 +11,10 @@ A custom html element that routes to pages based on its path attribute
 
 ## Quick Start
 ```html
- <path-router path="">     <route-page path="first">Route First</route-page>     <route-page path="second">Route Second</route-page></path-router>
+<path-router path="">
+    <route-page path="first">Route First</route-page>
+    <route-page path="second">Route Second</route-page>
+</path-router>
 ```
 
 ## Links
