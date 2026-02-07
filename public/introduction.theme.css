@@ -8,14 +8,14 @@
 {
     /* Palette */
     --blue: #60B5FF;
-    --blue-med: rgb(45, 133, 204);
+    --blue-med: rgb(28, 97, 153);
     --blue-dark: rgb(0, 88, 155);
     --blue-darker: rgb(0, 59, 124);
     --blue-light: #AFDDFF;
     --blue-lighter: oklch(97.858% 0.01105 243.923);
     
     /* --tan: #FFECDB; */
-    --orange: #FF9149;
+    --accent-1: white;
 
     /* --white: #F5F5F5; */
     /* --white: oklch(97.015% 0.00011 271.152); */
@@ -24,7 +24,7 @@
     --white-3: oklab(100% 0 0);
 
     /* Assignment */
-    --icon-fill: var(--orange);
+    --icon-fill: var(--accent-1);
 
     --surface-background: var(--white-1);
     --text-background: oklab(35% 0 0);
@@ -33,7 +33,7 @@
     --text-highlight: var(--white-2);
 
     --surface-header: var(--blue-med);
-    --text-header: var(--white-2);
+    --text-header: var(--accent-1);
 
     --surface-article: var(--white-2);
 
@@ -66,6 +66,7 @@
     --surface-code: var(--blue-lighter);
     --text-code: var(--blue-dark);
 
+    --surface-table: var(--white-2);
     --surface-table-head: var(--blue-light);
     --text-table-head: var(--blue-darker);
     
@@ -74,7 +75,10 @@
     --border-color-table-accent: var(--blue-dark);
     --surface-table-accent-head: var(--blue-dark);
 
+    --surface-reference: rgba(0, 0, 0, 0.05);
     --surface-reference-header: var(--blue-dark);
+    --border-reference-details: solid 1px transparent;
+    --border-reference-details-open: solid 1px oklch(.9 0 0);
 
     --text-example-description: var(--text-background);
     
@@ -151,6 +155,8 @@ body
         --surface-card: oklab(35% 0 0);
         --surface-card-header: radial-gradient(circle at center 800%, var(--blue-light), var(--blue-darker));
 
+        --surface-reference: #00000044;
+        --border-reference-details-open: solid 1px oklch(.1 0 0);
         --surface-table: oklab(25% 0 0);
 
         --text-anchor: oklch(69.924% 0.13581 247.309);
@@ -193,6 +199,8 @@ a:active
     color: var(--text-anchor-active);
 }
 
+svg { display: initial; }
+
 code
 {
     background-color: var(--surface-code);
@@ -225,6 +233,49 @@ main > header .content > *
     grid-column: 2;
 }
 
+main > header .content .text
+{
+    column-gap: var(--gap-large);
+    grid-template-columns: auto auto 1fr;
+}
+
+main > header .repos
+{
+    align-content: flex-end;
+    margin-bottom: 1rem;
+}
+
+main > header .repos .icon
+{
+    width: var(--repo-icon-size);
+    height: var(--repo-icon-size);
+    border-radius: 50%;
+}
+
+main > header .actions
+{
+    display: grid;
+    grid-template-columns: auto auto;
+    align-content: flex-end;
+    justify-content: flex-end;
+}
+
+main > header .actions a
+{
+    color: var(--text-highlight-anchor);
+    text-decoration: none;
+    padding: var(--gap-small) var(--gap);
+    display: inline-block;
+    border-radius: 30px;
+    margin-block: var(--gap-small);
+}
+
+main > header .actions a:hover
+{
+    color: #ffffff;
+    text-shadow: 1px 1px 0 rgb(0 0 0 / .2);
+    background: rgb(0 0 0 / .3);
+}
 
 main > article
 {
@@ -252,7 +303,7 @@ article > header
     color: var(--text-header);
     grid-column: 1 / 4;
     padding-inline: 1em;
-    text-shadow: 2px 1px 0 rgb(0 0 0 / .3);
+    /* text-shadow: 2px 1px 0 rgb(0 0 0 / .3); */
     display: grid;
     grid-template-columns: auto 1fr;
     align-items: center;
@@ -260,12 +311,12 @@ article > header
 }
 article > header h2
 {
-    font-size: 1.1rem;
+    font-size: 14px;
 }
 article > header .icon
 {
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
     --fill-color: var(--icon-fill);
     --fill-color-secondary: var(--blue-med)
 }
@@ -305,8 +356,8 @@ summary
 }
 summary .arrow-icon
 {
-    width: 16px;
-    height: 16px;
+    width: 12px;
+    height: 12px;
     flex-shrink: 0;
     transform: rotate(-90deg);
     transition: transform ease-out 200ms;
@@ -347,6 +398,12 @@ table th
     font-size: 14px;
     background-color: var(--surface-table-head);;
     color: var(--text-table-head);
+}
+
+table th.accent
+,table td.accent
+{
+    width: 220px;
 }
 
 table td
@@ -399,6 +456,11 @@ code-example::part(panel)
 ,code-example::part(preview)
 {
     box-shadow: 1px 1px 5px 1px rgb(0 0 0 / .4);
+}
+
+.code-title .option
+{
+    cursor: pointer;
 }
 
 footer
@@ -538,7 +600,7 @@ footer
 {
     width: 84px;
     height: 84px;
-    --fill-color: var(--orange);
+    --fill-color: var(--accent-1);
 }
 .card > header h3
 {
@@ -576,15 +638,15 @@ footer
     /* background: var(--arrow-icon); */
     background-repeat: no-repeat;
     position: absolute;
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
     transform: rotate(-90deg);
     z-index: 0;
 }
 .page-header .arrow svg
 {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
 }
 .page-header .arrow:nth-of-type(1)
 {
@@ -678,25 +740,50 @@ footer
 .quick-reference .reference
 {
     display: grid;
-    gap: var(--gap);
+    gap: var(--gap-small);
+    border: var(--border-reference-details);
     /* margin-bottom: var(--gap-large); */
+}
+
+.quick-reference .reference[open]
+{
+    background-color: var(--surface-reference);
+    border: var(--border-reference-details-open);
+    /* border-bottom: solid 1px var(--surface-reference-header);
+    padding-bottom: 1em; */
 }
 
 .quick-reference .reference > .title
 {
-    background-color: var(--surface-reference-header);
-    color: var(--text-highlight);
-    border-radius: 5px;
-    padding: var(--gap);
-    text-shadow: 2px 2px 0 rgb(0 0 0 / .1);
+    /* background-color: var(--surface-reference-header); */
+    /* color: var(--text-highlight); */
+    cursor: pointer;
+    color: var(--blue-med);
+    font-weight: 300;
+    font-size: 1.3em;
+    letter-spacing: -2px;
+    padding: 0 .5em;
+    /* font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; */
+    border-radius: 3px;
+    /* padding: var(--gap); */
+    /* text-shadow: 2px 1px 0 rgb(0 0 0 / .05); */
+}
+.quick-reference .reference > .title:hover
+{
+    background: #2498ed22;
 }
 
 .quick-reference .reference > .title h4
 {
     margin: 0;
-    font-weight: 900;
+    /* font-weight: 900; */
     padding: 0;
     flex: 1;
+}
+
+.quick-reference .reference > table
+{
+    margin: .5em;
 }
 
 .quick-reference td .key::after
@@ -944,9 +1031,8 @@ code-example.npm .code-title .title.npm
     padding: var(--gap-large);
     font-size: 14px;
     display: grid;
-    margin-inline: auto;
-    /* align-items: center; */
-    /* justify-self: center; */
+    margin: var(--gap-small);
+    justify-self: center;
     border: solid 1px var(--border-color-message);
     border-radius: 5px;
     background: var(--surface-message);
@@ -1145,7 +1231,6 @@ footer a:visited
 
     .message
     {
-        margin-inline: var(--gap-small);
         padding: var(--gap);
     }
     .button-link

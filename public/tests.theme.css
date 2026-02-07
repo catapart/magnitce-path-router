@@ -99,6 +99,8 @@ main
     overflow: hidden;
 }
 
+svg { display: initial; }
+
 .page-header
 {
     height: max-content;
@@ -162,8 +164,8 @@ main
 {
     background-repeat: no-repeat;
     position: absolute;
-    width: 75px;
-    height: 75px;
+    width: 60px;
+    height: 60px;
     transform: rotate(-90deg);
     z-index: 0;
 }
@@ -173,8 +175,8 @@ main
 }
 .page-header .arrow svg
 {
-    width: 75px;
-    height: 75px;
+    width: 60px;
+    height: 60px;
 }
 .page-header .arrow:nth-of-type(1)
 {
