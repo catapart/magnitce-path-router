@@ -26,6 +26,7 @@
     --text-highlight-anchor-active: var(--white-2);
 
     --border-menu-item: solid 3px var(--blue-med);
+    --border-menu-item-open: solid 3px var(--blue-darker);
     
     --surface-arrow-1:  white;
     --surface-arrow-2: var(--blue);
@@ -111,6 +112,8 @@ a:hover
     color: var(--text-anchor-hover);
 }
 
+svg { display: initial; }
+
 summary
 {
     display: grid;
@@ -121,7 +124,7 @@ summary
 summary::before
 {
     content: '▶';
-    font-size: 11px;
+    font-size: 10px;
 }
 [open] > summary::before
 {
@@ -234,9 +237,13 @@ table td::before
     border-left: solid 3px transparent;
     padding-left: var(--gap-small);
 }
+.menu-item:has(details[open])
+{
+    border-left: var(--border-menu-item-open);
+}
 .menu-item:hover
 {
-    border-left: var(--border-menu-item);
+    border-left: var(--border-menu-item) !important;
 }
 
 .menu-item a
@@ -282,6 +289,26 @@ table td::before
     white-space: nowrap;
 }
 
+
+.module
+{
+    border-bottom: solid 1px;
+    margin-bottom: .5em;
+}
+
+.module .version
+{
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: var(--gap-large);
+}
+
+.module .version h5
+{
+    margin-block: 1em;
+}
+
 .function
 ,.object
 ,.constant
@@ -313,6 +340,13 @@ table td::before
 ,.constant > .content
 {
     padding-inline: var(--gap-small);
+}
+
+.function > .content> .description
+,.object > .content > .description
+,.constant > .content > .description
+{
+    margin-block: var(--gap-large);
 }
 
 .function .message
@@ -349,6 +383,11 @@ table td::before
 {
     padding:  var(--gap-small);
     text-align: center;
+}
+
+.information
+{
+    margin-block: 1.5em;
 }
 
 /* Documentation Page */
@@ -421,8 +460,8 @@ table td::before
 {
     background-repeat: no-repeat;
     position: absolute;
-    width: 75px;
-    height: 75px;
+    width: 60px;
+    height: 60px;
     transform: rotate(-90deg);
     z-index: 0;
 }
@@ -432,8 +471,8 @@ table td::before
 }
 #documentation .page-header .arrow svg
 {
-    width: 75px;
-    height: 75px;
+    width: 60px;
+    height: 60px;
 }
 #documentation .page-header .arrow:nth-of-type(1)
 {
@@ -478,7 +517,15 @@ table td::before
 
 #documentation menu > header
 {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: var(--gap);
     padding-inline: var(--gap);
+}
+
+#documentation main menu > header
+{
 }
 
 #documentation menu > header h2
@@ -505,7 +552,67 @@ table td::before
     height: 100%;
 }
 
-#documentation #versions
+#versions
+{
+    position: relative;
+    width: 90px;
+}
+#versions summary
+{
+    border: solid 1px;
+    border-radius: 3px;
+    font-size: 12px;
+    padding: 3px 7px;
+    text-align: right;
+}
+#versions summary > .arrow-icon
+{
+    background: var(--arrow-icon);
+    transform: rotate(-90deg);
+    transition: transform ease-out 90ms;
+    width: 10px;
+    height: 10px;
+}
+#versions[open] > summary
+{
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+#versions[open] > summary > .arrow-icon
+{
+    transform: rotate(0);
+}
+
+#versions > .items
+{
+    position: absolute;
+    top: calc(100% - 1px);
+    width: 90px;
+    left: 0;
+    background-color: var(--surface-background);
+    color: var(--text-background);
+    border: solid 1px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    padding: 0;
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+}
+
+#versions .items .item
+{
+    margin: 0;
+    display: block;
+    width: 100%;
+    padding: 3px 7px;
+    text-align: right;
+}
+#versions .items .item:hover
+{
+    background-color: highlight;
+    color: highlighttext;
+}
+
+/* #documentation #versions
 {
     padding: var(--gap-small) 0;
     margin-left: var(--gap);
@@ -527,7 +634,7 @@ table td::before
 #documentation #versions li:first-of-type a::after
 { 
     content: " (latest)";
-}
+} */
 
 /* Menu Page */
 #menu
@@ -598,7 +705,10 @@ table td::before
     display: none;
 }
 
-
+/* mobile only */
+@media screen and (max-width: 650px)
+{
+}
 /* desktop only */
 @media screen and (min-width: 700px)
 {
@@ -631,6 +741,13 @@ table td::before
         display: none;
     }
 
+    .module
+    {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: var(--gap-large);
+    }
 
     .function > .content
     ,.object > .content

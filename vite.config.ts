@@ -3,11 +3,15 @@ import { default as terser } from '@rollup/plugin-terser';
 import dts from 'vite-plugin-dts';
 
 export default defineConfig({
+    server: {
+        
+    },
     build: {
         lib: {
             entry: ['src/path-router.ts'],
         },
         minify: false,
+        copyPublicDir: false,
         rollupOptions: {
             external: [
                 '**/*tests.ts',
@@ -33,7 +37,7 @@ export default defineConfig({
                 },
                 {
                     dir: 'dist',
-                    entryFileNames: 'cpath-router.umd.min.js',
+                    entryFileNames: 'path-router.umd.min.js',
                     name: 'path-router.umd.min.js',
                     format: 'umd',
                     plugins: [terser()]
@@ -41,5 +45,5 @@ export default defineConfig({
             ]
         }
     },
-    plugins: [dts({exclude: "**/*.test.ts"})]
+    plugins: [dts({ exclude: ["**/*.test.ts", 'src/dev'], rollupTypes: true })]
 });

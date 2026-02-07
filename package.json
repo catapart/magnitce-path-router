@@ -2,10 +2,10 @@
   "name": "@magnit-ce/path-router",
   "version": "0.3.3",
   "description": "A custom html element that routes to pages based on its path attribute",
-  "type": "module",
-  "main": "dist/path-router.js",
-  "module": "dist/path-router.umd.js",
+  "main": "dist/path-router.umd.js",
+  "module": "dist/path-router.js",
   "types": "dist/path-router.d.ts",
+  "type": "module",
   "files": [
     "dist"
   ],
@@ -16,8 +16,7 @@
     "test:build": "vite build --config vite.config.tests.ts",
     "test": "npm run test:build && web-dev-server --watch --app-index test-runner/index.html",
     "changeset": "npx @changesets/cli",
-    "release": "npm run build && npx @changesets/cli publish",
-    "lib": "npm run build && node -e \"const fs = require('fs'); fs.cpSync('dist/path-router.js', 'introduction/libs/path-router.min.js');\""
+    "release": "npm run build && npx @changesets/cli publish"
   },
   "keywords": [
     "custom",
@@ -25,28 +24,29 @@
     "html",
     "browser",
     "component",
+    "navigation",
     "routing",
+    "router",
     "path",
     "tab",
     "page",
     "layout"
   ],
+  "devDependencies": {
+    "@changesets/cli": "^2.27.7",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@web/dev-server": "^0.4.6",
+    "ce-part-utils": "^0.0.4",
+    "changesets": "^1.0.2",
+    "glob": "^13.0.0",
+    "typescript": "^5.5.3",
+    "vite": "^7.3.0",
+    "vite-plugin-dts": "^4.5.4"
+  },
   "author": "catapart",
   "license": "CC0-1.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/catapart/magnitce-path-router"
-  },
-  "devDependencies": {
-    "@changesets/cli": "^2.27.7",
-    "@magnit-ce/test-runner": "^0.0.6",
-    "@rollup/plugin-terser": "^0.4.4",
-    "@web/dev-server": "^0.4.6",
-    "ce-part-utils": "^0.0.4",
-    "changesets-gitlab": "^0.13.4",
-    "glob": "^11.0.3",
-    "typescript": "^5.5.3",
-    "vite": "^7.1.7",
-    "vite-plugin-dts": "^4.5.4"
   }
 }
