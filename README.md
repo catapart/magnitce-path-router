@@ -1,3 +1,8 @@
+# Warning - Non-production package
+> [!WARNING]  
+> This project is being prepared for production, but is not ready to be used as a dependency for anything. There will be breaking changes and unrecoverable states. Do not use until this warning has been removed.
+> When the library reaches the `1.0.0` designation, that will be a production package. From that point, you can use the major version number (`1` in `1.0.0`) to recognize when breaking changes are introduced.
+
 # The `path-router` Custom Element
 
 ## Overview
@@ -21,9 +26,9 @@ A custom html element that routes to pages based on its path attribute
 ### Demo:
 https://catapart.github.io/magnitce-path-router
 ### Documentation:
-https://catapart.github.io/magnitce-path-router/documentation
+https://catapart.github.io/magnitce-path-router/docs
 ### Automated Testing:
-https://catapart.github.io/magnitce-path-router/test-runner
+https://catapart.github.io/magnitce-path-router/tests.html
 
 ## Repo Notes
 This section provides instructions for how to use the repo to develop the library.
@@ -42,6 +47,20 @@ The `vite.config` file sets defaults options for the dev, build, and release pro
 #### `vite.config.tests.ts`
 This specialized `vite.config` file defines custom inputs and outputs that include tests and then are packaged into the `test-runner` directory, rather than built to the `dist` directory.
 
+### Development
+The `src` directory has a `dev` subdirectory that is intended for development. Developers can link to code-test files written in typescript, which allows for full type support while writing tests during development.
+
+Place development tests in the `tests` subdirectory of the `dev` directory. Use the suffix `.tests` to denote that a typescript file is a code-tests file. (*example: `interface.tests.ts`*)
+
+Once tests have been added, the `build-tests` script can be used to compile the typescript tests into javascript tests that will be available for use in any `<code-tests>` or `<test-runner>` elements - including on the `tests.html` page.
+
+### Test Page
+The test page (`tests.html`) in the root directory can be used to demonstrate passing tests to users. 
+
+Tests can be created in the `src/dev/tests` directory and developed using the dev page. When all tests are passing, use the `build-tests` script to transpile the `.ts` test files into `.js` test files that are deployed to the `public/tests` directory, which can be referenced by the `tests.html` page.
+
+The test page will also expect a reference to the library file, which won't exist until the `build` script has been run. If running the project causes errors, check the test page to either remove the script tags requesting the library file, or build the library to provide the test page with its requested source file.
+
 ### Scripts
 #### `dev`
 Use `vite` to begin a server with Hot Module Replacement, which will automatically reload any time a change in a source file is saved.
@@ -49,10 +68,8 @@ Use `vite` to begin a server with Hot Module Replacement, which will automatical
 Use `vite` to transpile the source code into code chunks or library files. Files are output into the `dist` directory by default.
 #### `preview`
 Use `vite` to serve the `dist` directory. Useful for non-library projects, where the `dist` directory will contain an `index.html` file, or other browse-able entry point.
-#### `test:build`
+#### `build-tests`
 Use `vite` to transpile all files with a `.tests.[ts|js|tsx|jsx]` extension into the `public/tests` subdirectory. Creates javascript files that can be served to the `<test-runner>` and `<code-tests>` components, which are included in the `public/libs` subdirectory.
-#### `test`
-Runs the `test:build` script and then serves the library website using `serve`, to prevent module resolution issues that occur when running the `dev` script.
 #### `changeset`
 Runs the `npx @changesets/cli` command to create a new changeset which will prepare the library to be published.
 #### `release`
@@ -112,12 +129,3 @@ This library adds custom HTML elements that allow developers to run simple defin
 
 ##### [`glob`](https://www.npmjs.com/package/glob)
 `glob` is a low-level library that provides full-featured search capabilities to a command-line input. These search features are used by this library to differentiate between test files and source files within the `vite.config` files.
-
-##### [`@web/dev-server`](https://modern-web.dev/docs/dev-server/overview/)
-This library provides a local server to serve the project directory without module resolution conflicts between `vite` and the `<test-runner>` element. This library is not necessary if `vite` can be configured to stop wrapping import links for specific run modes (like "testing" vs "development"). At this point, no such configuration has been included in this project so the `web/dev-server` library is used as a work-around for that deficiency.
-
-
-# Warning - Non-production package
-This project is being prepared for production, but is not ready to be used as a dependency for anything. There will be breaking changes and unrecoverable states. Do not use until this warning has been removed.
-
-When the library reaches the `1.0.0` designation, that will be a production package. From that point, you can use the major version number (`1` in `1.0.0`) to recognize when breaking changes are introduced.

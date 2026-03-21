@@ -7,10 +7,34 @@
     <meta name="description" content="Automated tests for the path-router custom element">
     <title>path-router Test Runner</title>
     <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        html {
+            color-scheme: light dark;
+        }
+
+        body {
+            display: grid;
+            overflow: hidden;
+        }
+
         svg {
             display: none;
         }
     </style>
+    <noscript>
+        <style>
+            test-runner {
+                display: none;
+            }
+        </style>
+    </noscript>
     <link rel="stylesheet" href="public/tests.theme.css">
     <link rel="stylesheet" href="public/tests.css">
 </head>
@@ -47,6 +71,12 @@
             <div class="message">Automated testing has not been prepared for this library.</div>
 
         </test-runner>
+        <noscript>
+            <div class="noscript message warn">
+                <p>This page is a dynamic test runner for a javascript library. Javascript libraries require javascript to function and cannot process at all if javascript is disbled or otherwise prevented from running.</p>
+                <p>To test the library, this page also uses custom elements designed for testing javascript code. To see the testing results and confirm the library's functionality, please enable javascript.</p>
+            </div>
+        </noscript>
     </main>
     <div id="icon-definitions">
         <svg id="icon-definition_arrow" viewBox="0 0 8 8" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
@@ -54,6 +84,8 @@
         </svg>
     </div>
     <script type="module" src="public/libs/test-runner.min.js"></script>
+
+    <script type="module" src="public/libs/path-router.min.js"></script>
 </body>
 
 </html>
