@@ -1,6 +1,7 @@
 // add any setup code here;
 // initialize frameworks, register custom elements, anything you may need to do before running tests
 
+import '@magnit-ce/test-runner';
 import '../path-router';
 
 if(document.readyState == 'loading')

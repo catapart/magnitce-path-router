@@ -699,6 +699,13 @@ table td::before
     margin-top: 100px;
 }
 
+#document > main > article > header
+{
+    font-size: 1.8em;
+    font-weight: bold;
+    margin-bottom: 1em;
+}
+
 /* Utilities */
 #icon-definitions
 {
